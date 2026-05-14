@@ -14,7 +14,8 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 	bUseControllerRotationRoll = false;
 
 	// 進行した方向にキャラクターが振り向く設定
-	GetCharacterMovement()->bOrientRotationToMovement = true; // TODO: nullptr 等でチェックは不要か？
+	// ACharacter が CharacterMovementComponent を生成済みなので、nullptr チェック不要
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmBlankCharacter"));
