@@ -21,5 +21,6 @@ void ULinearPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (LinearPlayerCharacterMovement)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(LinearPlayerCharacterMovement->Velocity);
+		IsFalling = LinearPlayerCharacterMovement->IsFalling();
 	}
 }
