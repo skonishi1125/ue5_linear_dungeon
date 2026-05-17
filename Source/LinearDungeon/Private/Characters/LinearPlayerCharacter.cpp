@@ -1,5 +1,6 @@
 ﻿#include "Characters/LinearPlayerCharacter.h"
 #include "Logging/StructuredLog.h"
+
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
