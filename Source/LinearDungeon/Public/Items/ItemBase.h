@@ -24,7 +24,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	//UFUNCTION() BP から呼ばないので、不要
-	virtual void OnActivated();
+	virtual void OnActivatedOverlap();
+
+	virtual void OnDeactivatedOverlap();
 
 private:
 	// 派生クラスから nullptr 等に設定されてしまうことを防ぐために private とする
@@ -40,6 +42,12 @@ private:
 		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult
+	);
+
+	UFUNCTION()
+	void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
 	);
 
 };

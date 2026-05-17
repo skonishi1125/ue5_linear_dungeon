@@ -8,8 +8,13 @@ void AWeapon::BeginPlay()
 	UE_LOGFMT(LogTemp, Warning, "Weapon BeginPlay");
 }
 
-void AWeapon::OnActivated()
+void AWeapon::OnActivatedOverlap()
 {
-	Super::OnActivated();
-	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnActivated()");
+	//Super::OnActivatedOverlap();
+	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnActivatedOverlap()");
+}
+
+void AWeapon::OnDeactivatedOverlap()
+{
+	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnDeactivatedOverlap()");
 }

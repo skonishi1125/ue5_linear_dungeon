@@ -9,7 +9,12 @@ void APotion::BeginPlay()
 
 }
 
-void APotion::OnActivated()
+void APotion::OnActivatedOverlap()
 {
-	UE_LOGFMT(LogTemp, Warning, "APotion::OnActivated()");
+	UE_LOGFMT(LogTemp, Warning, "APotion::OnActivatedOverlap()");
+}
+
+void APotion::OnDeactivatedOverlap()
+{
+	UE_LOGFMT(LogTemp, Warning, "APotion::OnDeactivatedOverlap()");
 }

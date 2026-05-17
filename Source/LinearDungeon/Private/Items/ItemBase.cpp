@@ -29,12 +29,8 @@ void AItemBase::BeginPlay()
 	if (OverlapSphere)
 	{
 		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &AItemBase::OnItemBeginOverlap);
+		OverlapSphere->OnComponentEndOverlap.AddDynamic(this, &AItemBase::OnItemEndOverlap);
 	}
-}
-
-void AItemBase::OnActivated()
-{
-	UE_LOGFMT(LogTemp, Warning, "AItemBase::OnActivated()");
 }
 
 void AItemBase::OnItemBeginOverlap(
@@ -42,9 +38,28 @@ void AItemBase::OnItemBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOGFMT(LogTemp, Warning, "AItemBase::OnItemBeginOverlap()");
+	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemBeginOverlap()");
 	//AItemBase::OnActivated(); クラスを明示すると、子クラスの処理が呼ばれない
-	OnActivated();
+	OnActivatedOverlap();
+}
+
+void AItemBase::OnActivatedOverlap()
+{
+	//UE_LOGFMT(LogTemp, Warning, "AItemBase::OnActivatedOverlap()");
+}
+
+void AItemBase::OnItemEndOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
+)
+{
+	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemEndOverlap()");
+	OnDeactivatedOverlap();
+}
+
+void AItemBase::OnDeactivatedOverlap()
+{
+	//UE_LOGFMT(LogTemp, Warning, "AItemBase::OnDeactivatedOverlap()");
 }
 
 //void AItemBase::Tick(float DeltaTime)

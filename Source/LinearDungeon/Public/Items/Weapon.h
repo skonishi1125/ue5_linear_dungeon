@@ -12,6 +12,8 @@ class LINEARDUNGEON_API AWeapon : public AItemBase
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnActivated() override;
+	virtual void OnActivatedOverlap() override;
+
+	virtual void OnDeactivatedOverlap() override;
 
 };
