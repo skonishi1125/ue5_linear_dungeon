@@ -20,15 +20,16 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<ALinearPlayerCharacter> LinearPlayerCharacter;
 
-	UPROPERTY(BlueprintReadOnly, category = Movement)
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	TObjectPtr<UCharacterMovementComponent> LinearPlayerCharacterMovement;
 
-	UPROPERTY(BlueprintReadOnly, category = Movement)
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	float GroundSpeed;
 
-	UPROPERTY(BlueprintReadOnly, category = Movement)
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool IsFalling;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Movement | Character State")
 	ECharacterState CharacterState;
 
 };
