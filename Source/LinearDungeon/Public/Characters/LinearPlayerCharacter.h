@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Characters/LinearCharacterBase.h"
 #include "InputActionValue.h"
+#include "Characters/CharacterTypes.h"
 
 #include "LinearPlayerCharacter.generated.h"
 
@@ -19,14 +20,6 @@ class UInputAction;
 class AItemBase;
 class FName;
 
-// UE における Enum の作法として、E...という形で定義する
-UENUM(BlueprintType)
-enum class ECharacterState : uint8
-{
-	ECS_Unequipped UMETA(DisplayName = "Unequipped"),
-	ECS_EquippedOneHandedWeapon UMETA(DisplayName = "Equipped One-Handed Weapon"),
-	ECS_EquippedTwoHandedWeapon UMETA(DisplayName = "Equipped Two-Handed Weapon"),
-};
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
@@ -35,8 +28,8 @@ class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
 public:
 	ALinearPlayerCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline void の強制
-
+	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline 関数の強制
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 
 protected:
 	virtual void BeginPlay() override;

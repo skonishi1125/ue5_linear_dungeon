@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Characters/LinearPlayerCharacter.h"
+#include "Characters/CharacterTypes.h"
 
 #include "LinearPlayerAnimInstance.generated.h"
 
