@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Characters/LinearPlayerCharacter.h"
+
 #include "LinearPlayerAnimInstance.generated.h"
 
 class ALinearPlayerCharacter;
@@ -26,5 +28,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, category = Movement)
 	bool IsFalling;
+
+	ECharacterState CharacterState;
 
 };

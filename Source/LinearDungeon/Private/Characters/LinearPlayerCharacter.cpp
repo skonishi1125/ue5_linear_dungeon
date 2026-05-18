@@ -139,6 +139,8 @@ void ALinearPlayerCharacter::Equip()
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName);
+		// TODO: とりあえず 片手武器として実装
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	}
 
 }
