@@ -12,8 +12,15 @@ class LINEARDUNGEON_API APotion : public AItemBase
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnActivatedOverlap() override;
+	virtual void OnItemBeginOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult
+	) override;
 
-	virtual void OnDeactivatedOverlap() override;
+	virtual void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
+	) override;
 	
 };

@@ -9,12 +9,24 @@ void APotion::BeginPlay()
 
 }
 
-void APotion::OnActivatedOverlap()
+void APotion::OnItemBeginOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOGFMT(LogTemp, Warning, "APotion::OnActivatedOverlap()");
+	Super::OnItemBeginOverlap(
+		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult
+	);
+	UE_LOGFMT(LogTemp, Warning, "APotion::OnItemBeginOverlap");
 }
 
-void APotion::OnDeactivatedOverlap()
+void APotion::OnItemEndOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
+)
 {
-	UE_LOGFMT(LogTemp, Warning, "APotion::OnDeactivatedOverlap()");
+	Super::OnItemEndOverlap(
+		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex
+	);
+	UE_LOGFMT(LogTemp, Warning, "APotion::OnItemEndOverlap");
 }

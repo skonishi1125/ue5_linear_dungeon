@@ -40,12 +40,6 @@ void AItemBase::OnItemBeginOverlap(
 {
 	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemBeginOverlap()");
 	//AItemBase::OnActivated(); クラスを明示すると、子クラスの処理が呼ばれない
-	OnActivatedOverlap();
-}
-
-void AItemBase::OnActivatedOverlap()
-{
-	//UE_LOGFMT(LogTemp, Warning, "AItemBase::OnActivatedOverlap()");
 }
 
 void AItemBase::OnItemEndOverlap(
@@ -54,13 +48,8 @@ void AItemBase::OnItemEndOverlap(
 )
 {
 	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemEndOverlap()");
-	OnDeactivatedOverlap();
 }
 
-void AItemBase::OnDeactivatedOverlap()
-{
-	//UE_LOGFMT(LogTemp, Warning, "AItemBase::OnDeactivatedOverlap()");
-}
 
 //void AItemBase::Tick(float DeltaTime)
 //{
