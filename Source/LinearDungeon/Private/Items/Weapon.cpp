@@ -19,6 +19,19 @@ void AWeapon::OnItemBeginOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult
 	);
 	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemBeginOverlap");
+
+	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
+	if (LinearPlayerCharacter != nullptr)
+	{
+		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+		ItemMesh->AttachToComponent(
+			LinearPlayerCharacter->GetMesh(),
+			TransformRules,
+			FName("RightHandSocket")
+		);
+	}
+
+
 }
 
 void AWeapon::OnItemEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
