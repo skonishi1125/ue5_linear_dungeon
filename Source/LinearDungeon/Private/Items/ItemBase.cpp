@@ -3,6 +3,7 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Characters/LinearPlayerCharacter.h"
 
 AItemBase::AItemBase()
 {
@@ -40,6 +41,13 @@ void AItemBase::OnItemBeginOverlap(
 {
 	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemBeginOverlap()");
 	//AItemBase::OnActivated(); クラスを明示すると、子クラスの処理が呼ばれない
+
+	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
+	if (LinearPlayerCharacter)
+	{
+		LinearPlayerCharacter->SetOverlappingItem(this);
+	}
+
 }
 
 void AItemBase::OnItemEndOverlap(
@@ -48,6 +56,13 @@ void AItemBase::OnItemEndOverlap(
 )
 {
 	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemEndOverlap()");
+
+	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
+	if (LinearPlayerCharacter)
+	{
+		LinearPlayerCharacter->SetOverlappingItem(nullptr);
+	}
+
 }
 
 

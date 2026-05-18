@@ -15,6 +15,10 @@ class UInputComponent;
 class UInputMappingContext;
 class UInputAction;
 
+// アイテム関連
+class AItemBase;
+class FName;
+
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
 {
@@ -22,6 +26,8 @@ class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
 public:
 	ALinearPlayerCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline void の強制
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,11 +56,23 @@ protected:
 
 	void Attack();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> EquipAction;
+
+	void Equip();
+
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
+
+	// Overlap したアイテム情報の格納
+	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
+	TObjectPtr<AItemBase> OverlappingItem;
+
+	FName RightHandSocketName = "RightHandSocket";
 
 };

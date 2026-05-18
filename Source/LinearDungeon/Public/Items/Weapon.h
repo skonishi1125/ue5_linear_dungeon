@@ -4,10 +4,14 @@
 #include "Items/ItemBase.h"
 #include "Weapon.generated.h"
 
+class USceneComponent;
+
 UCLASS()
 class LINEARDUNGEON_API AWeapon : public AItemBase
 {
 	GENERATED_BODY()
+public:
+	void Equip(USceneComponent* InParent, FName InSocketName);
 
 protected:
 	virtual void BeginPlay() override;

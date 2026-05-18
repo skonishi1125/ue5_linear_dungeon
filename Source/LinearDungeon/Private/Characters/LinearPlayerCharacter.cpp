@@ -6,6 +6,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/ItemBase.h"
+#include "Items/Weapon.h"
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
@@ -75,6 +77,11 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Attack);
 		}
 
+		if (EquipAction)
+		{
+			EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Equip);
+		}
+
 	}
 }
 
@@ -123,5 +130,16 @@ void ALinearPlayerCharacter::TryJump()
 void ALinearPlayerCharacter::Attack()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Attack()");
+}
+
+void ALinearPlayerCharacter::Equip()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
+	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName);
+	}
+
 }
 

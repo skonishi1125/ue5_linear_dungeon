@@ -4,6 +4,8 @@
 #include "Characters/LinearPlayerCharacter.h"
 
 
+
+
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -19,20 +21,8 @@ void AWeapon::OnItemBeginOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult
 	);
 	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemBeginOverlap");
-
-	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
-	if (LinearPlayerCharacter != nullptr)
-	{
-		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-		ItemMesh->AttachToComponent(
-			LinearPlayerCharacter->GetMesh(),
-			TransformRules,
-			FName("RightHandSocket")
-		);
-	}
-
-
 }
+
 
 void AWeapon::OnItemEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
@@ -41,6 +31,12 @@ void AWeapon::OnItemEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	);
 	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemEndOverlap");
 
+}
+
+void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+{
+	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+	ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
 }
 
 
