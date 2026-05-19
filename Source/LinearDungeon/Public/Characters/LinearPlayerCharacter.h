@@ -20,6 +20,9 @@ class UInputAction;
 class AItemBase;
 class FName;
 
+// AM 関連
+class UAnimMontage;
+
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
@@ -78,5 +81,12 @@ private:
 	TObjectPtr<AItemBase> OverlappingItem;
 
 	FName RightHandSocketName = "RightHandSocket";
+
+	// ======= Anim Montages =======
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> AttackMontage;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2") };
 
 };

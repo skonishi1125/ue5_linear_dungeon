@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/ItemBase.h"
 #include "Items/Weapon.h"
+#include "Animation/AnimMontage.h"
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
@@ -130,6 +131,34 @@ void ALinearPlayerCharacter::TryJump()
 void ALinearPlayerCharacter::Attack()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Attack()");
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage && AttackMontageSectionNames.Num() > 0)
+	{
+		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+
+		int32 Selection = FMath::RandRange(0, 1);
+		FName SectionName = FName();
+		switch (Selection)
+		{
+		case 0:
+			SectionName = AttackMontageSectionNames[0];
+			UE_LOGFMT(LogTemp, Warning, "0 {Selection}", Selection);
+
+			break;
+		case 1:
+			SectionName = AttackMontageSectionNames[1];
+			UE_LOGFMT(LogTemp, Warning, "1 {Selection}", Selection);
+
+			break;
+		default:
+			UE_LOGFMT(LogTemp, Warning, "default");
+			break;
+		}
+
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+
+	}
+
 }
 
 void ALinearPlayerCharacter::Equip()
