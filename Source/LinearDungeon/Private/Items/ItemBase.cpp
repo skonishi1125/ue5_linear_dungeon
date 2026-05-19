@@ -37,12 +37,18 @@ void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	RunningTime += DeltaTime;
+	UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() State: {ItemState}", static_cast<uint8>(ItemState));
 
-	// 上下ホバリング
-	HoveringObject();
+	if (ItemState == EItemState::EIS_Dropped)
+	{
+		UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() Drop");
 
-	// 左回転処理
-	RotateObject(DeltaTime);
+		// 上下ホバリング
+		HoveringObject();
+
+		// 左回転処理
+		RotateObject(DeltaTime);
+	}
 }
 
 

@@ -11,6 +11,11 @@ class UStaticMeshComponent;
 // Overlap 関連
 class UPrimitiveComponent;
 
+enum class EItemState : uint8
+{
+	EIS_Dropped,
+	EIS_Equipped
+};
 
 
 UCLASS()
@@ -21,6 +26,9 @@ public:
 	AItemBase();
 	virtual void Tick(float DeltaTime) override;
 protected:
+	// ===== State 関連 =====
+	EItemState ItemState = EItemState::EIS_Dropped;
+
 	virtual void BeginPlay() override;
 
 	// UFINCTION() は UE のシステムがこの関数にアクセスしてチェックするので、

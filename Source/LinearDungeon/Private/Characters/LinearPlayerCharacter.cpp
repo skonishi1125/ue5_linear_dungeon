@@ -88,6 +88,8 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void ALinearPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (! CanMove()) return;
+
 	FVector2D MoveVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
@@ -104,6 +106,11 @@ void ALinearPlayerCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDir, MoveVector.Y);
 		AddMovementInput(RightDir, MoveVector.X);
 	}
+}
+
+bool ALinearPlayerCharacter::CanMove()
+{
+	return ActionState == EActionState::EAS_Unoccupied;
 }
 
 void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
@@ -124,8 +131,15 @@ void ALinearPlayerCharacter::TryJump()
 {
 	// 何かジャンプ前にさせたいことがあれば、ここで書く
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::TryJump()");
+	if (ActionState == EActionState::EAS_Unoccupied)
+	{
+		Super::Jump();
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec Super::Jump(). Now Actioning.");
+	}
 
-	Super::Jump();
 }
 
 void ALinearPlayerCharacter::Attack()
@@ -175,6 +189,7 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 	}
 }
 
+// Anim Montage の Notifies, ABP などから呼ぶ
 void ALinearPlayerCharacter::AttackEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;

@@ -44,6 +44,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
 	void Move(const FInputActionValue& Value);
+	bool CanMove();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> LookAction;
@@ -56,6 +57,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AttackAction;
 	void Attack();
+	bool CanAttack();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> EquipAction;
@@ -64,7 +66,6 @@ protected:
 	// ===== Montages 関連 =====
 	// Attack
 	void PlayAttackMontage();
-	bool CanAttack();
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 
