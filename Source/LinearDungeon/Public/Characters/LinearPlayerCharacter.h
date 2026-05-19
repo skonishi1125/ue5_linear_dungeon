@@ -43,40 +43,50 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
-
 	void Move(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> LookAction;
-
 	void Look(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
-
 	void TryJump();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AttackAction;
-
 	void Attack();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> EquipAction;
-
 	void Equip();
+
+	// ===== Montages 関連 =====
+	// Attack
+	void PlayAttackMontage();
+	bool CanAttack();
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
 
 
 private:
+	// ===== Character の状態 =====
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
+	// Attack Montage 側で Montage 終わりの Notify でこの State を調整するので、BP で公開する
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"));
+	EActionState ActionState = EActionState::EAS_Unoccupied;
+
+
+	// ===== カメラなど紐づけるComponent =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
 
-	// Overlap したアイテム情報の格納
+	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
 

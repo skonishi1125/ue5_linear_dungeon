@@ -131,12 +131,27 @@ void ALinearPlayerCharacter::TryJump()
 void ALinearPlayerCharacter::Attack()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Attack()");
+
+	if (CanAttack())
+	{
+		PlayAttackMontage();
+		ActionState = EActionState::EAS_Attacking;
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayAttackMontage(). Now Actioning or unequipped.");
+	}
+
+}
+
+void ALinearPlayerCharacter::PlayAttackMontage()
+{
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage && AttackMontageSectionNames.Num() > 0)
 	{
 		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 
-		int32 Selection = FMath::RandRange(0, 1);
+		const int32 Selection = FMath::RandRange(0, 1);
 		FName SectionName = FName();
 		switch (Selection)
 		{
@@ -158,8 +173,19 @@ void ALinearPlayerCharacter::Attack()
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 
 	}
-
 }
+
+void ALinearPlayerCharacter::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+bool ALinearPlayerCharacter::CanAttack()
+{
+	return ActionState == EActionState::EAS_Unoccupied &&
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
+
 
 void ALinearPlayerCharacter::Equip()
 {
@@ -173,4 +199,5 @@ void ALinearPlayerCharacter::Equip()
 	}
 
 }
+
 
