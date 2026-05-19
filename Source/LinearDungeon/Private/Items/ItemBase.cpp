@@ -7,8 +7,7 @@
 
 AItemBase::AItemBase()
 {
-	// 子クラス側で必要なものだけ、そちらで true にするようにする
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	// USphereComponent 関連設定
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
@@ -32,6 +31,34 @@ void AItemBase::BeginPlay()
 		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &AItemBase::OnItemBeginOverlap);
 		OverlapSphere->OnComponentEndOverlap.AddDynamic(this, &AItemBase::OnItemEndOverlap);
 	}
+}
+
+void AItemBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	RunningTime += DeltaTime;
+
+	// 上下ホバリング
+	HoveringObject();
+
+	// 左回転処理
+	RotateObject(DeltaTime);
+}
+
+
+void AItemBase::HoveringObject()
+{
+	AddActorWorldOffset(
+		FVector(0, 0, 
+			Amplitude * FMath::Sin(RunningTime * TimeConstant)
+		)
+	);
+}
+
+void AItemBase::RotateObject(float DeltaTime)
+{
+	const float DeltaRotation = RotationSpeed * DeltaTime;
+	AddActorLocalRotation(FRotator(.0f, DeltaRotation, .0f));
 }
 
 void AItemBase::OnItemBeginOverlap(
@@ -64,10 +91,4 @@ void AItemBase::OnItemEndOverlap(
 	}
 
 }
-
-
-//void AItemBase::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//}
 

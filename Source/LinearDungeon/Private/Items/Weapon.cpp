@@ -39,4 +39,3 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
 }
 
-
