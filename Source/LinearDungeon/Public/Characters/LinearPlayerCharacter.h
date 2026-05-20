@@ -63,11 +63,21 @@ protected:
 	TObjectPtr<UInputAction> EquipAction;
 	void Equip();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> RollingAction;
+	void Rolling();
+	bool CanRolling();
+
 	// ===== Montages 関連 =====
 	// Attack
 	void PlayAttackMontage();
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
+
+	// Rolling
+	void PlayRollingMontage();
+	UFUNCTION(BlueprintCallable)
+	void RollingEnd();
 
 
 
@@ -96,8 +106,10 @@ private:
 	// ======= Anim Montages =======
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> AttackMontage;
-	
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2") };
+
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> RollingMontage;
 
 };

@@ -83,6 +83,12 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Equip);
 		}
 
+		if (RollingAction)
+		{
+			EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Rolling);
+
+		}
+
 	}
 }
 
@@ -215,4 +221,37 @@ void ALinearPlayerCharacter::Equip()
 
 }
 
+void ALinearPlayerCharacter::Rolling()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Rolling()");
+	if (CanRolling())
+	{
+		PlayRollingMontage();
+		ActionState = EActionState::EAS_Rolling;
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayRollingMontage(). Now Actioning.");
+	}
 
+}
+
+
+void ALinearPlayerCharacter::PlayRollingMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Play(RollingMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+}
+
+
+void ALinearPlayerCharacter::RollingEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+
+bool ALinearPlayerCharacter::CanRolling()
+{
+	// どんな時でもキャンセルできると面白いかもしれない
+	return ActionState == EActionState::EAS_Unoccupied;
+}
