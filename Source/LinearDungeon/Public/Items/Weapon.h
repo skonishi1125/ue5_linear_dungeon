@@ -6,12 +6,14 @@
 
 class USceneComponent;
 class USoundBase; // UMetaSound ÇÕÇ±ÇÍÇåpè≥Ç∑ÇÈÇÃÇ≈ÅAÇ±ÇÃÉNÉâÉXÇ∆ÇµÇƒäiî[Ç≈Ç´ÇÈ
+class UBoxComponent;
 
 UCLASS()
 class LINEARDUNGEON_API AWeapon : public AItemBase
 {
 	GENERATED_BODY()
 public:
+	AWeapon();
 	void Equip(USceneComponent* InParent, FName InSocketName);
 
 protected:
@@ -32,5 +34,8 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	TObjectPtr<USoundBase> EquipSound;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	TObjectPtr<UBoxComponent> WeaponBox;
 
 };

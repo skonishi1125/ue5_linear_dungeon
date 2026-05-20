@@ -47,16 +47,17 @@ protected:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
 	);
 
+	// 派生クラスから nullptr 等に設定されてしまうことを防ぐために private とする
+	// BP で触れるようにしつつ, private に配置するために AllowPrivateAccess を設定
+	// -> 26.5.20 元々 private だったが、Weapon 側で 装備時に Collision 設定を無効とするため protected に配置
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USphereComponent> OverlapSphere; // USceneComponent を継承しているので、これを Root として扱っていく
+
 	// 継承先 Class で ItemMesh->... とするため、protected に配置
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
 
 private:
-	// 派生クラスから nullptr 等に設定されてしまうことを防ぐために private とする
-	// BP で触れるようにしつつ, private に配置するために AllowPrivateAccess を設定
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USphereComponent> OverlapSphere; // USceneComponent を継承しているので、これを Root として扱っていく
-
 	// 放置アイテムの浮遊, 回転処理
 	float RunningTime;
 
