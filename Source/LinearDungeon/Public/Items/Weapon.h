@@ -5,6 +5,7 @@
 #include "Weapon.generated.h"
 
 class USceneComponent;
+class USoundBase; // UMetaSound ‚Í‚±‚ê‚ğŒp³‚·‚é‚Ì‚ÅA‚±‚ÌƒNƒ‰ƒX‚Æ‚µ‚ÄŠi”[‚Å‚«‚é
 
 UCLASS()
 class LINEARDUNGEON_API AWeapon : public AItemBase
@@ -28,5 +29,8 @@ protected:
 		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
 	) override;
+private:
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	TObjectPtr<USoundBase> EquipSound;
 
 };
