@@ -49,7 +49,7 @@ protected:
 
 	// 派生クラスから nullptr 等に設定されてしまうことを防ぐために private とする
 	// BP で触れるようにしつつ, private に配置するために AllowPrivateAccess を設定
-	// -> 26.5.20 元々 private だったが、Weapon 側で 装備時に Collision 設定を無効とするため protected に配置
+	// -> 26.5.20 元々 private だったが、Weapon 側で 装備時に Collision 設定を無効とするため protected に配置。AllowPrivateAccess も外した
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> OverlapSphere; // USceneComponent を継承しているので、これを Root として扱っていく
 
