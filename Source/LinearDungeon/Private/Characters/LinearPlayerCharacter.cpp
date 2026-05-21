@@ -9,6 +9,7 @@
 #include "Items/ItemBase.h"
 #include "Items/Weapon.h"
 #include "Animation/AnimMontage.h"
+#include "Components/BoxComponent.h"
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
@@ -215,8 +216,8 @@ void ALinearPlayerCharacter::Equip()
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName);
-		// TODO: とりあえず 片手武器として実装
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 暫定で全て片手武器
+		EquippedWeapon = OverlappingWeapon;
 	}
 
 }
@@ -254,4 +255,20 @@ bool ALinearPlayerCharacter::CanRolling()
 {
 	// どんな時でもキャンセルできると面白いかもしれない
 	return ActionState == EActionState::EAS_Unoccupied;
+}
+
+void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+	}
+}
+
+void ALinearPlayerCharacter::SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionDisabled);
+	}
 }

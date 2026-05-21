@@ -18,6 +18,7 @@ class UInputAction;
 
 // アイテム関連
 class AItemBase;
+class AWeapon;
 class FName;
 
 // AM 関連
@@ -79,6 +80,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void RollingEnd();
 
+	// ===== 武器判定操作 =====
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled);
+
 
 
 private:
@@ -100,6 +107,9 @@ private:
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	TObjectPtr<AWeapon> EquippedWeapon;
 
 	FName RightHandSocketName = "RightHandSocket";
 

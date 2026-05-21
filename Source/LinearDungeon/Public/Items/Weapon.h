@@ -15,6 +15,7 @@ class LINEARDUNGEON_API AWeapon : public AItemBase
 public:
 	AWeapon();
 	void Equip(USceneComponent* InParent, FName InSocketName);
+	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; } // Character ë§Ç≈ëÄçÏÇ∑ÇÈ
 
 protected:
 	virtual void BeginPlay() override;

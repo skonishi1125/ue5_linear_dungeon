@@ -20,7 +20,7 @@ AWeapon::AWeapon()
 
 	// •Ší”»’èÝ’è
 	// Pawn ‚É‚¾‚¯‚Í Overlap ŒŸ’m‚É”½‰ž‚µ‚È‚¢‚æ‚¤‚ÉÝ’è
-	WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // ’ÊíŽž‚Í NoCollision
 	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
