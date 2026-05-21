@@ -10,18 +10,38 @@
 // 判定関連
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/KismetSystemLibrary.h" // BoxTrace
 
 
 AWeapon::AWeapon()
 {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box"));
 	WeaponBox->SetupAttachment(GetRootComponent());
+
+	// 武器判定設定
+	// Pawn にだけは Overlap 検知に反応しないように設定
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace Start"));
+	BoxTraceStart->SetupAttachment(GetRootComponent());
+
+	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace End"));
+	BoxTraceEnd->SetupAttachment(GetRootComponent());
+
+
 }
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	UE_LOGFMT(LogTemp, Warning, "Weapon BeginPlay");
+	if (WeaponBox)
+	{
+		WeaponBox->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnBoxOverlap);
+	}
+
 }
 
 void AWeapon::OnItemBeginOverlap(
@@ -36,13 +56,40 @@ void AWeapon::OnItemBeginOverlap(
 }
 
 
-void AWeapon::OnItemEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AWeapon::OnItemEndOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	Super::OnItemEndOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex
 	);
 	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemEndOverlap");
 
+}
+
+void AWeapon::OnBoxOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+	bool bFromSweep, const FHitResult& SweepResult)
+{
+	// BoxTrace 始点と終点
+	const FVector Start = BoxTraceStart->GetComponentLocation();
+	const FVector End = BoxTraceEnd->GetComponentLocation();
+
+	// 無視する対象を配列で指定できる。今回は自身を格納
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	FHitResult BoxHit;
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this, Start, End, FVector(5.f, 5.f, 5.f),
+		BoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
+		ActorsToIgnore,	EDrawDebugTrace::ForDuration, 
+		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
+		true
+	);
+	
 }
 
 void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
