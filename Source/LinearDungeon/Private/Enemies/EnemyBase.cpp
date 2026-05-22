@@ -3,6 +3,10 @@
 #include "LinearDungeon/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h" // DrawDebugAllow
 
+// ‰¹ŠÖ˜A
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "Components/CapsuleComponent.h"
 
 AEnemyBase::AEnemyBase()
@@ -39,6 +43,12 @@ void AEnemyBase::GetHit(const FVector& ImpactPoint)
 	DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
 
 	DirectionalHitReact(ImpactPoint);
+
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
+
 }
 
 void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)

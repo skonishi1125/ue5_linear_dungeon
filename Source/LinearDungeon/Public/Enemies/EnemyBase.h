@@ -8,6 +8,7 @@
 
 // AM ŠÖ˜A
 class UAnimMontage;
+class USoundBase;
 
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
@@ -36,4 +37,7 @@ private:
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;
+
+	UPROPERTY(EditAnywhere, Category = Sounds)
+	TObjectPtr<USoundBase> HitSound;
 };
