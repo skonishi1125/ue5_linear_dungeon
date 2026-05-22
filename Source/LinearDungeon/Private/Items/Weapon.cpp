@@ -11,6 +11,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h" // BoxTrace
+#include "Interfaces/HitInterface.h"
 
 
 AWeapon::AWeapon()
@@ -89,6 +90,15 @@ void AWeapon::OnBoxOverlap(
 		BoxHit, // Hit ‚µ‚½î•ñ‚ğw’è‚Ì•Ï”‚ÉŠi”[ (& ‚ÅQÆ“n‚µ‚ÌŒ`‚É‚È‚Á‚Ä‚¢‚é)
 		true
 	);
+
+	if (BoxHit.GetActor())
+	{
+		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
+		if (HitInterface)
+		{
+			HitInterface->GetHit(BoxHit.ImpactPoint);
+		}
+	}
 	
 }
 
