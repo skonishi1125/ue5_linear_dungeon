@@ -1,5 +1,6 @@
 #include "Items/Weapon.h"
 #include "Logging/StructuredLog.h"
+#include "LinearDungeon/DebugMacros.h"
 
 #include "Characters/LinearPlayerCharacter.h"
 
