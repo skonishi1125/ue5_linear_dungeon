@@ -1,5 +1,7 @@
 #include "Enemies/EnemyBase.h"
 #include "Logging/StructuredLog.h"
+#include "LinearDungeon/DebugMacros.h"
+
 #include "Components/CapsuleComponent.h"
 
 AEnemyBase::AEnemyBase()
@@ -32,6 +34,6 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void AEnemyBase::GetHit(const FVector& ImpactPoint)
 {
-	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit()");
+	LOG_WARN("AEnemyBase::GetHit()")
 }
 
