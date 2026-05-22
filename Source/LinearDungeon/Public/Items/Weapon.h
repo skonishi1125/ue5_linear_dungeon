@@ -16,6 +16,8 @@ public:
 	AWeapon();
 	void Equip(USceneComponent* InParent, FName InSocketName);
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; } // Character 側で操作する
+	// 武器判定で考慮しない Actor の配列
+	TArray<AActor*> BoxIgnoreActors; // 攻撃モーション中の一時的なリストなので、生ポインタで良い
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +56,5 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> BoxTraceEnd;
-
 
 };

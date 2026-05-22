@@ -22,6 +22,7 @@ public:
 	// Interface の Override
 	virtual void GetHit(const FVector& ImpactPoint) override;
 
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -29,6 +30,9 @@ protected:
 	void PlayHitReactionMontage(const FName& SectionName);
 
 private:
+	// 被弾時のベクトル計算
+	void DirectionalHitReact(const FVector& ImpactPoint);
+
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;

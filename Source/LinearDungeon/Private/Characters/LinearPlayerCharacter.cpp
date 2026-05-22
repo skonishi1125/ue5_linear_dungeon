@@ -262,6 +262,7 @@ void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type C
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
 		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		EquippedWeapon->BoxIgnoreActors.Empty();
 	}
 }
 

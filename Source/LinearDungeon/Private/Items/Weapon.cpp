@@ -32,7 +32,6 @@ AWeapon::AWeapon()
 	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace End"));
 	BoxTraceEnd->SetupAttachment(GetRootComponent());
 
-
 }
 
 void AWeapon::BeginPlay()
@@ -78,16 +77,20 @@ void AWeapon::OnBoxOverlap(
 	const FVector Start = BoxTraceStart->GetComponentLocation();
 	const FVector End = BoxTraceEnd->GetComponentLocation();
 
-	// 無視する対象を配列で指定できる。今回は自身を格納
+	// 無視する対象
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
+	for (AActor* Actor : BoxIgnoreActors)
+	{
+		ActorsToIgnore.AddUnique(Actor);
+	}
 
 	FHitResult BoxHit;
 
 	UKismetSystemLibrary::BoxTraceSingle(
 		this, Start, End, FVector(5.f, 5.f, 5.f),
 		BoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
-		ActorsToIgnore,	EDrawDebugTrace::ForDuration, 
+		ActorsToIgnore, EDrawDebugTrace::ForDuration,
 		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
 		true
 	);
@@ -99,6 +102,10 @@ void AWeapon::OnBoxOverlap(
 		{
 			HitInterface->GetHit(BoxHit.ImpactPoint);
 		}
+		// 武器を振った時、同じ敵に複数回当たらないようにする
+		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)
+		BoxIgnoreActors.AddUnique(BoxHit.GetActor());
+
 	}
 	
 }
