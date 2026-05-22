@@ -6,6 +6,9 @@
 
 #include "EnemyBase.generated.h"
 
+// AM ŠÖ˜A
+class UAnimMontage;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -22,4 +25,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// ===== Montages =====
+	void PlayHitReactionMontage(const FName& SectionName);
+
+private:
+	// ===== Montages =====
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> HitReactionMontage;
 };

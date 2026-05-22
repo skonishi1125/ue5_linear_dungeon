@@ -36,5 +36,18 @@ void AEnemyBase::GetHit(const FVector& ImpactPoint)
 {
 	LOG_WARN("AEnemyBase::GetHit()");
 	DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
+	PlayHitReactionMontage(FName("FromFront"));
+
+}
+
+void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactionMontage)
+	{
+		AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
+	}
+
 }
 
