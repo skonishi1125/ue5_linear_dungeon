@@ -10,6 +10,9 @@
 class UAnimMontage;
 class USoundBase;
 
+// Particle
+class UParticleSystem;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -40,4 +43,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Sounds)
 	TObjectPtr<USoundBase> HitSound;
+
+	UPROPERTY(EditAnywhere, Category = Particles)
+	TObjectPtr<UParticleSystem> HitParticle;
+
 };

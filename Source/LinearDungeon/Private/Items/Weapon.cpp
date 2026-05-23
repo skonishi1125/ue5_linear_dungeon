@@ -90,7 +90,8 @@ void AWeapon::OnBoxOverlap(
 	UKismetSystemLibrary::BoxTraceSingle(
 		this, Start, End, FVector(5.f, 5.f, 5.f),
 		BoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
-		ActorsToIgnore, EDrawDebugTrace::ForDuration,
+		ActorsToIgnore, 
+		EDrawDebugTrace::None, // Debug 表示
 		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
 		true
 	);
