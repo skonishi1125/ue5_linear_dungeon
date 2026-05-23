@@ -79,13 +79,6 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 		Theta *= -1.f;
 	}
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("%f"), CosTheta));
-	}
-	UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60.f, 5.f, FColor::Red, 5.f);
-
-
 	//UE_LOGFMT(LogTemp, Warning, "%f", Theta); ÉGÉâÅ[Ç…Ç»ÇÈ
 	/*
 		UE_LOGFMT(LogTemp, Warning, "{0}", Theta);
