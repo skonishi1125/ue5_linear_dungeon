@@ -107,6 +107,8 @@ void AWeapon::OnBoxOverlap(
 		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)
 		BoxIgnoreActors.AddUnique(BoxHit.GetActor());
 
+		CreateFields(BoxHit.ImpactPoint);
+
 	}
 	
 }
