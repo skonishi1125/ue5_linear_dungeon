@@ -8,6 +8,9 @@
 class UGeometryCollectionComponent;
 class UChaosGameplayEventDispatcher;
 
+// drop item
+class ULootDropComponent;
+
 UCLASS()
 class LINEARDUNGEON_API ABreakableActor : public AActor, public IHitInterface
 {
@@ -28,5 +31,11 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 
+	UPROPERTY()
 	TObjectPtr<UChaosGameplayEventDispatcher> GameplayEventDispatcher;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Items", meta = (AllowPrivateAccess = "true"))
+	//TSubclassOf<AItemBase> DropItemClassToSpawn;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULootDropComponent> LootDropComponent;
 };

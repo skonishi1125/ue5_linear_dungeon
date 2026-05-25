@@ -72,7 +72,7 @@ void AItemBase::OnItemBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemBeginOverlap()");
+	//UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemBeginOverlap()");
 	//AItemBase::OnActivated(); クラスを明示すると、子クラスの処理が呼ばれない
 
 	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
@@ -88,7 +88,7 @@ void AItemBase::OnItemEndOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
 )
 {
-	UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemEndOverlap()");
+	//UE_LOGFMT(LogTemp, Warning, "==PARENT== AItemBase::OnItemEndOverlap()");
 
 	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
 	if (LinearPlayerCharacter)
