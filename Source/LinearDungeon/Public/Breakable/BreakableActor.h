@@ -28,7 +28,7 @@ protected:
 
 private:
 	// BP ‚Å‰ó‚ê‚½‚Æ‚«‚ÉQÆ‚·‚é‚æ‚¤‚É‚µ‚½‚©‚çAVisibleAnywhere ‚©‚ç•Ï‚¦‚½
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 
 	UPROPERTY()
