@@ -24,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true")) // BP ‚Å‰ó‚ê‚½‚Æ‚«‚ÉQÆ‚·‚é‚æ‚¤‚É‚µ‚½‚©‚çAVisibleAnywhere ‚©‚ç•Ï‚¦‚½
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 
 	TObjectPtr<UChaosGameplayEventDispatcher> GameplayEventDispatcher;
