@@ -24,7 +24,8 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true")) // BP で壊れたときに参照するようにしたから、VisibleAnywhere から変えた
+	// BP で壊れたときに参照するようにしたから、VisibleAnywhere から変えた
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 
 	TObjectPtr<UChaosGameplayEventDispatcher> GameplayEventDispatcher;

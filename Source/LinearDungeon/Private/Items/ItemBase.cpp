@@ -37,11 +37,11 @@ void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	RunningTime += DeltaTime;
-	UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() State: {ItemState}", static_cast<uint8>(ItemState));
+	//UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() State: {ItemState}", static_cast<uint8>(ItemState));
 
 	if (ItemState == EItemState::EIS_Dropped)
 	{
-		UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() Drop");
+		//UE_LOGFMT(LogTemp, Warning, "AItemBase::Tick() Drop");
 
 		// è„â∫ÉzÉoÉäÉìÉO
 		HoveringObject();
