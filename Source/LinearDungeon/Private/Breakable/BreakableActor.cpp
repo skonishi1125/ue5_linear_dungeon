@@ -27,8 +27,8 @@ void ABreakableActor::Tick(float DeltaTime)
 
 }
 
-void ABreakableActor::GetHit(const FVector& ImpactPoint)
+void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	UE_LOGFMT(LogTemp, Warning, " ABreakableActor::GetHit");
+	UE_LOGFMT(LogTemp, Warning, " ABreakableActor::GetHit_Implementation()");
 }
 

@@ -18,7 +18,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Interface ‚Ì Override
-	virtual void GetHit(const FVector& ImpactPoint) override;
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 protected:
 	virtual void BeginPlay() override;

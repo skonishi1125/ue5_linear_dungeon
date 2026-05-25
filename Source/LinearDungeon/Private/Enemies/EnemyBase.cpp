@@ -37,9 +37,9 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-void AEnemyBase::GetHit(const FVector& ImpactPoint)
+void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	LOG_WARN("AEnemyBase::GetHit()");
+	LOG_WARN("AEnemyBase::GetHit_Implementation()");
 	//DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
 
 	DirectionalHitReact(ImpactPoint);

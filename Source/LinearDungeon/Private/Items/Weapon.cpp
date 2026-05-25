@@ -101,7 +101,8 @@ void AWeapon::OnBoxOverlap(
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
-			HitInterface->GetHit(BoxHit.ImpactPoint);
+			//HitInterface->GetHit(BoxHit.ImpactPoint);
+			HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
 		}
 		// 武器を振った時、同じ敵に複数回当たらないようにする
 		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)
