@@ -3,11 +3,13 @@
 #include "LinearDungeon/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h" // DrawDebugAllow
 
+#include "Components/CapsuleComponent.h"
+
 // ‰¹ŠÖ˜A
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "Components/CapsuleComponent.h"
+#include "Components/AttributeComponent.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -19,6 +21,9 @@ AEnemyBase::AEnemyBase()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
+
+	// Components ’Ç‰Á
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 }
 
 void AEnemyBase::BeginPlay()

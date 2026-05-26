@@ -13,6 +13,9 @@ class USoundBase;
 // Particle
 class UParticleSystem;
 
+// Component
+class UAttributeComponent;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -34,6 +37,9 @@ protected:
 	void PlayHitReactionMontage(const FName& SectionName);
 
 private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAttributeComponent> Attributes;
+
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
 
