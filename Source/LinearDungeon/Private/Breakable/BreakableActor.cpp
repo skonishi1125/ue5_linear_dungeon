@@ -2,6 +2,7 @@
 #include "Logging/StructuredLog.h"
 
 #include "GeometryCollection/GeometryCollectionComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Chaos/ChaosGameplayEventDispatcher.h"
 
 #include "Items/ItemBase.h"
@@ -16,9 +17,19 @@ ABreakableActor::ABreakableActor()
 	GeometryCollection->SetGenerateOverlapEvents(true);
 	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
+	// 破片が Pawn に干渉しないように設定
+	// GC 自体の Collision は遮断して、CapsuleComponent 側で Block する形をとる
+	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	Capsule->SetupAttachment(GetRootComponent());
+	Capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Capsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+
+
+	// Event Dispatcher 設定
 	GameplayEventDispatcher = CreateDefaultSubobject<UChaosGameplayEventDispatcher>(TEXT("GameplayEventDispatcher"));
 
-	// Component 割当
+	// 固有 Component 割当（アイテムドロップ）
 	LootDropComponent = CreateDefaultSubobject<ULootDropComponent>(TEXT("LootDropComponent"));
 }
 

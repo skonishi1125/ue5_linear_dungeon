@@ -6,6 +6,7 @@
 #include "BreakableActor.generated.h"
 
 class UGeometryCollectionComponent;
+class UCapsuleComponent;
 class UChaosGameplayEventDispatcher;
 
 // drop item
@@ -27,12 +28,14 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	// BP Ç≈âÛÇÍÇΩÇ∆Ç´Ç…éQè∆Ç∑ÇÈÇÊÇ§Ç…ÇµÇΩÇ©ÇÁÅAVisibleAnywhere Ç©ÇÁïœÇ¶ÇΩ
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UChaosGameplayEventDispatcher> GameplayEventDispatcher;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UCapsuleComponent* Capsule;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Items", meta = (AllowPrivateAccess = "true"))
 	//TSubclassOf<AItemBase> DropItemClassToSpawn;
