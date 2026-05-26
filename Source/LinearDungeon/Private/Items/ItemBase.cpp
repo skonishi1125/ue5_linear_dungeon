@@ -5,6 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Characters/LinearPlayerCharacter.h"
 
+#include "NiagaraComponent.h"
+
 AItemBase::AItemBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,6 +22,10 @@ AItemBase::AItemBase()
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	ItemMesh->SetupAttachment(GetRootComponent());
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // Mesh Ž©‘Ì‚ª Overlap ‚É”»’è‚³‚ê‚È‚¢‚æ‚¤‚É‚·‚é
+
+	// Effect
+	NSEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NSEffect"));
+	NSEffect->SetupAttachment(GetRootComponent());
 
 }
 

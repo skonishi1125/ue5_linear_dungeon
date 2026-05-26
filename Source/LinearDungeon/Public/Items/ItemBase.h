@@ -11,6 +11,9 @@ class UStaticMeshComponent;
 // Overlap 関連
 class UPrimitiveComponent;
 
+// Effect
+class UNiagaraComponent;
+
 enum class EItemState : uint8
 {
 	EIS_Dropped,
@@ -57,6 +60,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraComponent> NSEffect;
+
 private:
 	// 放置アイテムの浮遊, 回転処理
 	float RunningTime;
@@ -67,7 +73,4 @@ private:
 
 	void RotateObject(float DeltaTime);
 	float RotationSpeed = 90.0f; // [deg/s]: 秒間あたり何度回るか
-
-
-
 };

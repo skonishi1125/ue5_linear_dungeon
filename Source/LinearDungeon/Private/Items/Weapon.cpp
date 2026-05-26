@@ -14,6 +14,9 @@
 #include "Kismet/KismetSystemLibrary.h" // BoxTrace
 #include "Interfaces/HitInterface.h"
 
+// Effect
+#include "NiagaraComponent.h"
+
 
 AWeapon::AWeapon()
 {
@@ -135,6 +138,12 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	if (EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
+	}
+
+	// エフェクトを切る
+	if (NSEffect)
+	{
+		NSEffect->Deactivate();
 	}
 
 }

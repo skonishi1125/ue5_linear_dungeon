@@ -8,6 +8,9 @@ public class LinearDungeon : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GeometryCollectionEngine", "ChaosSolverEngine" });
+		PublicDependencyModuleNames.AddRange(new string[] { 
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
+			"GeometryCollectionEngine", "ChaosSolverEngine", "Niagara"
+		});
 	}
 }
