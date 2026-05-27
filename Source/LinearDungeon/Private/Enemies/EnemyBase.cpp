@@ -3,13 +3,15 @@
 #include "LinearDungeon/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h" // DrawDebugAllow
 
+// Component 関連
 #include "Components/CapsuleComponent.h"
+#include "Components/AttributeComponent.h"
+#include "Components/WidgetComponent.h"
 
 // 音関連
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "Components/AttributeComponent.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -23,7 +25,10 @@ AEnemyBase::AEnemyBase()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	// Components 追加
-	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));// AC は Attach 不要
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidget->SetupAttachment(GetRootComponent());
+
 }
 
 void AEnemyBase::BeginPlay()
