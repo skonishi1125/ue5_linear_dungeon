@@ -36,11 +36,6 @@ void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetHealthPercent(.1f);
-	}
-
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -73,6 +68,18 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 		);
 	}
 
+}
+
+float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// Widget XVˆ—
+	if (Attributes && HealthBarWidget)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+	}
+
+	return DamageAmount;
 }
 
 void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)

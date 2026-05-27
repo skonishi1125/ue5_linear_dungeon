@@ -30,6 +30,12 @@ public:
 	// Interface の Override
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
+	// AActor の持つ TakeDamage Override
+	float TakeDamage(
+		float DamageAmount, struct FDamageEvent const& DamageEvent, 
+		class AController* EventInstigator, AActor* DamageCauser
+	) override;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,10 +46,10 @@ protected:
 private:
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAttributeComponent> Attributes;
+	TObjectPtr<UAttributeComponent> Attributes; // HP 等の情報
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UHealthBarComponent> HealthBarWidget;
+	TObjectPtr<UHealthBarComponent> HealthBarWidget; // 体力バー Widget
 
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);

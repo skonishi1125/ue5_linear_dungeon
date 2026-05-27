@@ -111,14 +111,32 @@ void AWeapon::OnBoxOverlap(
 		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)
 		BoxIgnoreActors.AddUnique(BoxHit.GetActor());
 
+		// Geometry Collections 等を破壊するための力 Field 作成
 		CreateFields(BoxHit.ImpactPoint);
+
+		// ダメージ処理
+		UGameplayStatics::ApplyDamage(
+			BoxHit.GetActor(),
+			Damage,
+			GetInstigator()->GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
 
 	}
 	
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+void AWeapon::Equip(
+	USceneComponent* InParent, FName InSocketName,
+	AActor* NewOwner, APawn* NewInstigator
+)
 {
+	// Owner, Instigator 設定
+	SetOwner(NewOwner);
+	SetInstigator(NewInstigator);
+
+	// 武器のアタッチ先指定
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	GetRootComponent()->AttachToComponent(InParent, TransformRules, InSocketName);
 	ItemState = EItemState::EIS_Equipped;
