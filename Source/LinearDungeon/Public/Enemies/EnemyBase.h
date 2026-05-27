@@ -40,6 +40,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void Die();
+
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
 
@@ -63,5 +65,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Particles)
 	TObjectPtr<UParticleSystem> HitParticle;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> DeathMontage;
 
 };

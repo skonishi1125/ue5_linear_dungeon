@@ -101,6 +101,16 @@ void AWeapon::OnBoxOverlap(
 
 	if (BoxHit.GetActor())
 	{
+		// 1. ダメージ処理
+		UGameplayStatics::ApplyDamage(
+			BoxHit.GetActor(),
+			Damage,
+			GetInstigator()->GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+
+		// 2.Interface に応じた固有処理
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
@@ -114,14 +124,6 @@ void AWeapon::OnBoxOverlap(
 		// Geometry Collections 等を破壊するための力 Field 作成
 		CreateFields(BoxHit.ImpactPoint);
 
-		// ダメージ処理
-		UGameplayStatics::ApplyDamage(
-			BoxHit.GetActor(),
-			Damage,
-			GetInstigator()->GetController(),
-			this,
-			UDamageType::StaticClass()
-		);
 
 	}
 	

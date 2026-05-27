@@ -38,6 +38,39 @@ void AEnemyBase::BeginPlay()
 
 }
 
+void AEnemyBase::Die()
+{
+	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
+
+	// Montage 再生
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+
+		const int32 Selection = FMath::RandRange(0, 2);
+		FName SectionName = FName();
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Death1");
+			break;
+		case 1:
+			SectionName = FName("Death2");
+			break;
+		case 2:
+			SectionName = FName("Death3");
+			break;
+		default:
+			break;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+
+		UE_LOGFMT(LogTemp, Warning, "Playing DeathMontage {Name}", SectionName);
+
+	}
+}
+
 void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -51,8 +84,19 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	LOG_WARN("AEnemyBase::GetHit_Implementation()");
+	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
 	//DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
+
+	if (Attributes && Attributes->IsAlive())
+	{
+		// 生存 のけぞりアニメ再生
+		DirectionalHitReact(ImpactPoint);
+	}
+	else
+	{
+		// 死亡処理, アニメ再生
+		Die();
+	}
 
 	DirectionalHitReact(ImpactPoint);
 
