@@ -90,15 +90,15 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 	if (Attributes && Attributes->IsAlive())
 	{
 		// 生存 のけぞりアニメ再生
+		UE_LOGFMT(LogTemp, Warning, "DirectionalHitReact");
 		DirectionalHitReact(ImpactPoint);
 	}
 	else
 	{
 		// 死亡処理, アニメ再生
+		UE_LOGFMT(LogTemp, Warning, "Die");
 		Die();
 	}
-
-	DirectionalHitReact(ImpactPoint);
 
 	if (HitSound)
 	{
