@@ -13,6 +13,5 @@ class LINEARDUNGEON_API UHealthBar : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UProgressBar> HealthBar; // エディタ側と同じ名前にする
-	
+	TObjectPtr<UProgressBar> HealthBar; // エディタで持たせたパーツの命名と同じ変数名にする
 };

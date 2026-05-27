@@ -6,7 +6,8 @@
 // Component 関連
 #include "Components/CapsuleComponent.h"
 #include "Components/AttributeComponent.h"
-#include "Components/WidgetComponent.h"
+//#include "Components/WidgetComponent.h"
+#include "Components/HUD/HealthBarComponent.h"
 
 // 音関連
 #include "Sound/SoundBase.h"
@@ -26,7 +27,7 @@ AEnemyBase::AEnemyBase()
 
 	// Components 追加
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));// AC は Attach 不要
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
 
 }
@@ -34,6 +35,12 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetHealthPercent(.1f);
+	}
+
 }
 
 void AEnemyBase::Tick(float DeltaTime)

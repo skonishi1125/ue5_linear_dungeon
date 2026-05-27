@@ -15,7 +15,7 @@ class UParticleSystem;
 
 // Component
 class UAttributeComponent;
-class UWidgetComponent;
+class UHealthBarComponent;
 
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
@@ -43,7 +43,7 @@ private:
 	TObjectPtr<UAttributeComponent> Attributes;
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UWidgetComponent> HealthBarWidget;
+	TObjectPtr<UHealthBarComponent> HealthBarWidget;
 
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
