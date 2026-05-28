@@ -54,6 +54,11 @@ private:
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
 
+	UPROPERTY(VisibleInstanceOnly)
+	TObjectPtr<AActor> CombatTarget;
+
+	UPROPERTY(EditAnywhere)
+	double CombatRadius = 500.f;
 	
 
 	// ===== Components =====

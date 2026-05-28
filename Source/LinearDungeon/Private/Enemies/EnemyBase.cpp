@@ -35,12 +35,28 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+	// 初期は、HP bar は消しておく（被弾したら表示する）
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetVisibility(false);
+	}
 
 }
 
 void AEnemyBase::Die()
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
+
+	// 判定, HealthBar 非表示
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (HealthBarWidget)
+	{
+		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget OFF");
+		HealthBarWidget->SetVisibility(false);
+	}
+
+	// 一定時間経過したら、Destroy されるようにする
+	SetLifeSpan(5.f);
 
 	// Montage 再生
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -72,11 +88,29 @@ void AEnemyBase::Die()
 		UE_LOGFMT(LogTemp, Warning, "Playing DeathMontage {Name}", SectionName);
 
 	}
+
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (CombatTarget)
+	{
+		// A から B のベクトル : B - A
+		// 敵 から 攻撃相手 へのベクトル計算
+		const double DistanceToTarget = 
+			(CombatTarget->GetActorLocation() - GetActorLocation()).Size();
+		if (DistanceToTarget > CombatRadius)
+		{
+			CombatTarget = nullptr;
+			if (HealthBarWidget)
+			{
+				HealthBarWidget->SetVisibility(false);
+			}
+		}
+
+	}
 }
 
 void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -90,6 +124,14 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
 	//DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
 
+	// HealthBar 表示
+	if (HealthBarWidget && ! HealthBarWidget->IsVisible())
+	{
+		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget ON");
+		HealthBarWidget->SetVisibility(true);
+	}
+
+	// アニメ再生
 	if (Attributes && Attributes->IsAlive())
 	{
 		// 生存 のけぞりアニメ再生
@@ -124,6 +166,16 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	{
 		Attributes->ReceiveDamage(DamageAmount);
 		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+	}
+
+	// 攻撃された相手
+	if (EventInstigator != nullptr)
+	{
+		AActor* InstigatorPawn = EventInstigator->GetPawn();
+		if (InstigatorPawn != nullptr)
+		{
+			CombatTarget = InstigatorPawn;
+		}
 	}
 
 	return DamageAmount;
