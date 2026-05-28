@@ -17,7 +17,6 @@
 // Effect
 #include "NiagaraComponent.h"
 
-
 AWeapon::AWeapon()
 {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box"));

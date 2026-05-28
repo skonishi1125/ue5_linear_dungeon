@@ -19,6 +19,7 @@ class UInputAction;
 // アイテム関連
 class AItemBase;
 class AWeapon;
+class AShield;
 class FName;
 
 // AM 関連
@@ -108,10 +109,14 @@ private:
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AWeapon> EquippedWeapon;
 
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
+	TObjectPtr<AShield> EquippedShield;
+
 	FName RightHandSocketName = "RightHandSocket";
+	FName LeftHandSocketName = "LeftHandSocket";
 
 	// ======= Anim Montages =======
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/ItemBase.h"
 #include "Items/Weapon.h"
+#include "Items/Shield.h"
 #include "Animation/AnimMontage.h"
 #include "Components/BoxComponent.h"
 
@@ -212,13 +213,31 @@ bool ALinearPlayerCharacter::CanAttack()
 void ALinearPlayerCharacter::Equip()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
+
+	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	AShield* OverlappingShield = Cast<AShield>(OverlappingItem);
+
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 暫定で全て片手武器
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// 暫定で全て片手武器
 		EquippedWeapon = OverlappingWeapon;
 	}
+	else if (OverlappingShield)
+	{
+		OverlappingShield->Equip(GetMesh(), LeftHandSocketName, this, this);
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作る
+		EquippedShield = OverlappingShield;
+	}
+
+	//AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	//if (OverlappingWeapon)
+	//{
+	//	OverlappingWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
+	//	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 暫定で全て片手武器
+	//	EquippedWeapon = OverlappingWeapon;
+	//}
 
 }
 
