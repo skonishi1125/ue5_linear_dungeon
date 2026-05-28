@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
+#include "Characters/CharacterTypes.h"
 
 #include "EnemyBase.generated.h"
 
@@ -42,19 +43,25 @@ protected:
 
 	void Die();
 
+	// 死亡ポーズの種類（ABP Idle -> Dead 遷移に使う）
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
 
 private:
+	// 被弾時のベクトル計算
+	void DirectionalHitReact(const FVector& ImpactPoint);
+
+	
+
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等の情報
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget; // 体力バー Widget
-
-	// 被弾時のベクトル計算
-	void DirectionalHitReact(const FVector& ImpactPoint);
 
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
