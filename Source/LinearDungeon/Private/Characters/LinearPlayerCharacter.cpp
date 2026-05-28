@@ -161,7 +161,7 @@ void ALinearPlayerCharacter::Attack()
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayAttackMontage(). Now Actioning or unequipped.");
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayAttackMontage(). Now Actioning or unequipped Weapon.");
 	}
 
 }
@@ -205,8 +205,11 @@ void ALinearPlayerCharacter::AttackEnd()
 
 bool ALinearPlayerCharacter::CanAttack()
 {
-	return ActionState == EActionState::EAS_Unoccupied &&
-		CharacterState != ECharacterState::ECS_Unequipped;
+	return 
+		ActionState == EActionState::EAS_Unoccupied &&
+		EquippedWeapon != nullptr
+		//CharacterState != ECharacterState::ECS_Unequipped
+	;
 }
 
 
