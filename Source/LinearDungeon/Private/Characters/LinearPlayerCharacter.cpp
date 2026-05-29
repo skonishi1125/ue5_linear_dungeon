@@ -294,15 +294,6 @@ void ALinearPlayerCharacter::Equip()
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作る
 		EquippedShield = OverlappingShield;
 	}
-
-	//AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	//if (OverlappingWeapon)
-	//{
-	//	OverlappingWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
-	//	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 暫定で全て片手武器
-	//	EquippedWeapon = OverlappingWeapon;
-	//}
-
 }
 
 void ALinearPlayerCharacter::Rolling()

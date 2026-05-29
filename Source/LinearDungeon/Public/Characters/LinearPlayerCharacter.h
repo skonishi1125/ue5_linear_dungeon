@@ -88,16 +88,10 @@ protected:
 	void PlayRollingMontage();
 	UFUNCTION(BlueprintCallable)
 	void RollingEnd();
-	UFUNCTION(BlueprintImplementableEvent)
-	void CreateRollingFields(const FVector& GenerateLocation);
-
-
 	UFUNCTION(BlueprintCallable, Category = "RollingField")
 	void StartRollingField();
-
 	UFUNCTION(BlueprintCallable, Category = "RollingField")
 	void StopRollingField();
-
 	// 毎フレームBlueprint側でFieldを発生させるためのイベント
 	UFUNCTION(BlueprintImplementableEvent, Category = "RollingField")
 	void UpdateRollingField(const FVector& Location);
