@@ -35,6 +35,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline 関数の強制
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,6 +61,12 @@ protected:
 	TObjectPtr<UInputAction> AttackAction;
 	void Attack();
 	bool CanAttack();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> DefenseAction;
+	void StartDefense();
+	void StopDefense();
+	bool CanDefense();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> EquipAction;

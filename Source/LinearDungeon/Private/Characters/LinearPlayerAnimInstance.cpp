@@ -2,6 +2,7 @@
 #include "Characters/LinearPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h" // GroundSpeed 取得用
+#include "Characters/CharacterTypes.h"
 
 void ULinearPlayerAnimInstance::NativeInitializeAnimation()
 {
@@ -28,4 +29,14 @@ void ULinearPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		// 武器の所持 / 非所持 などでアニメをを使い分けるため
 		CharacterState = LinearPlayerCharacter->GetCharacterState();
 	}
+
+	if (LinearPlayerCharacter && LinearPlayerCharacter->GetCharacterActionState() == EActionState::EAS_Defensing)
+	{
+		bIsDefensing = true;
+	}
+	else
+	{
+		bIsDefensing = false;
+	}
+
 }

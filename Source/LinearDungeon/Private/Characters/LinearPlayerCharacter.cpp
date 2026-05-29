@@ -80,6 +80,12 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Attack);
 		}
 
+		if (DefenseAction)
+		{
+			EnhancedInputComponent->BindAction(DefenseAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::StartDefense);
+			EnhancedInputComponent->BindAction(DefenseAction, ETriggerEvent::Completed, this, &ALinearPlayerCharacter::StopDefense);
+		}
+
 		if (EquipAction)
 		{
 			EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Equip);
@@ -209,6 +215,41 @@ bool ALinearPlayerCharacter::CanAttack()
 		ActionState == EActionState::EAS_Unoccupied &&
 		EquippedWeapon != nullptr
 		//CharacterState != ECharacterState::ECS_Unequipped
+	;
+}
+
+// Defense は ABP State で管理する
+void ALinearPlayerCharacter::StartDefense()
+{
+	if (CanDefense())
+	{
+		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
+		ActionState = EActionState::EAS_Defensing;
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec StartDefense()");
+	}
+}
+
+void ALinearPlayerCharacter::StopDefense()
+{
+	if (ActionState == EActionState::EAS_Defensing)
+	{
+		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
+		ActionState = EActionState::EAS_Unoccupied;
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "Cannot exec StopDefense()");
+	}
+}
+
+bool ALinearPlayerCharacter::CanDefense()
+{
+	return
+		ActionState == EActionState::EAS_Unoccupied &&
+		EquippedShield != nullptr
 	;
 }
 
