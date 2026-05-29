@@ -299,8 +299,12 @@ void ALinearPlayerCharacter::Rolling()
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Rolling()");
 	if (CanRolling())
 	{
-		PlayRollingMontage();
 		ActionState = EActionState::EAS_Rolling;
+		// Anim に設定されている進行量自体を増やす
+		AnimRootMotionTranslationScale = 1.5f;
+
+		PlayRollingMontage();
+		CreateRollingFields(GetActorLocation());
 	}
 	else
 	{
@@ -319,6 +323,7 @@ void ALinearPlayerCharacter::PlayRollingMontage()
 
 void ALinearPlayerCharacter::RollingEnd()
 {
+	AnimRootMotionTranslationScale = 1.f;
 	ActionState = EActionState::EAS_Unoccupied;
 }
 
@@ -326,7 +331,10 @@ void ALinearPlayerCharacter::RollingEnd()
 bool ALinearPlayerCharacter::CanRolling()
 {
 	// どんな時でもキャンセルできると面白いかもしれない
-	return ActionState == EActionState::EAS_Unoccupied;
+	return 
+		ActionState == EActionState::EAS_Unoccupied &&
+		! GetCharacterMovement()->IsFalling()
+	;
 }
 
 void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)

@@ -87,6 +87,8 @@ protected:
 	void PlayRollingMontage();
 	UFUNCTION(BlueprintCallable)
 	void RollingEnd();
+	UFUNCTION(BlueprintImplementableEvent)
+	void CreateRollingFields(const FVector& GenerateLocation);
 
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
