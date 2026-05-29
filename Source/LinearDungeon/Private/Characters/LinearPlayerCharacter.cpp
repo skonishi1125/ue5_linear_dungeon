@@ -39,6 +39,17 @@ void ALinearPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ALinearPlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Rolling 中の間、FieldSystem を生成する
+	if (bIsGeneratingRollingField)
+	{
+		UpdateRollingField(GetActorLocation());
+	}
+}
+
 
 void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -326,6 +337,17 @@ void ALinearPlayerCharacter::RollingEnd()
 	AnimRootMotionTranslationScale = 1.f;
 	ActionState = EActionState::EAS_Unoccupied;
 }
+
+void ALinearPlayerCharacter::StartRollingField()
+{
+	bIsGeneratingRollingField = true;
+}
+
+void ALinearPlayerCharacter::StopRollingField()
+{
+	bIsGeneratingRollingField = false;
+}
+
 
 
 bool ALinearPlayerCharacter::CanRolling()

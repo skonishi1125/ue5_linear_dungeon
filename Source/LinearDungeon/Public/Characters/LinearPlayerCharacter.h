@@ -39,6 +39,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	// ===== Enhanced Input 関連メソッド =====
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -90,6 +91,18 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void CreateRollingFields(const FVector& GenerateLocation);
 
+
+	UFUNCTION(BlueprintCallable, Category = "RollingField")
+	void StartRollingField();
+
+	UFUNCTION(BlueprintCallable, Category = "RollingField")
+	void StopRollingField();
+
+	// 毎フレームBlueprint側でFieldを発生させるためのイベント
+	UFUNCTION(BlueprintImplementableEvent, Category = "RollingField")
+	void UpdateRollingField(const FVector& Location);
+
+
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
@@ -135,5 +148,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> RollingMontage;
+	bool bIsGeneratingRollingField = false; // Rolling 中の FieldSystem 生成フラグ
 
 };
