@@ -105,7 +105,7 @@ private:
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 
-	// ===== カメラなど紐づけるComponent =====
+	// ===== Component =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
 
@@ -129,7 +129,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2") };
+	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2"), FName("JumpAttack")};
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> RollingMontage;

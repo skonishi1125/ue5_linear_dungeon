@@ -179,23 +179,32 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 	{
 		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 
-		const int32 Selection = FMath::RandRange(0, 1);
 		FName SectionName = FName();
-		switch (Selection)
+
+		// ジャンプ中ならジャンプ攻撃、そうでないなら通常攻撃
+		if (GetCharacterMovement()->IsFalling())
 		{
-		case 0:
-			SectionName = AttackMontageSectionNames[0];
-			UE_LOGFMT(LogTemp, Warning, "0 {Selection}", Selection);
+			SectionName = AttackMontageSectionNames[2];
+		}
+		else
+		{
+			const int32 Selection = FMath::RandRange(0, 1);
+			switch (Selection)
+			{
+			case 0:
+				SectionName = AttackMontageSectionNames[0];
+				UE_LOGFMT(LogTemp, Warning, "0 {Selection}", Selection);
 
-			break;
-		case 1:
-			SectionName = AttackMontageSectionNames[1];
-			UE_LOGFMT(LogTemp, Warning, "1 {Selection}", Selection);
+				break;
+			case 1:
+				SectionName = AttackMontageSectionNames[1];
+				UE_LOGFMT(LogTemp, Warning, "1 {Selection}", Selection);
 
-			break;
-		default:
-			UE_LOGFMT(LogTemp, Warning, "default");
-			break;
+				break;
+			default:
+				UE_LOGFMT(LogTemp, Warning, "default");
+				break;
+			}
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
