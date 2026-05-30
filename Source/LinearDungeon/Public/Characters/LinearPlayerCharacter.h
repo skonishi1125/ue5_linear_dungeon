@@ -37,6 +37,10 @@ public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
 
+	// AM_Rolling Notify から呼び出す、FieldSystem 操作関数
+	void OnRollingFieldNotifyBegin();
+	void OnRollingFieldNotifyEnd();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -82,20 +86,14 @@ protected:
 	// Attack
 	void PlayAttackMontage();
 	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
+	void OnAttackAnimEnded();
 
 	// Rolling
 	void PlayRollingMontage();
 	UFUNCTION(BlueprintCallable)
-	void RollingEnd();
-	UFUNCTION(BlueprintCallable, Category = "RollingField")
-	void StartRollingField();
-	UFUNCTION(BlueprintCallable, Category = "RollingField")
-	void StopRollingField();
-	// 毎フレームBlueprint側でFieldを発生させるためのイベント
-	UFUNCTION(BlueprintImplementableEvent, Category = "RollingField")
-	void UpdateRollingField(const FVector& Location);
-
+	void OnRollingAnimEnded();
+	void AttachRollingFieldSystem();
+	void DetachRollingFieldSystem();
 
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
@@ -135,13 +133,18 @@ private:
 	FName LeftHandSocketName = "LeftHandSocket";
 
 	// ======= Anim Montages =======
+	// Attack
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2"), FName("JumpAttack")};
 
+	// Rolling
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> RollingMontage;
-	bool bIsGeneratingRollingField = false; // Rolling 中の FieldSystem 生成フラグ
+	UPROPERTY(VisibleInstanceOnly, meta = (AllowPrivateAccess = "true"), Category = "RollingField")
+	TObjectPtr<AActor> FieldSystemActor; // BP 側で割り当てる
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "RollingField")
+	TSubclassOf<AActor> FieldActorClass;
 
 };

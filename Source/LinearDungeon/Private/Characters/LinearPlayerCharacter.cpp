@@ -42,12 +42,6 @@ void ALinearPlayerCharacter::BeginPlay()
 void ALinearPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// Rolling 中の間、FieldSystem を生成する
-	if (bIsGeneratingRollingField)
-	{
-		UpdateRollingField(GetActorLocation());
-	}
 }
 
 
@@ -223,8 +217,7 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 	}
 }
 
-// Anim Montage の Notifies, ABP などから呼ぶ
-void ALinearPlayerCharacter::AttackEnd()
+void ALinearPlayerCharacter::OnAttackAnimEnded()
 {
 	ActionState = EActionState::EAS_Unoccupied;
 }
@@ -313,7 +306,6 @@ void ALinearPlayerCharacter::Rolling()
 
 }
 
-
 void ALinearPlayerCharacter::PlayRollingMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -321,23 +313,48 @@ void ALinearPlayerCharacter::PlayRollingMontage()
 }
 
 
-void ALinearPlayerCharacter::RollingEnd()
+void ALinearPlayerCharacter::OnRollingAnimEnded()
 {
 	AnimRootMotionTranslationScale = 1.f;
 	ActionState = EActionState::EAS_Unoccupied;
 }
 
-void ALinearPlayerCharacter::StartRollingField()
+void ALinearPlayerCharacter::AttachRollingFieldSystem()
 {
-	bIsGeneratingRollingField = true;
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this; // 生み出す FieldSystem の親を自身に設定
+		FieldSystemActor = World->SpawnActor<AActor>(
+			// 親と同じ Locate, Rotate などでスポーン
+			FieldActorClass, GetActorLocation(), GetActorRotation(), SpawnParams
+		);
+		if (FieldSystemActor)
+		{
+			// LPCharacter にアタッチ
+			FieldSystemActor->AttachToComponent(
+				GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale
+			);
+		}
+	}
 }
 
-void ALinearPlayerCharacter::StopRollingField()
+void ALinearPlayerCharacter::OnRollingFieldNotifyBegin()
 {
-	bIsGeneratingRollingField = false;
+	AttachRollingFieldSystem();
 }
 
+void ALinearPlayerCharacter::DetachRollingFieldSystem()
+{
+	FieldSystemActor->Destroy();
+	FieldSystemActor = nullptr;
+}
 
+void ALinearPlayerCharacter::OnRollingFieldNotifyEnd()
+{
+	DetachRollingFieldSystem();
+}
 
 bool ALinearPlayerCharacter::CanRolling()
 {
