@@ -304,9 +304,7 @@ void ALinearPlayerCharacter::Rolling()
 		ActionState = EActionState::EAS_Rolling;
 		// Anim に設定されている進行量自体を増やす
 		AnimRootMotionTranslationScale = 1.5f;
-
 		PlayRollingMontage();
-		CreateRollingFields(GetActorLocation());
 	}
 	else
 	{
