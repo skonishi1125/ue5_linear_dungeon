@@ -46,6 +46,8 @@ protected:
 
 	void Die();
 	bool InTargetRange(AActor* Target, double Radius);
+	AActor* ChoosePatrolTarget();
+	void MoveToTarget(AActor* Target);
 
 	// éÄñSÉ|Å[ÉYÇÃéÌóﬁÅiABP Idle -> Dead ëJà⁄Ç…égÇ§Åj
 	UPROPERTY(BlueprintReadOnly)
@@ -85,12 +87,18 @@ private:
 	TObjectPtr<UAnimMontage> DeathMontage;
 
 	// ===== úpújèàóù(Patrol) =====
+	void CheckPatrolTarget();
+	void CheckCombatTarget();
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TObjectPtr<AActor> PatrolTarget;
-
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
+	FTimerHandle PatrolTimer;
+	void PatrolTimerFinished();
 	double PatrolRadius = 200.f;
+	UPROPERTY(EditAnywhere)
+	double PatrolWaitingTime = 3.f;
+
 
 	
 	TObjectPtr<AAIController> EnemyController;

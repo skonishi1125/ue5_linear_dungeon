@@ -56,32 +56,13 @@ void AEnemyBase::BeginPlay()
 	// 敵 移動処理テストコード
 	// Controller を取得し、AIController にキャスト（Player Controller なら失敗する形になる）
 	EnemyController = Cast<AAIController>(GetController());
-	if (EnemyController)
+	if (PatrolTarget == nullptr && PatrolTargets.Num() > 0)
 	{
-		if (PatrolTarget == nullptr && PatrolTargets.Num() > 0)
-		{
-			UE_LOGFMT(LogTemp, Warning, "Adjust: PatrolTarget = PatrolTargets[0]");
-			PatrolTarget = PatrolTargets[0];
-		}
-
-		FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
-		MoveRequest.SetGoalActor(PatrolTarget); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
-		MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
-
-		// FNavigationPath クラスのスマートポインタ
-		// MoveTo で計算した、現在地から目的地までの経路データを受け取るための変数
-		FNavPathSharedPtr NavPath;
-		FPathFollowingRequestResult Result = EnemyController->MoveTo(MoveRequest, &NavPath); // 経路検索の結果を Result で受け取る
-
-		// 生成された経路から、パスの頂点リストを取得
-		// リストを for で回して、計算結果の頂点を Sphere で出したもの
-		TArray<FNavPathPoint>& PathPoints = NavPath->GetPathPoints();
-		for (auto& Point : PathPoints)
-		{
-			const FVector& Location = Point.Location;
-			DrawDebugSphere(GetWorld(), Location, 12.f, 12, FColor::Green, false, 10.f);
-		}
+		UE_LOGFMT(LogTemp, Warning, "Adjust: PatrolTarget = PatrolTargets[0]");
+		PatrolTarget = PatrolTargets[0];
 	}
+
+	MoveToTarget(PatrolTarget);
 
 }
 
@@ -90,9 +71,16 @@ void AEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 相手に攻撃された状態で、範囲内外かで HealthBar の表示を制御する
+	CheckCombatTarget();
+
+	CheckPatrolTarget();
+}
+
+void AEnemyBase::CheckCombatTarget()
+{
 	if (CombatTarget)
 	{
-		if (! InTargetRange(CombatTarget, CombatRadius))
+		if (!InTargetRange(CombatTarget, CombatRadius))
 		{
 			CombatTarget = nullptr;
 			if (HealthBarWidget)
@@ -101,45 +89,21 @@ void AEnemyBase::Tick(float DeltaTime)
 			}
 		}
 	}
+}
 
-	if (PatrolTarget && EnemyController)
+void AEnemyBase::CheckPatrolTarget()
+{
+	if (InTargetRange(PatrolTarget, PatrolRadius))
 	{
-		if (InTargetRange(PatrolTarget, PatrolRadius))
-		{
-			// Target 切り替え時、既存の Target を再度対象に選ばないようにする
-			TArray<AActor*> ValidTargets;
-			for (auto Target : PatrolTargets)
-			{
-				if (Target != PatrolTarget)
-				{
-					ValidTargets.AddUnique(Target);
-				}
-			}
-
-			// ランダムに配列から Target を取得
-			const int32 NumPatrolTargets = ValidTargets.Num();
-			if (NumPatrolTargets > 0)
-			{
-				const int32 TargetSelection = FMath::RandRange(0, NumPatrolTargets - 1);
-				AActor* Target = ValidTargets[TargetSelection];
-				PatrolTarget = Target;
-
-				// 移動処理再実行
-				FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
-				MoveRequest.SetGoalActor(PatrolTarget); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
-				MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
-
-				EnemyController->MoveTo(MoveRequest);
-
-			}
-			
-		}
+		PatrolTarget = ChoosePatrolTarget();
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemyBase::PatrolTimerFinished, PatrolWaitingTime);
 	}
-
 }
 
 bool AEnemyBase::InTargetRange(AActor* Target, double Radius)
 {
+	if (Target == nullptr) return false;
+
 	// A から B のベクトル : B - A
 	// 自身（敵） から 対象 へのベクトル計算
 	const double DistanceToTarget =
@@ -150,6 +114,39 @@ bool AEnemyBase::InTargetRange(AActor* Target, double Radius)
 
 	// 指定のゾーン（Radius) 内なら true, そうでない（範囲外）なら false
 	return DistanceToTarget <= Radius;
+}
+
+void AEnemyBase::MoveToTarget(AActor* Target)
+{
+	if (EnemyController == nullptr || Target == nullptr) return;
+
+	FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
+	MoveRequest.SetGoalActor(Target); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
+	MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
+	EnemyController->MoveTo(MoveRequest); 
+}
+
+AActor* AEnemyBase::ChoosePatrolTarget()
+{
+	// Target 切り替え時、既存の Target を再度対象に選ばないようにする
+	TArray<AActor*> ValidTargets;
+	for (auto Target : PatrolTargets)
+	{
+		if (Target != PatrolTarget)
+		{
+			ValidTargets.AddUnique(Target);
+		}
+	}
+
+	// ランダムに配列から Target を取得
+	const int32 NumPatrolTargets = ValidTargets.Num();
+	if (NumPatrolTargets > 0)
+	{
+		const int32 TargetSelection = FMath::RandRange(0, NumPatrolTargets - 1);
+		return ValidTargets[TargetSelection];
+	}
+
+	return nullptr;
 }
 
 void AEnemyBase::Die()
@@ -324,6 +321,13 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 
 	PlayHitReactionMontage(Section);
+}
+
+// Timer を設定し、指定時間後この関数が発火する
+void AEnemyBase::PatrolTimerFinished()
+{
+	MoveToTarget(PatrolTarget);
+
 }
 
 void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
