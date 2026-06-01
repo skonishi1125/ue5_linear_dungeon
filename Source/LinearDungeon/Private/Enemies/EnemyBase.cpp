@@ -8,6 +8,7 @@
 #include "Components/AttributeComponent.h"
 //#include "Components/WidgetComponent.h"
 #include "Components/HUD/HealthBarComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // ‰¹ŠÖ˜A
 #include "Sound/SoundBase.h"
@@ -29,6 +30,12 @@ AEnemyBase::AEnemyBase()
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));// AC ‚Í Attach •s—v
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
+
+	// “G‚ª•ûŒü“]Š·‚·‚é‚Æ‚«A‚©‚­‚©‚­‚µ‚½ Animation ‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
 
 }
 
