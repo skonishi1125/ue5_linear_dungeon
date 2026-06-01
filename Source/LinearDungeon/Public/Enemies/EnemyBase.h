@@ -45,6 +45,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void Die();
+	bool InTargetRange(AActor* Target, double Radius);
 
 	// 死亡ポーズの種類（ABP Idle -> Dead 遷移に使う）
 	UPROPERTY(BlueprintReadOnly)
@@ -89,6 +90,8 @@ private:
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
+	double PatrolRadius = 200.f;
+
 	
 	TObjectPtr<AAIController> EnemyController;
 

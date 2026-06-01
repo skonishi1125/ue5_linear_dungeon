@@ -56,8 +56,13 @@ void AEnemyBase::BeginPlay()
 	// 敵 移動処理テストコード
 	// Controller を取得し、AIController にキャスト（Player Controller なら失敗する形になる）
 	EnemyController = Cast<AAIController>(GetController());
-	if (EnemyController && PatrolTarget)
+	if (EnemyController)
 	{
+		if (PatrolTarget == nullptr && PatrolTargets.Num() > 0)
+		{
+			UE_LOGFMT(LogTemp, Warning, "Adjust: PatrolTarget = PatrolTargets[0]");
+			PatrolTarget = PatrolTargets[0];
+		}
 
 		FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
 		MoveRequest.SetGoalActor(PatrolTarget); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
@@ -78,6 +83,73 @@ void AEnemyBase::BeginPlay()
 		}
 	}
 
+}
+
+void AEnemyBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// 相手に攻撃された状態で、範囲内外かで HealthBar の表示を制御する
+	if (CombatTarget)
+	{
+		if (! InTargetRange(CombatTarget, CombatRadius))
+		{
+			CombatTarget = nullptr;
+			if (HealthBarWidget)
+			{
+				HealthBarWidget->SetVisibility(false);
+			}
+		}
+	}
+
+	if (PatrolTarget && EnemyController)
+	{
+		if (InTargetRange(PatrolTarget, PatrolRadius))
+		{
+			// Target 切り替え時、既存の Target を再度対象に選ばないようにする
+			TArray<AActor*> ValidTargets;
+			for (auto Target : PatrolTargets)
+			{
+				if (Target != PatrolTarget)
+				{
+					ValidTargets.AddUnique(Target);
+				}
+			}
+
+			// ランダムに配列から Target を取得
+			const int32 NumPatrolTargets = ValidTargets.Num();
+			if (NumPatrolTargets > 0)
+			{
+				const int32 TargetSelection = FMath::RandRange(0, NumPatrolTargets - 1);
+				AActor* Target = ValidTargets[TargetSelection];
+				PatrolTarget = Target;
+
+				// 移動処理再実行
+				FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
+				MoveRequest.SetGoalActor(PatrolTarget); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
+				MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
+
+				EnemyController->MoveTo(MoveRequest);
+
+			}
+			
+		}
+	}
+
+}
+
+bool AEnemyBase::InTargetRange(AActor* Target, double Radius)
+{
+	// A から B のベクトル : B - A
+	// 自身（敵） から 対象 へのベクトル計算
+	const double DistanceToTarget =
+		(Target->GetActorLocation() - GetActorLocation()).Size();
+
+	DRAW_SPHERE_SingleFrame(GetActorLocation());
+	DRAW_SPHERE_SingleFrame(Target->GetActorLocation())
+
+	// 指定のゾーン（Radius) 内なら true, そうでない（範囲外）なら false
+	return DistanceToTarget <= Radius;
 }
 
 void AEnemyBase::Die()
@@ -128,27 +200,7 @@ void AEnemyBase::Die()
 
 }
 
-void AEnemyBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
-	if (CombatTarget)
-	{
-		// A から B のベクトル : B - A
-		// 敵 から 攻撃相手 へのベクトル計算
-		const double DistanceToTarget = 
-			(CombatTarget->GetActorLocation() - GetActorLocation()).Size();
-		if (DistanceToTarget > CombatRadius)
-		{
-			CombatTarget = nullptr;
-			if (HealthBarWidget)
-			{
-				HealthBarWidget->SetVisibility(false);
-			}
-		}
-
-	}
-}
 
 void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
