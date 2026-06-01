@@ -18,6 +18,9 @@ class UParticleSystem;
 class UAttributeComponent;
 class UHealthBarComponent;
 
+// Navigation
+class AAIController;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -59,7 +62,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 500.f;
-	
 
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
@@ -80,5 +82,14 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> DeathMontage;
+
+	// ===== úpújèàóù(Patrol) =====
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TObjectPtr<AActor> PatrolTarget;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<AActor*> PatrolTargets;
+	
+	TObjectPtr<AAIController> EnemyController;
 
 };

@@ -14,6 +14,11 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
+// Navigation
+#include "AIController.h"
+#include "NavigationData.h"
+#include "Navigation/PathFollowingComponent.h"
+#include "AITypes.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -46,6 +51,23 @@ void AEnemyBase::BeginPlay()
 	if (HealthBarWidget)
 	{
 		HealthBarWidget->SetVisibility(false);
+	}
+
+	// “G‚ªˆÚ“®‚·‚éˆ—
+	EnemyController = Cast<AAIController>(GetController());
+	if (EnemyController && PatrolTarget)
+	{
+		FAIMoveRequest MoveRequest;
+		MoveRequest.SetGoalActor(PatrolTarget);
+		MoveRequest.SetAcceptanceRadius(15.f);
+		FNavPathSharedPtr NavPath;
+		EnemyController->MoveTo(MoveRequest, &NavPath);
+		TArray<FNavPathPoint>& PathPoints = NavPath->GetPathPoints();
+		for (auto& Point : PathPoints)
+		{
+			const FVector& Location = Point.Location;
+			DrawDebugSphere(GetWorld(), Location, 12.f, 12, FColor::Green, false, 10.f);
+		}
 	}
 
 }
