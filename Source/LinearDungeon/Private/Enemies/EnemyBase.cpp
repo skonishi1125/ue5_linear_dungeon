@@ -53,15 +53,23 @@ void AEnemyBase::BeginPlay()
 		HealthBarWidget->SetVisibility(false);
 	}
 
-	// 敵が移動する処理
+	// 敵 移動処理テストコード
+	// Controller を取得し、AIController にキャスト（Player Controller なら失敗する形になる）
 	EnemyController = Cast<AAIController>(GetController());
 	if (EnemyController && PatrolTarget)
 	{
-		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalActor(PatrolTarget);
-		MoveRequest.SetAcceptanceRadius(15.f);
+
+		FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
+		MoveRequest.SetGoalActor(PatrolTarget); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
+		MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
+
+		// FNavigationPath クラスのスマートポインタ
+		// MoveTo で計算した、現在地から目的地までの経路データを受け取るための変数
 		FNavPathSharedPtr NavPath;
-		EnemyController->MoveTo(MoveRequest, &NavPath);
+		FPathFollowingRequestResult Result = EnemyController->MoveTo(MoveRequest, &NavPath); // 経路検索の結果を Result で受け取る
+
+		// 生成された経路から、パスの頂点リストを取得
+		// リストを for で回して、計算結果の頂点を Sphere で出したもの
 		TArray<FNavPathPoint>& PathPoints = NavPath->GetPathPoints();
 		for (auto& Point : PathPoints)
 		{
