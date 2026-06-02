@@ -20,6 +20,8 @@ class UHealthBarComponent;
 
 // Navigation
 class AAIController;
+class UAIPerceptionComponent;
+class UAISenseConfig_Sight;
 
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
@@ -53,6 +55,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 
+	// AI Perception 感知時に走らせる関数
+	UFUNCTION()
+	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
+
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
 
@@ -73,6 +79,11 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget; // 体力バー Widget
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAISenseConfig_Sight> SightConfig; //  視覚設定
+
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;
@@ -89,18 +100,14 @@ private:
 	// ===== 徘徊処理(Patrol) =====
 	void CheckPatrolTarget();
 	void CheckCombatTarget();
+	void PatrolTimerFinished();
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TObjectPtr<AActor> PatrolTarget;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
+	TObjectPtr<AAIController> EnemyController;
 	FTimerHandle PatrolTimer;
-	void PatrolTimerFinished();
-	double PatrolRadius = 200.f;
 	UPROPERTY(EditAnywhere)
 	double PatrolWaitingTime = 3.f;
-
-
-	
-	TObjectPtr<AAIController> EnemyController;
-
+	double PatrolRadius = 200.f;
 };

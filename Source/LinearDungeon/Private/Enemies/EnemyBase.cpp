@@ -19,6 +19,8 @@
 #include "NavigationData.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "AITypes.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -36,6 +38,28 @@ AEnemyBase::AEnemyBase()
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
 
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+
+	if (SightConfig)
+	{
+		// 視覚パラメータの初期設定
+		SightConfig->SightRadius = 1500.f;// 視認可能な半径
+		SightConfig->LoseSightRadius = 1600.f; // 見失う半径（チラつき防止のため少し大きめに設定する）
+		SightConfig->PeripheralVisionAngleDegrees = 45.f; // 視野角
+		SightConfig->SetMaxAge(3.f);// 記憶保持時間
+
+		// どの所属（敵、味方、中立）を検知するか
+		// デフォルトでは全て検知しない設定のため、明示的にtrueにする
+		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+
+		// Perceptionコンポーネントに設定を登録
+		AIPerceptionComponent->ConfigureSense(*SightConfig);
+		AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
+	}
+
 	// 敵が方向転換するとき、かくかくした Animation にならないようにする
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
@@ -47,6 +71,13 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// デリゲート登録
+	if (AIPerceptionComponent)
+	{
+		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyBase::OnTargetDetected);
+	}
+
 	// 初期は、HP bar は消しておく（被弾したら表示する）
 	if (HealthBarWidget)
 	{
@@ -328,6 +359,24 @@ void AEnemyBase::PatrolTimerFinished()
 {
 	MoveToTarget(PatrolTarget);
 
+}
+
+void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
+{
+	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnTargetDetected()");
+	if (!Actor) return;
+
+	// 発見したか、見失ったのかを判定
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		UE_LOGFMT(LogTemp, Log, "Detected target: {0}", Actor->GetName());
+		// TODO: 追跡状態へ移行する処理など
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Log, "Lost sight of target: {0}", Actor->GetName());
+		// TODO: 見失ったあとの処理（数秒待機してPatrolに戻るなど）
+	}
 }
 
 void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
