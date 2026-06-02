@@ -85,12 +85,11 @@ void AEnemyBase::BeginPlay()
 		HealthBarWidget->SetVisibility(false);
 	}
 
-	// 敵 移動処理テストコード
-	// Controller を取得し、AIController にキャスト（Player Controller なら失敗する形になる）
+	// PatrolTarget を初期決定していなければ、[0]を初期対象とする
 	EnemyController = Cast<AAIController>(GetController());
 	if (PatrolTarget == nullptr && PatrolTargets.Num() > 0)
 	{
-		UE_LOGFMT(LogTemp, Warning, "Adjust: PatrolTarget = PatrolTargets[0]");
+		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::BeginPlay() Setting PatrolTarget = PatrolTargets[0]");
 		PatrolTarget = PatrolTargets[0];
 	}
 
@@ -139,10 +138,14 @@ void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
+
 void AEnemyBase::CheckCombatTarget()
 {
 	if (CombatTarget)
 	{
+		// 範囲外になった時、
+		// * HealthBar 非表示
+		// * State を Patrol に戻して、元のターゲットに対象を戻す
 		if (!InTargetRange(CombatTarget, CombatRadius))
 		{
 			CombatTarget = nullptr;
@@ -150,6 +153,8 @@ void AEnemyBase::CheckCombatTarget()
 			{
 				HealthBarWidget->SetVisibility(false);
 			}
+			EnemyState = EEnemyState::EES_Patrolling;
+			MoveToTarget(PatrolTarget);
 		}
 	}
 }
