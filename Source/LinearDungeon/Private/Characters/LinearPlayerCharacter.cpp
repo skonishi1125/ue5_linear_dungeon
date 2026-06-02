@@ -37,6 +37,7 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 void ALinearPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	Tags.Add(FName("LinearPlayerCharacter"));
 }
 
 void ALinearPlayerCharacter::Tick(float DeltaTime)

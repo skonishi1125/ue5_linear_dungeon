@@ -21,6 +21,7 @@
 #include "AITypes.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Characters/LinearPlayerCharacter.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -101,10 +102,41 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 相手に攻撃された状態で、範囲内外かで HealthBar の表示を制御する
-	CheckCombatTarget();
+	// 敵が既に攻撃されている状態で、範囲内外かで HealthBar の表示を制御する
+	if (EnemyState > EEnemyState::EES_Patrolling)
+	{
+		CheckCombatTarget();
+	}
+	else
+	{
+		CheckPatrolTarget();
+	}
+}
 
-	CheckPatrolTarget();
+// 発見したか、見失ったのかを判定
+void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
+{
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		if (EnemyState == EEnemyState::EES_Chasing) return;
+		if (Actor->ActorHasTag(FName("LinearPlayerCharacter")))
+		{
+			EnemyState = EEnemyState::EES_Chasing;
+			// チェイスして Character にたどり着いたときは、タイマーの待機処理は必要ないので無効にしておく
+			GetWorldTimerManager().ClearTimer(PatrolTimer);
+			CombatTarget = Actor;
+			MoveToTarget(CombatTarget);
+			UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Detected target: {0}", Actor->GetName());
+		}
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Lost sight of target: {0}", Actor->GetName());
+		// TODO: 見失ったあとの処理（数秒待機してPatrolに戻るなど）
+		EnemyState = EEnemyState::EES_Patrolling;
+		CheckPatrolTarget();
+
+	}
 }
 
 void AEnemyBase::CheckCombatTarget()
@@ -359,24 +391,6 @@ void AEnemyBase::PatrolTimerFinished()
 {
 	MoveToTarget(PatrolTarget);
 
-}
-
-void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
-{
-	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnTargetDetected()");
-	if (!Actor) return;
-
-	// 発見したか、見失ったのかを判定
-	if (Stimulus.WasSuccessfullySensed())
-	{
-		UE_LOGFMT(LogTemp, Log, "Detected target: {0}", Actor->GetName());
-		// TODO: 追跡状態へ移行する処理など
-	}
-	else
-	{
-		UE_LOGFMT(LogTemp, Log, "Lost sight of target: {0}", Actor->GetName());
-		// TODO: 見失ったあとの処理（数秒待機してPatrolに戻るなど）
-	}
 }
 
 void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
