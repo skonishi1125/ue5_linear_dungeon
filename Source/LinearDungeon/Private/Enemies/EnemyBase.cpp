@@ -120,20 +120,24 @@ void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 		if (EnemyState == EEnemyState::EES_Chasing) return;
 		if (Actor->ActorHasTag(FName("LinearPlayerCharacter")))
 		{
-			EnemyState = EEnemyState::EES_Chasing;
 			// チェイスして Character にたどり着いたときは、タイマーの待機処理は必要ないので無効にしておく
 			GetWorldTimerManager().ClearTimer(PatrolTimer);
-			CombatTarget = Actor;
-			MoveToTarget(CombatTarget);
-			UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Detected target: {0}", Actor->GetName());
+
+			if (EnemyState != EEnemyState::EES_Attacking)
+			{
+				EnemyState = EEnemyState::EES_Chasing;
+				CombatTarget = Actor;
+				MoveToTarget(CombatTarget);
+				UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Detected target: {0} Chasing!", Actor->GetName());
+			}
 		}
 	}
 	else
 	{
 		UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Lost sight of target: {0}", Actor->GetName());
 		// TODO: 見失ったあとの処理（数秒待機してPatrolに戻るなど）
-		EnemyState = EEnemyState::EES_Patrolling;
-		CheckPatrolTarget();
+		//EnemyState = EEnemyState::EES_Patrolling;
+		//CheckPatrolTarget();
 
 	}
 }
@@ -141,21 +145,34 @@ void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 
 void AEnemyBase::CheckCombatTarget()
 {
-	if (CombatTarget)
+	// サーチ範囲
+	// 範囲外になった時、
+	// * HealthBar 非表示
+	// * State を Patrol に戻して、元のターゲットに対象を戻す
+	if (! InTargetRange(CombatTarget, CombatRadius))
 	{
-		// 範囲外になった時、
-		// * HealthBar 非表示
-		// * State を Patrol に戻して、元のターゲットに対象を戻す
-		if (!InTargetRange(CombatTarget, CombatRadius))
+		CombatTarget = nullptr;
+		if (HealthBarWidget)
 		{
-			CombatTarget = nullptr;
-			if (HealthBarWidget)
-			{
-				HealthBarWidget->SetVisibility(false);
-			}
-			EnemyState = EEnemyState::EES_Patrolling;
-			MoveToTarget(PatrolTarget);
+			HealthBarWidget->SetVisibility(false);
 		}
+		EnemyState = EEnemyState::EES_Patrolling;
+		MoveToTarget(PatrolTarget);
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chase stop");
+
+	}
+	// 攻撃範囲外なら、攻撃が当たる範囲まで追いかける
+	else if (! InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+		MoveToTarget(CombatTarget);
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chasing");
+	}
+	// 攻撃範囲内 攻撃処理
+	else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
+	{
+		EnemyState = EEnemyState::EES_Attacking;
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Attack!");
 	}
 }
 

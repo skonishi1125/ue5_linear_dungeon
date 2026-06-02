@@ -72,7 +72,10 @@ private:
 	TObjectPtr<AActor> CombatTarget;
 
 	UPROPERTY(EditAnywhere)
-	double CombatRadius = 500.f;
+	double CombatRadius = 500.f; // HealthBar ‚È‚Ç‚Ì‰Â‹”ÍˆÍ
+
+	UPROPERTY(EditAnywhere)
+	double AttackRadius = 150.f; // Enemy ‚ªUŒ‚ƒ‚[ƒVƒ‡ƒ“‚É“ü‚é‚Ü‚Å‚Ì”ÍˆÍ
 
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
