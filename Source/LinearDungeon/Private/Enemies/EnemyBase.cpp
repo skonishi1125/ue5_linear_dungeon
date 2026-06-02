@@ -346,6 +346,8 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 		if (InstigatorPawn != nullptr)
 		{
 			CombatTarget = InstigatorPawn;
+			EnemyState = EEnemyState::EES_Chasing;
+			MoveToTarget(CombatTarget);
 		}
 	}
 
