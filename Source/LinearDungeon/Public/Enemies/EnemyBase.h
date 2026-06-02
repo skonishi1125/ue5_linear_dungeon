@@ -23,6 +23,9 @@ class AAIController;
 class UAIPerceptionComponent;
 class UAISenseConfig_Sight;
 
+// 攻撃
+class UBoxComponent;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -46,18 +49,35 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void Die();
+	// Patrol -> Chase 処理
+	// AI Perception 感知時に走らせる関数
+	UFUNCTION()
+	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
 	bool InTargetRange(AActor* Target, double Radius);
 	AActor* ChoosePatrolTarget();
 	void MoveToTarget(AActor* Target);
 
-	// 死亡ポーズの種類（ABP Idle -> Dead 遷移に使う）
+	// 死亡処理
+	void Die();
+	// ポーズの種類（ABP Idle -> Dead 遷移に使う）
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 
-	// AI Perception 感知時に走らせる関数
+	// 攻撃処理
+	// Overlap 時のイベント関数 (UFUNCTION 必須)
 	UFUNCTION()
-	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
+	void OnRightHandOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult
+	);
+
+	UFUNCTION()
+	void OnLeftHandOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+		bool bFromSweep, const FHitResult& SweepResult
+	);
 
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
@@ -102,6 +122,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> DeathMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> AttackMontage;
+
 	// ===== 徘徊処理(Patrol) =====
 	void CheckPatrolTarget();
 	void CheckCombatTarget();
@@ -115,4 +138,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	double PatrolWaitingTime = 3.f;
 	double PatrolRadius = 200.f;
+
+	// ===== 攻撃処理 =====
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> RightHandCollision;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> LeftHandCollision;
 };

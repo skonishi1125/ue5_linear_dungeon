@@ -23,6 +23,9 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Characters/LinearPlayerCharacter.h"
 
+// 攻撃判定
+#include "Components/BoxComponent.h"
+
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -67,6 +70,24 @@ AEnemyBase::AEnemyBase()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 
+	// ===== 攻撃判定設定 =====
+	RightHandCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandBox"));
+	RightHandCollision->SetupAttachment(GetMesh(), FName("hand_r")); // Bone に割り当てる
+	RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // TODO: NoCollision にして、Notify で変更する
+	RightHandCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	// Player(Pawn) に対してのみ動作させる
+	//RightHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	//RightHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	RightHandCollision->SetGenerateOverlapEvents(true);
+
+	LeftHandCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandBox"));
+	LeftHandCollision->SetupAttachment(GetMesh(), FName("hand_l"));
+	LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);// TODO: NoCollision にして、Notify で変更する
+	LeftHandCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	//LeftHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	//LeftHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	LeftHandCollision->SetGenerateOverlapEvents(true);
+
 }
 
 void AEnemyBase::BeginPlay()
@@ -78,6 +99,15 @@ void AEnemyBase::BeginPlay()
 	{
 		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyBase::OnTargetDetected);
 	}
+	if (RightHandCollision)
+	{
+		RightHandCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::OnRightHandOverlap);
+	}
+	if (LeftHandCollision)
+	{
+		LeftHandCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::OnLeftHandOverlap);
+	}
+
 
 	// 初期は、HP bar は消しておく（被弾したら表示する）
 	if (HealthBarWidget)
@@ -173,6 +203,9 @@ void AEnemyBase::CheckCombatTarget()
 	{
 		EnemyState = EEnemyState::EES_Attacking;
 		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Attack!");
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
 	}
 }
 
@@ -280,6 +313,38 @@ void AEnemyBase::Die()
 
 	}
 
+}
+
+void AEnemyBase::OnRightHandOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult
+)
+{
+	if (
+		OtherActor && OtherActor != this && 
+		OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))
+	)
+	{
+		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
+		// とりあえず固定で 10.0 のダメージを与える（実務では変数から取得する）
+		//UGameplayStatics::ApplyDamage(OtherActor, 10.f, GetController(), this, UDamageType::StaticClass());
+	}
+}
+
+void AEnemyBase::OnLeftHandOverlap(
+	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult
+)
+{
+	if (
+		OtherActor && OtherActor != this &&
+		OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))
+	)
+	{
+		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+	}
 }
 
 
