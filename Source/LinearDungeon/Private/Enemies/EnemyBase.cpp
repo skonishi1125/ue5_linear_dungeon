@@ -6,7 +6,6 @@
 // Component 関連
 #include "Components/CapsuleComponent.h"
 #include "Components/AttributeComponent.h"
-//#include "Components/WidgetComponent.h"
 #include "Components/HUD/HealthBarComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -38,7 +37,7 @@ AEnemyBase::AEnemyBase()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	// Components 追加
-	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));// AC は Attach 不要
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
 
@@ -321,14 +320,18 @@ void AEnemyBase::OnRightHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (
-		OtherActor && OtherActor != this && 
-		OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))
-	)
+	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))	)
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
-		// とりあえず固定で 10.0 のダメージを与える（実務では変数から取得する）
+		// とりあえず固定で 10.0 のダメージ
 		//UGameplayStatics::ApplyDamage(OtherActor, 10.f, GetController(), this, UDamageType::StaticClass());
+
+		// Interface に応じた固有処理
+		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
+		if (HitInterface)
+		{
+			HitInterface->Execute_GetHit(OtherActor, OtherActor->GetActorLocation());
+		}
 	}
 }
 
@@ -338,12 +341,16 @@ void AEnemyBase::OnLeftHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (
-		OtherActor && OtherActor != this &&
-		OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))
-	)
+	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(FName("LinearPlayerCharacter")))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+
+		// Interface に応じた固有処理
+		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
+		if (HitInterface)
+		{
+			HitInterface->Execute_GetHit(OtherActor, OtherActor->GetActorLocation());
+		}
 	}
 }
 

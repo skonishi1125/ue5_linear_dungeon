@@ -4,6 +4,7 @@
 #include "Characters/LinearCharacterBase.h"
 #include "InputActionValue.h"
 #include "Characters/CharacterTypes.h"
+#include "Interfaces/HitInterface.h"
 
 #include "LinearPlayerCharacter.generated.h"
 
@@ -16,6 +17,10 @@ class UInputComponent;
 class UInputMappingContext;
 class UInputAction;
 
+// Health 関連
+class UAttributeComponent;
+
+
 // アイテム関連
 class AItemBase;
 class AWeapon;
@@ -27,7 +32,7 @@ class UAnimMontage;
 
 
 UCLASS()
-class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase
+class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
 {
 	GENERATED_BODY()
 public:
@@ -40,6 +45,9 @@ public:
 	// AM_Rolling Notify から呼び出す、FieldSystem 操作関数
 	void OnRollingFieldNotifyBegin();
 	void OnRollingFieldNotifyEnd();
+
+	// 食らい処理
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -95,6 +103,9 @@ protected:
 	void AttachRollingFieldSystem();
 	void DetachRollingFieldSystem();
 
+	// HitReaction
+	void PlayHitReactionMontage();
+
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
@@ -118,6 +129,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAttributeComponent> Attributes; // HP 等
 
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
@@ -146,5 +160,9 @@ private:
 	TObjectPtr<AActor> FieldSystemActor; // BP 側で割り当てる
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "RollingField")
 	TSubclassOf<AActor> FieldActorClass;
+
+	// HitReaction
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> HitReactionMontage;
 
 };

@@ -1,16 +1,20 @@
 ﻿#include "Characters/LinearPlayerCharacter.h"
 #include "Logging/StructuredLog.h"
 
+// Component
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/AttributeComponent.h"
+
 #include "Items/ItemBase.h"
 #include "Items/Weapon.h"
 #include "Items/Shield.h"
 #include "Animation/AnimMontage.h"
-#include "Components/BoxComponent.h"
+
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
@@ -24,6 +28,7 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
+	// Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmBlankCharacter"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 400.f;
@@ -32,6 +37,9 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+
 }
 
 void ALinearPlayerCharacter::BeginPlay()
@@ -290,6 +298,24 @@ void ALinearPlayerCharacter::Equip()
 	}
 }
 
+void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		EquippedWeapon->BoxIgnoreActors.Empty();
+	}
+}
+
+void ALinearPlayerCharacter::SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionDisabled);
+	}
+}
+
+
 void ALinearPlayerCharacter::Rolling()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Rolling()");
@@ -366,19 +392,23 @@ bool ALinearPlayerCharacter::CanRolling()
 	;
 }
 
-void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+// 食らい処理
+void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
-	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->BoxIgnoreActors.Empty();
-	}
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
+
+	// TODO: 防御中かどうかで Anime を調整
+
+	// HealthBar 反映
+	// アニメ再生 （やられ or 死亡）
+	PlayHitReactionMontage();
+	// HitSoundなど
+	// State を作って、他の行動でキャンセルできないようにする
+
 }
 
-void ALinearPlayerCharacter::SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled)
+void ALinearPlayerCharacter::PlayHitReactionMontage()
 {
-	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
-	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionDisabled);
-	}
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 }

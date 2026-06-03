@@ -101,12 +101,8 @@ void AWeapon::OnBoxOverlap(
 	if (BoxHit.GetActor())
 	{
 		// 1. ダメージ処理
-		UGameplayStatics::ApplyDamage(
-			BoxHit.GetActor(),
-			Damage,
-			GetInstigator()->GetController(),
-			this,
-			UDamageType::StaticClass()
+		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), Damage,
+			GetInstigator()->GetController(), this, UDamageType::StaticClass()
 		);
 
 		// 2.Interface に応じた固有処理
