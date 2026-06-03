@@ -15,7 +15,10 @@ enum class EActionState : uint8
 	EAS_Unoccupied UMETA(DisplayName = "Unoccupied"),
 	EAS_Attacking UMETA(DisplayName = "Attacking"),
 	EAS_Defensing UMETA(DisplayName = "Defensing"),
-	EAS_Rolling UMETA(DisplayName = "Rolling")
+	EAS_Rolling UMETA(DisplayName = "Rolling"),
+	EAS_Hitting UMETA(DisplayName = "Hitting"), // ”í’e
+	EAS_Dying UMETA(DisplayName = "Dying")
+
 };
 
 // Enemy ‚É‚à Character ‚Ç‚¿‚ç‚àŽg‚¤
@@ -33,7 +36,7 @@ enum class EEnemyState : uint8
 {
 	EES_Patrolling UMETA(DisplayName = "Patrolling"),
 	EES_Chasing UMETA(DisplayName = "Chasing"),
-	EES_Attacking UMETA(DisplayName = "Attacking"),
+	EES_Attacking UMETA(DisplayName = "Attacking")
 };
 
 UENUM(BlueprintType)

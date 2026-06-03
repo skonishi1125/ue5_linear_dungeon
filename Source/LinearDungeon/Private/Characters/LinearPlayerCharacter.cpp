@@ -390,7 +390,7 @@ void ALinearPlayerCharacter::OnRollingFieldNotifyEnd()
 
 bool ALinearPlayerCharacter::CanRolling()
 {
-	// どんな時でもキャンセルできると面白いかもしれない
+	// TODO: 攻撃の後隙中にキャンセルさせたい
 	return 
 		ActionState == EActionState::EAS_Unoccupied &&
 		! GetCharacterMovement()->IsFalling()
@@ -426,9 +426,11 @@ void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		// 生存 のけぞりアニメ再生
 		PlayHitReactionMontage();
+		ActionState = EActionState::EAS_Hitting;
 	}
 	else
 	{
+		// 死亡 アニメ再生、State 変更
 		Die();
 	}
 
@@ -452,13 +454,20 @@ void ALinearPlayerCharacter::PlayHitReactionMontage()
 	}
 }
 
+void ALinearPlayerCharacter::OnHitReactionAnimEnded()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
 void ALinearPlayerCharacter::Die()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Die()");
 
-	// 一定時間経過したら、Destroy されるようにするなら以下
-	/*SetLifeSpan(5.f);*/
 	PlayDeathMontage();
+	ActionState = EActionState::EAS_Dying; // 死亡時は、この EAS から変わることはない
+
+	// Collision とかの無効化、Enemy の Target を外すなど
+
 }
 
 void ALinearPlayerCharacter::PlayDeathMontage()

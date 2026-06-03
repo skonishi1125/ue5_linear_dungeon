@@ -108,6 +108,8 @@ protected:
 
 	// HitReaction
 	void PlayHitReactionMontage();
+	UFUNCTION(BlueprintCallable)
+	void OnHitReactionAnimEnded();
 	void Die();
 	void PlayDeathMontage();
 	UPROPERTY(BlueprintReadOnly)
