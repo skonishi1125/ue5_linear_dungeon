@@ -20,7 +20,6 @@ class UInputAction;
 // Health 関連
 class UAttributeComponent;
 
-
 // アイテム関連
 class AItemBase;
 class AWeapon;
@@ -29,7 +28,7 @@ class FName;
 
 // AM 関連
 class UAnimMontage;
-
+class USoundBase;
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
@@ -47,6 +46,10 @@ public:
 	void OnRollingFieldNotifyEnd();
 
 	// 食らい処理
+	float TakeDamage(
+		float DamageAmount, struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator, AActor* DamageCauser
+	) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 protected:
@@ -105,6 +108,7 @@ protected:
 
 	// HitReaction
 	void PlayHitReactionMontage();
+	void PlayDeathMontage();
 
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
@@ -164,5 +168,15 @@ private:
 	// HitReaction
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TArray<FName> HitReactionSectionNames{ FName("Impact"), FName("BlockImpact") };
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<USoundBase> HitSound;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<USoundBase> BlockSound;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> DeathMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
 
 };

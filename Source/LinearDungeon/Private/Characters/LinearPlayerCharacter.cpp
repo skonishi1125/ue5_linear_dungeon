@@ -10,10 +10,15 @@
 #include "Components/BoxComponent.h"
 #include "Components/AttributeComponent.h"
 
+// 扱う Actor
 #include "Items/ItemBase.h"
 #include "Items/Weapon.h"
 #include "Items/Shield.h"
 #include "Animation/AnimMontage.h"
+
+// 音関連
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
@@ -392,23 +397,82 @@ bool ALinearPlayerCharacter::CanRolling()
 	;
 }
 
-// 食らい処理
+// ダメージ処理(Interface より手前で呼ばれる)
+float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// TODO: 防御中かどうかで処理を分ける（ダメージを抑えるかとか）
+
+	if (Attributes)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+		UE_LOGFMT(
+			LogTemp, Warning, 
+			"ALinearPlayerCharacter::TakeDamage() CurrentHealthPercent: {0}", Attributes->GetHealthPercent()
+		);
+	}
+	return DamageAmount;
+}
+
+// ダメージ後、状況に応じた処理
 void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
-
 	// TODO: 防御中かどうかで Anime を調整
 
 	// HealthBar 反映
+
 	// アニメ再生 （やられ or 死亡）
-	PlayHitReactionMontage();
+	if (Attributes && Attributes->IsAlive())
+	{
+		// 生存 のけぞりアニメ再生
+		PlayHitReactionMontage();
+	}
+	else
+	{
+		PlayDeathMontage();
+		//Die();
+	}
+
 	// HitSoundなど
-	// State を作って、他の行動でキャンセルできないようにする
+ 	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+	}
+
+	// State を作って、他の行動が食らいでキャンセルされないようにする
+	// （State が切り替わらず、キャラが止まってしまうので）
 
 }
 
 void ALinearPlayerCharacter::PlayHitReactionMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+	if (AnimInstance && HitReactionMontage)
+	{
+		AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+	}
+}
+
+void ALinearPlayerCharacter::PlayDeathMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage && DeathMontageSectionNames.Num() > 0)
+	{
+		AnimInstance->Montage_Play(DeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+
+		const int32 Selection = FMath::RandRange(0, 1);
+		FName SectionName = FName();
+		switch (Selection)
+		{
+			case 0:
+				SectionName = DeathMontageSectionNames[0];
+				break;
+			case 1:
+				SectionName = DeathMontageSectionNames[1];
+				break;
+			default:
+				break;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+	}
 }

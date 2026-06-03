@@ -324,7 +324,9 @@ void AEnemyBase::OnRightHandOverlap(
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
 		// とりあえず固定で 10.0 のダメージ
-		//UGameplayStatics::ApplyDamage(OtherActor, 10.f, GetController(), this, UDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(
+			OtherActor, 10.f, GetController(), this, UDamageType::StaticClass()
+		);
 
 		// Interface に応じた固有処理
 		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
@@ -335,6 +337,7 @@ void AEnemyBase::OnRightHandOverlap(
 	}
 }
 
+// TODO: 両手攻撃でどちらも処理が走ってしまうので、調整対応する
 void AEnemyBase::OnLeftHandOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
@@ -344,6 +347,9 @@ void AEnemyBase::OnLeftHandOverlap(
 	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(FName("LinearPlayerCharacter")))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+		UGameplayStatics::ApplyDamage(
+			OtherActor, 10.f, GetController(), this, UDamageType::StaticClass()
+		);
 
 		// Interface に応じた固有処理
 		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
