@@ -429,8 +429,7 @@ void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 	}
 	else
 	{
-		PlayDeathMontage();
-		//Die();
+		Die();
 	}
 
 	// HitSoundなど
@@ -453,6 +452,15 @@ void ALinearPlayerCharacter::PlayHitReactionMontage()
 	}
 }
 
+void ALinearPlayerCharacter::Die()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Die()");
+
+	// 一定時間経過したら、Destroy されるようにするなら以下
+	/*SetLifeSpan(5.f);*/
+	PlayDeathMontage();
+}
+
 void ALinearPlayerCharacter::PlayDeathMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -466,9 +474,11 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 		{
 			case 0:
 				SectionName = DeathMontageSectionNames[0];
+				DeathPose = EDeathPose::EDP_Death1;
 				break;
 			case 1:
 				SectionName = DeathMontageSectionNames[1];
+				DeathPose = EDeathPose::EDP_Death2;
 				break;
 			default:
 				break;

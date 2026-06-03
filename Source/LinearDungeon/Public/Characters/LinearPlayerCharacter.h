@@ -108,7 +108,10 @@ protected:
 
 	// HitReaction
 	void PlayHitReactionMontage();
+	void Die();
 	void PlayDeathMontage();
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive; // 死亡時のポーズ
 
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
@@ -130,23 +133,18 @@ private:
 	// ===== Component =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
-
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
-
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等
 
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
-
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AWeapon> EquippedWeapon;
-
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AShield> EquippedShield;
-
 	FName RightHandSocketName = "RightHandSocket";
 	FName LeftHandSocketName = "LeftHandSocket";
 
