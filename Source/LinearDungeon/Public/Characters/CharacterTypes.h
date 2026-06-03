@@ -35,3 +35,11 @@ enum class EEnemyState : uint8
 	EES_Chasing UMETA(DisplayName = "Chasing"),
 	EES_Attacking UMETA(DisplayName = "Attacking"),
 };
+
+UENUM(BlueprintType)
+enum class EAttackCollisionType : uint8
+{
+	EAC_RightHand UMETA(DisplayName = "Right Hand"),
+	EAC_LeftHand UMETA(DisplayName = "Left Hand"),
+	EAC_BothHands UMETA(DisplayName = "Both Hands")
+};

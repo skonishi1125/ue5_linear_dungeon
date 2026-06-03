@@ -73,19 +73,19 @@ AEnemyBase::AEnemyBase()
 	// ===== 攻撃判定設定 =====
 	RightHandCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandBox"));
 	RightHandCollision->SetupAttachment(GetMesh(), FName("hand_r")); // Bone に割り当てる
-	RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // TODO: NoCollision にして、Notify で変更する
+	RightHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RightHandCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	// Player(Pawn) に対してのみ動作させる
-	//RightHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	//RightHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	RightHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	RightHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	RightHandCollision->SetGenerateOverlapEvents(true);
 
 	LeftHandCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandBox"));
 	LeftHandCollision->SetupAttachment(GetMesh(), FName("hand_l"));
-	LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);// TODO: NoCollision にして、Notify で変更する
+	LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	LeftHandCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	//LeftHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	//LeftHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	LeftHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	LeftHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	LeftHandCollision->SetGenerateOverlapEvents(true);
 
 }
@@ -345,6 +345,58 @@ void AEnemyBase::OnLeftHandOverlap(
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
 	}
+}
+
+void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
+{
+	switch (CollisionType)
+	{
+		case EAttackCollisionType::EAC_RightHand:
+			if (RightHandCollision)
+			{
+				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
+		case EAttackCollisionType::EAC_LeftHand:
+			if (RightHandCollision)
+			{
+				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
+		case EAttackCollisionType::EAC_BothHands:
+			if (RightHandCollision)
+			{
+				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			if (RightHandCollision)
+			{
+				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
+	}
+}
+
+void AEnemyBase::OnAttackCollisionNotifyBegin(EAttackCollisionType CollisionType)
+{
+	ActivateAttackCollision(CollisionType);
+}
+
+void AEnemyBase::DeactivateAttackCollision()
+{
+	if (RightHandCollision)
+	{
+		RightHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (LeftHandCollision)
+	{
+		LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AEnemyBase::OnAttackCollisionNotifyEnd()
+{
+	DeactivateAttackCollision();
 }
 
 
