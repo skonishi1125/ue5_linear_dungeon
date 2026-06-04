@@ -20,7 +20,6 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
-
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
 	// Controller の回転に Character 自身は依存しないことを明示する
@@ -181,8 +180,12 @@ void ALinearPlayerCharacter::Attack()
 
 	if (CanAttack())
 	{
-		PlayAttackMontage();
+		PlayAttackMontage(); // 1団目の攻撃開始
 		ActionState = EActionState::EAS_Attacking;
+	}
+	else if (ActionState == EActionState::EAS_Attacking && bCanSaveAttack)
+	{
+		bSaveAttack = true;
 	}
 	else
 	{
@@ -209,19 +212,49 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 		{
 			SectionName = AttackMontageSectionNames[ComboCountIndex];
 			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+
+			// 2回目以降は、OnCheckCombo() で操作する
 			ComboCountIndex++;
-			if (ComboCountIndex > MaxComboIndex)
-			{
-				ComboCountIndex = 0;
-			}
+
 		}
 
+	}
+}
+
+void ALinearPlayerCharacter::OnCanSaveAttack(bool bCanSave)
+{
+	bCanSaveAttack = bCanSave;
+}
+
+void ALinearPlayerCharacter::OnCheckCombo()
+{
+	// 先行入力が保存されていれば、次の攻撃セクションへ移行する
+	if (bSaveAttack)
+	{
+		bSaveAttack = false;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && AttackMontage && AttackMontageSectionNames.Num() > 0)
+		{
+			// コンボ上限に達していない場合のみ遷移
+			if (ComboCountIndex <= MaxComboIndex)
+			{
+				FName NextSection = AttackMontageSectionNames[ComboCountIndex];
+				AnimInstance->Montage_JumpToSection(NextSection, AttackMontage);
+				ComboCountIndex++;
+			}
+		}
 	}
 }
 
 void ALinearPlayerCharacter::OnAttackAnimEnded()
 {
 	ActionState = EActionState::EAS_Unoccupied;
+
+	// コンボに関する状態をすべてリセット
+	ComboCountIndex = 0;
+	bCanSaveAttack = false;
+	bSaveAttack = false;
 }
 
 bool ALinearPlayerCharacter::CanAttack()

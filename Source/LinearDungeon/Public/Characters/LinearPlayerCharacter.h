@@ -52,6 +52,10 @@ public:
 	) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
+	// AM_Attack Notify から呼び出す、コンボ攻撃用関数
+	void OnCanSaveAttack(bool bCanSave);
+	void OnCheckCombo();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -77,6 +81,8 @@ protected:
 	TObjectPtr<UInputAction> AttackAction;
 	void Attack();
 	bool CanAttack();
+	bool bCanSaveAttack = false; // 先行入力受付期間かどうか
+	bool bSaveAttack = false; // 先行入力が押されたか
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> DefenseAction;
