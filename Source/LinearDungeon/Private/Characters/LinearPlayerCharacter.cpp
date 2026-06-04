@@ -197,27 +197,22 @@ void ALinearPlayerCharacter::Attack()
 void ALinearPlayerCharacter::PlayAttackMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage && AttackMontageSectionNames.Num() > 0)
+	if (AnimInstance)
 	{
-		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		FName SectionName = FName();
 
-		// ジャンプ中ならジャンプ攻撃、そうでないなら通常攻撃
-		if (GetCharacterMovement()->IsFalling())
+		// ジャンプ攻撃
+		if (GetCharacterMovement()->IsFalling() && JumpAttackMontage)
 		{
-			SectionName = AttackMontageSectionNames[4];
-			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+			AnimInstance->Montage_Play(JumpAttackMontage, 1.0f);
 		}
-		else
-		{
-			SectionName = AttackMontageSectionNames[ComboCountIndex];
-			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 
-			// 2回目以降は、OnCheckCombo() で操作する
+		else if (ComboMontages.Num() > 0 && ComboMontages[0] != nullptr)
+		{
+			// インデックスを0にリセットして1段目を再生
+			ComboCountIndex = 0;
+			AnimInstance->Montage_Play(ComboMontages[ComboCountIndex], 1.0f);
 			ComboCountIndex++;
-
 		}
-
 	}
 }
 
@@ -234,13 +229,13 @@ void ALinearPlayerCharacter::OnCheckCombo()
 		bSaveAttack = false;
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance && AttackMontage && AttackMontageSectionNames.Num() > 0)
+		if (AnimInstance && ComboMontages.Num() > 0)
 		{
 			// コンボ上限に達していない場合のみ遷移
-			if (ComboCountIndex <= MaxComboIndex)
+			if (ComboCountIndex < ComboMontages.Num())
 			{
-				FName NextSection = AttackMontageSectionNames[ComboCountIndex];
-				AnimInstance->Montage_JumpToSection(NextSection, AttackMontage);
+				// 次のMontageを再生（自動的に前のMontageからブレンドされる）
+				AnimInstance->Montage_Play(ComboMontages[ComboCountIndex], 1.0f);
 				ComboCountIndex++;
 			}
 		}

@@ -159,14 +159,10 @@ private:
 	// ======= Anim Montages =======
 	// Attack
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TObjectPtr<UAnimMontage> AttackMontage;
+	TArray<UAnimMontage*> ComboMontages;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TArray<FName> AttackMontageSectionNames{ 
-		FName("ComboAttack1"), FName("ComboAttack2"), FName("ComboAttack3"), FName("ComboAttack4"),
-		FName("JumpAttack")
-	};
+	TObjectPtr<UAnimMontage> JumpAttackMontage;
 	int32 ComboCountIndex = 0;
-	const int32 MaxComboIndex = 4;
 
 
 	// Rolling
