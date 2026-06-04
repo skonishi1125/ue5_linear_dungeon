@@ -155,7 +155,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TArray<FName> AttackMontageSectionNames{ FName("Attack1"), FName("Attack2"), FName("JumpAttack")};
+	TArray<FName> AttackMontageSectionNames{ 
+		FName("ComboAttack1"), FName("ComboAttack2"), FName("ComboAttack3"), FName("ComboAttack4"),
+		FName("JumpAttack")
+	};
+	int32 ComboCountIndex = 0;
+	const int32 MaxComboIndex = 4;
+
 
 	// Rolling
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
