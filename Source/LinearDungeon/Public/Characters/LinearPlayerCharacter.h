@@ -117,9 +117,9 @@ protected:
 
 	// ===== 武器判定操作 =====
 	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+	void OnWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled);
+	void OnWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled);
 
 
 

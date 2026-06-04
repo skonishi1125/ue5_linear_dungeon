@@ -303,7 +303,7 @@ void ALinearPlayerCharacter::Equip()
 	}
 }
 
-void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+void ALinearPlayerCharacter::OnWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
 {
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
@@ -312,7 +312,7 @@ void ALinearPlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type C
 	}
 }
 
-void ALinearPlayerCharacter::SetWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled)
+void ALinearPlayerCharacter::OnWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled)
 {
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
