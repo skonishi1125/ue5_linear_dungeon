@@ -55,6 +55,7 @@ public:
 	// AM_Attack Notify から呼び出す、コンボ攻撃用関数
 	void OnCanSaveAttack(bool bCanSave);
 	void OnCheckCombo();
+	void OnAttackSteering(bool bCanSteer); // コンボ中のステアリング制御
 
 protected:
 	virtual void BeginPlay() override;
@@ -83,6 +84,7 @@ protected:
 	bool CanAttack();
 	bool bCanSaveAttack = false; // 先行入力受付期間かどうか
 	bool bSaveAttack = false; // 先行入力が押されたか
+	bool bCanAttackSteering = false; // 攻撃中の方向微調整・微前進の許可フラグ
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> DefenseAction;
@@ -163,6 +165,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> JumpAttackMontage;
 	int32 ComboCountIndex = 0;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Attack")
+	float AttackSteeringMultiply = .15f;
 
 
 	// Rolling

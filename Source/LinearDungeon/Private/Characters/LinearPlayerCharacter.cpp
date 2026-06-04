@@ -120,7 +120,6 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void ALinearPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	if (! CanMove()) return;
 
 	FVector2D MoveVector = Value.Get<FVector2D>();
 
@@ -134,9 +133,20 @@ void ALinearPlayerCharacter::Move(const FInputActionValue& Value)
 		const FVector ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X); // UEでいう正面
 		const FVector RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y); // UEでいう真右
 
-		// ACharacter の持つ移動用関数
-		AddMovementInput(ForwardDir, MoveVector.Y);
-		AddMovementInput(RightDir, MoveVector.X);
+		if (CanMove())
+		{
+			// ACharacter の持つ移動用関数
+			AddMovementInput(ForwardDir, MoveVector.Y);
+			AddMovementInput(RightDir, MoveVector.X);
+		}
+		else if (ActionState == EActionState::EAS_Attacking && bCanAttackSteering)
+		{
+			// 攻撃中移動は、移動入力の倍率を下げて微調整できるようにする
+			// bOrientRotationToMovement が true なので入力方向へ振り向ける
+			AddMovementInput(ForwardDir, MoveVector.Y * AttackSteeringMultiply);
+			AddMovementInput(RightDir, MoveVector.X * AttackSteeringMultiply);
+		}
+
 	}
 }
 
@@ -241,6 +251,12 @@ void ALinearPlayerCharacter::OnCheckCombo()
 		}
 	}
 }
+
+void ALinearPlayerCharacter::OnAttackSteering(bool bCanSteer)
+{
+	bCanAttackSteering = bCanSteer;
+}
+
 
 void ALinearPlayerCharacter::OnAttackAnimEnded()
 {
