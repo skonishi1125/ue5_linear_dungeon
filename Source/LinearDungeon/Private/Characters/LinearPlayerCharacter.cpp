@@ -20,6 +20,8 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
+const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
+
 ALinearPlayerCharacter::ALinearPlayerCharacter()
 {
 	// Controller の回転に Character 自身は依存しないことを明示する
@@ -49,7 +51,8 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 void ALinearPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	Tags.Add(FName("LinearPlayerCharacter"));
+	Tags.Add(TagName);
+	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
 }
 
 void ALinearPlayerCharacter::Tick(float DeltaTime)

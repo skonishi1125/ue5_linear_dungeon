@@ -147,7 +147,8 @@ void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		if (EnemyState == EEnemyState::EES_Chasing) return;
-		if (Actor->ActorHasTag(FName("LinearPlayerCharacter")))
+
+		if (Actor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 		{
 			// チェイスして Character にたどり着いたときは、タイマーの待機処理は必要ないので無効にしておく
 			GetWorldTimerManager().ClearTimer(PatrolTimer);
@@ -320,7 +321,7 @@ void AEnemyBase::OnRightHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(FName("LinearPlayerCharacter"))	)
+	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
 		// とりあえず固定で 10.0 のダメージ
@@ -344,7 +345,7 @@ void AEnemyBase::OnLeftHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(FName("LinearPlayerCharacter")))
+	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
 		UGameplayStatics::ApplyDamage(

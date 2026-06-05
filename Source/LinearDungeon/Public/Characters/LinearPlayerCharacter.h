@@ -40,6 +40,7 @@ public:
 	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline 関数の強制
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
+	static FORCEINLINE FName GetTag() { return TagName; }
 
 	// AM_Rolling Notify から呼び出す、FieldSystem 操作関数
 	void OnRollingFieldNotifyBegin();
@@ -53,8 +54,8 @@ public:
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
 	// AM_Attack Notify から呼び出す、コンボ攻撃用関数
-	void OnCanSaveAttack(bool bCanSave);
-	void OnCheckCombo();
+	void OnCanSaveAttack(bool bCanSave); // ComboWindow 先行入力受付フラグ操作関数
+	void OnCheckCombo();// CheckCombo 先行入力を受け付けたとき、次の Montage_Play を実行する関数
 	void OnAttackSteering(bool bCanSteer); // コンボ中のステアリング制御
 
 protected:
@@ -132,13 +133,15 @@ protected:
 
 
 private:
-	// ===== Character の状態 =====
+	// ===== Character 設定 =====
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
 	// Attack Montage 側で Montage 終わりの Notify でこの State を調整するので、BP で公開する
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"));
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
+	// タグ
+	static const FName TagName;
 
 	// ===== Component =====
 	UPROPERTY(VisibleAnywhere)
