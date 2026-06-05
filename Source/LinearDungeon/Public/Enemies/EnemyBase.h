@@ -52,6 +52,8 @@ public:
 	// UAnimNotify_EnemyAttackEnd などから呼び出す、攻撃が終わったことを通知する関数
 	void OnAttackEnd();
 
+	// UAnimNotifyState_TrackingTarget から呼び出す、どの区間の間 Target に向かせるかを制御する関数
+	void OnTrackingTarget(bool bIsTracking);
 
 protected:
 	virtual void BeginPlay() override;
@@ -150,4 +152,9 @@ private:
 	TObjectPtr<UBoxComponent> RightHandCollision;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> LeftHandCollision;
+	bool bIsTrackingTarget = false;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	double TrackingInterpSpeed = 5.0;
+	void UpdateTrackingRotation(float DeltaTime);
+
 };

@@ -130,6 +130,12 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 攻撃モーション中の特定期間(NotifyState) でフラグが制御されている間、相手に振り向く
+	if (bIsTrackingTarget && CombatTarget != nullptr)
+	{
+		UpdateTrackingRotation(DeltaTime);
+	}
+
 	if (EnemyState > EEnemyState::EES_Patrolling)
 	{
 		// Chase / Attack 中に判断される処理
@@ -439,6 +445,10 @@ void AEnemyBase::OnAttackEnd()
 	}
 }
 
+void AEnemyBase::OnTrackingTarget(bool bIsTracking)
+{
+	bIsTrackingTarget = bIsTracking;
+}
 
 
 void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -572,6 +582,23 @@ void AEnemyBase::PatrolTimerFinished()
 {
 	MoveToTarget(PatrolTarget);
 
+}
+
+// 攻撃モーション中に、対象方向にフラグが有効の間振り向かせる
+void AEnemyBase::UpdateTrackingRotation(float DeltaTime)
+{
+	if (CombatTarget == nullptr) return;
+
+	FVector StartLocation = GetActorLocation();
+	FVector TargetLocation = CombatTarget->GetActorLocation();
+
+	// Z 軸は無視
+	TargetLocation.Z = StartLocation.Z;
+
+	// ターゲットの方向を向くための理想の角度を計算して、滑らかに振り向かせる
+	FRotator TargetRotation = (TargetLocation - StartLocation).Rotation();
+	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, TrackingInterpSpeed);
+	SetActorRotation(InterpRotation);
 }
 
 void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
