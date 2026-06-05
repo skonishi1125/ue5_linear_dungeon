@@ -130,16 +130,73 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 敵が既に攻撃されている状態で、範囲内外かで HealthBar の表示を制御する
 	if (EnemyState > EEnemyState::EES_Patrolling)
 	{
+		// Chase / Attack 中に判断される処理
 		CheckCombatTarget();
 	}
 	else
 	{
+		// Patrol 中に判断される処理
 		CheckPatrolTarget();
 	}
 }
+
+void AEnemyBase::CheckPatrolTarget()
+{
+	if (InTargetRange(PatrolTarget, PatrolRadius))
+	{
+		PatrolTarget = ChoosePatrolTarget();
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemyBase::PatrolTimerFinished, PatrolWaitingTime);
+	}
+}
+
+void AEnemyBase::CheckCombatTarget()
+{
+	// 攻撃モーション中は距離による状態繊維をブロックする
+	if (EnemyState == EEnemyState::EES_Attacking) return;
+
+	// 検知範囲外になった時、HealthBar 非表示 / State を Patrol に戻して、元のターゲットに対象を戻す
+	if (!InTargetRange(CombatTarget, CombatRadius))
+	{
+		CombatTarget = nullptr;
+		if (HealthBarWidget)
+		{
+			HealthBarWidget->SetVisibility(false);
+		}
+		EnemyState = EEnemyState::EES_Patrolling;
+		MoveToTarget(PatrolTarget);
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chase stop");
+
+	}
+	// 攻撃範囲外なら、攻撃が当たる範囲まで追いかける
+	else if (!InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+		MoveToTarget(CombatTarget);
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chasing");
+	}
+	// 攻撃範囲内 攻撃処理
+	else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
+	{
+		EnemyState = EEnemyState::EES_Attacking;
+		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Attack!");
+
+		// 動きを止める
+		if (EnemyController)
+		{
+			EnemyController->StopMovement();
+			UE_LOGFMT(LogTemp, Log, "StopMovement()");
+		}
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
+	}
+}
+
+
+
 
 // 発見したか、見失ったのかを判定
 void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
@@ -172,52 +229,6 @@ void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
-
-void AEnemyBase::CheckCombatTarget()
-{
-	// サーチ範囲
-	// 範囲外になった時、
-	// * HealthBar 非表示
-	// * State を Patrol に戻して、元のターゲットに対象を戻す
-	if (! InTargetRange(CombatTarget, CombatRadius))
-	{
-		CombatTarget = nullptr;
-		if (HealthBarWidget)
-		{
-			HealthBarWidget->SetVisibility(false);
-		}
-		EnemyState = EEnemyState::EES_Patrolling;
-		MoveToTarget(PatrolTarget);
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chase stop");
-
-	}
-	// 攻撃範囲外なら、攻撃が当たる範囲まで追いかける
-	else if (! InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
-	{
-		EnemyState = EEnemyState::EES_Chasing;
-		MoveToTarget(CombatTarget);
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chasing");
-	}
-	// 攻撃範囲内 攻撃処理
-	else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
-	{
-		EnemyState = EEnemyState::EES_Attacking;
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Attack!");
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
-	}
-}
-
-void AEnemyBase::CheckPatrolTarget()
-{
-	if (InTargetRange(PatrolTarget, PatrolRadius))
-	{
-		PatrolTarget = ChoosePatrolTarget();
-		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemyBase::PatrolTimerFinished, PatrolWaitingTime);
-	}
-}
-
 bool AEnemyBase::InTargetRange(AActor* Target, double Radius)
 {
 	if (Target == nullptr) return false;
@@ -240,7 +251,7 @@ void AEnemyBase::MoveToTarget(AActor* Target)
 
 	FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
 	MoveRequest.SetGoalActor(Target); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
-	MoveRequest.SetAcceptanceRadius(15.f); // 目的地に着いたと許容する半径
+	MoveRequest.SetAcceptanceRadius(30.f); // 目的地に着いたと許容する半径
 	EnemyController->MoveTo(MoveRequest); 
 }
 
@@ -411,6 +422,21 @@ void AEnemyBase::DeactivateAttackCollision()
 void AEnemyBase::OnAttackCollisionNotifyEnd()
 {
 	DeactivateAttackCollision();
+}
+
+void AEnemyBase::OnAttackEnd()
+{
+	// TODO: 分岐させるべきか？
+	if (CombatTarget != nullptr)
+	{
+		EnemyState = EEnemyState::EES_Chasing;
+		MoveToTarget(CombatTarget); // Attack で StopMovement としたので、再開
+	}
+	else
+	{
+		EnemyState = EEnemyState::EES_Patrolling;
+		MoveToTarget(PatrolTarget); // 一応再度実行しておく
+	}
 }
 
 

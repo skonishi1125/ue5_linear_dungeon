@@ -49,6 +49,10 @@ public:
 	void OnAttackCollisionNotifyBegin(EAttackCollisionType CollisionType);
 	void OnAttackCollisionNotifyEnd();
 
+	// UAnimNotify_EnemyAttackEnd などから呼び出す、攻撃が終わったことを通知する関数
+	void OnAttackEnd();
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -62,12 +66,10 @@ protected:
 
 	// 死亡処理
 	void Die();
-	// ポーズの種類（ABP Idle -> Dead 遷移に使う）
 	UPROPERTY(BlueprintReadOnly)
-	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+	EDeathPose DeathPose = EDeathPose::EDP_Alive; // ポーズの種類（ABP Idle -> Dead 遷移に使う）
 
-	// 攻撃処理
-	// Overlap 時のイベント関数 (UFUNCTION 必須)
+	// 攻撃判定 Overlap 時のイベント関数 (UFUNCTION 必須)
 	UFUNCTION()
 	void OnRightHandOverlap(
 		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
