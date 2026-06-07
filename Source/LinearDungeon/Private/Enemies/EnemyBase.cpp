@@ -118,12 +118,23 @@ void AEnemyBase::Die()
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
 
+	// 振り向きの終了及び、移動の完成を止めて無効化
+	bIsTrackingTarget = false;
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+
 	// 判定, HealthBar 非表示
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	if (HealthBarWidget)
 	{
 		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget OFF");
 		HealthBarWidget->SetVisibility(false);
+	}
+
+	// AI Controller 側の 憑依解除
+	if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+	{
+		AIController->HandleEnemyDeath();
 	}
 
 	// 一定時間経過したら、Destroy されるようにする

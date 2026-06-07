@@ -84,3 +84,20 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 		}
 	}
 }
+
+void ALinearEnemyAIController::HandleEnemyDeath()
+{
+	if (BrainComponent)
+	{
+		BrainComponent->StopLogic(TEXT("Dead"));
+	}
+
+	if (AIPerceptionComponent)
+	{
+		AIPerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
+	}
+
+	UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
+
+
+}

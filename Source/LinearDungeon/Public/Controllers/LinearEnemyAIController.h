@@ -15,6 +15,9 @@ class LINEARDUNGEON_API ALinearEnemyAIController : public AAIController
 	GENERATED_BODY()
 public:
 	ALinearEnemyAIController();
+
+	// €–SAEnemy ‚©‚ç AI Controller ‚Ìˆ—‚ğ~‚ß‚é‚½‚ß‚Ì public ŠÖ”
+	void HandleEnemyDeath();
 protected:
 	virtual void BeginPlay() override;
 
