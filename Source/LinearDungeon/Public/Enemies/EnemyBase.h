@@ -18,11 +18,6 @@ class UParticleSystem;
 class UAttributeComponent;
 class UHealthBarComponent;
 
-// Navigation
-class AAIController;
-class UAIPerceptionComponent;
-class UAISenseConfig_Sight;
-
 // 攻撃
 class UBoxComponent;
 
@@ -55,16 +50,14 @@ public:
 	// UAnimNotifyState_TrackingTarget から呼び出す、どの区間の間 Target に向かせるかを制御する関数
 	void OnTrackingTarget(bool bIsTracking);
 
+	// 巡回ポイントを、Behavior Tree 等から呼び出すための関数
+	AActor* GetNextPatrolTarget();
+	double GetAttackRadius() const { return AttackRadius; }
+	void PerformAttack();
+
+
 protected:
 	virtual void BeginPlay() override;
-
-	// Patrol -> Chase 処理
-	// AI Perception 感知時に走らせる関数
-	UFUNCTION()
-	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
-	bool InTargetRange(AActor* Target, double Radius);
-	AActor* ChoosePatrolTarget();
-	void MoveToTarget(AActor* Target);
 
 	// 死亡処理
 	void Die();
@@ -100,9 +93,6 @@ private:
 	TObjectPtr<AActor> CombatTarget;
 
 	UPROPERTY(EditAnywhere)
-	double CombatRadius = 500.f; // HealthBar などの可視範囲
-
-	UPROPERTY(EditAnywhere)
 	double AttackRadius = 150.f; // Enemy が攻撃モーションに入るまでの範囲
 
 	// ===== Components =====
@@ -111,11 +101,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarWidget; // 体力バー Widget
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAISenseConfig_Sight> SightConfig; //  視覚設定
 
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
@@ -134,18 +119,10 @@ private:
 	TObjectPtr<UAnimMontage> AttackMontage;
 
 	// ===== 徘徊処理(Patrol) =====
-	void CheckPatrolTarget();
-	void CheckCombatTarget();
-	void PatrolTimerFinished();
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TObjectPtr<AActor> PatrolTarget;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
-	TObjectPtr<AAIController> EnemyController;
-	FTimerHandle PatrolTimer;
-	UPROPERTY(EditAnywhere)
-	double PatrolWaitingTime = 3.f;
-	double PatrolRadius = 200.f;
 
 	// ===== 攻撃処理 =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

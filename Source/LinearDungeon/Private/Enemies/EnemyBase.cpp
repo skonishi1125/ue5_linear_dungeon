@@ -8,18 +8,19 @@
 #include "Components/AttributeComponent.h"
 #include "Components/HUD/HealthBarComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Controllers/LinearEnemyAIController.h"
 
 // 音関連
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
 // Navigation
-#include "AIController.h"
-#include "NavigationData.h"
-#include "Navigation/PathFollowingComponent.h"
-#include "AITypes.h"
-#include "Perception/AIPerceptionComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
+//#include "AIController.h"
+//#include "NavigationData.h"
+//#include "Navigation/PathFollowingComponent.h"
+//#include "AITypes.h"
+//#include "Perception/AIPerceptionComponent.h"
+//#include "Perception/AISenseConfig_Sight.h"
 #include "Characters/LinearPlayerCharacter.h"
 
 // 攻撃判定
@@ -41,27 +42,9 @@ AEnemyBase::AEnemyBase()
 	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
 
-	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
-	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-
-	if (SightConfig)
-	{
-		// 視覚パラメータの初期設定
-		SightConfig->SightRadius = 1500.f;// 視認可能な半径
-		SightConfig->LoseSightRadius = 1600.f; // 見失う半径（チラつき防止のため少し大きめに設定する）
-		SightConfig->PeripheralVisionAngleDegrees = 45.f; // 視野角
-		SightConfig->SetMaxAge(3.f);// 記憶保持時間
-
-		// どの所属（敵、味方、中立）を検知するか
-		// デフォルトでは全て検知しない設定のため、明示的にtrueにする
-		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-
-		// Perceptionコンポーネントに設定を登録
-		AIPerceptionComponent->ConfigureSense(*SightConfig);
-		AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-	}
+	// AIController クラスを自作したものに置き換える
+	AIControllerClass = ALinearEnemyAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	// 敵が方向転換するとき、かくかくした Animation にならないようにする
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -94,10 +77,6 @@ void AEnemyBase::BeginPlay()
 	Super::BeginPlay();
 
 	// デリゲート登録
-	if (AIPerceptionComponent)
-	{
-		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyBase::OnTargetDetected);
-	}
 	if (RightHandCollision)
 	{
 		RightHandCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBase::OnRightHandOverlap);
@@ -115,14 +94,12 @@ void AEnemyBase::BeginPlay()
 	}
 
 	// PatrolTarget を初期決定していなければ、[0]を初期対象とする
-	EnemyController = Cast<AAIController>(GetController());
+	//EnemyController = Cast<AAIController>(GetController());
 	if (PatrolTarget == nullptr && PatrolTargets.Num() > 0)
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::BeginPlay() Setting PatrolTarget = PatrolTargets[0]");
 		PatrolTarget = PatrolTargets[0];
 	}
-
-	MoveToTarget(PatrolTarget);
 
 }
 
@@ -135,153 +112,6 @@ void AEnemyBase::Tick(float DeltaTime)
 	{
 		UpdateTrackingRotation(DeltaTime);
 	}
-
-	if (EnemyState > EEnemyState::EES_Patrolling)
-	{
-		// Chase / Attack 中に判断される処理
-		CheckCombatTarget();
-	}
-	else
-	{
-		// Patrol 中に判断される処理
-		CheckPatrolTarget();
-	}
-}
-
-void AEnemyBase::CheckPatrolTarget()
-{
-	if (InTargetRange(PatrolTarget, PatrolRadius))
-	{
-		PatrolTarget = ChoosePatrolTarget();
-		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemyBase::PatrolTimerFinished, PatrolWaitingTime);
-	}
-}
-
-void AEnemyBase::CheckCombatTarget()
-{
-	// 攻撃モーション中は距離による状態繊維をブロックする
-	if (EnemyState == EEnemyState::EES_Attacking) return;
-
-	// 検知範囲外になった時、HealthBar 非表示 / State を Patrol に戻して、元のターゲットに対象を戻す
-	if (!InTargetRange(CombatTarget, CombatRadius))
-	{
-		CombatTarget = nullptr;
-		if (HealthBarWidget)
-		{
-			HealthBarWidget->SetVisibility(false);
-		}
-		EnemyState = EEnemyState::EES_Patrolling;
-		MoveToTarget(PatrolTarget);
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chase stop");
-
-	}
-	// 攻撃範囲外なら、攻撃が当たる範囲まで追いかける
-	else if (!InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
-	{
-		EnemyState = EEnemyState::EES_Chasing;
-		MoveToTarget(CombatTarget);
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Chasing");
-	}
-	// 攻撃範囲内 攻撃処理
-	else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
-	{
-		EnemyState = EEnemyState::EES_Attacking;
-		UE_LOGFMT(LogTemp, Log, "CheckCombatTarget(): Attack!");
-
-		// 動きを止める
-		if (EnemyController)
-		{
-			EnemyController->StopMovement();
-			UE_LOGFMT(LogTemp, Log, "StopMovement()");
-		}
-
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
-	}
-}
-
-
-
-
-// 発見したか、見失ったのかを判定
-void AEnemyBase::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
-{
-	if (Stimulus.WasSuccessfullySensed())
-	{
-		if (EnemyState == EEnemyState::EES_Chasing) return;
-
-		if (Actor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
-		{
-			// チェイスして Character にたどり着いたときは、タイマーの待機処理は必要ないので無効にしておく
-			GetWorldTimerManager().ClearTimer(PatrolTimer);
-
-			if (EnemyState != EEnemyState::EES_Attacking)
-			{
-				EnemyState = EEnemyState::EES_Chasing;
-				CombatTarget = Actor;
-				MoveToTarget(CombatTarget);
-				UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Detected target: {0} Chasing!", Actor->GetName());
-			}
-		}
-	}
-	else
-	{
-		UE_LOGFMT(LogTemp, Log, "AEnemyBase::OnTargetDetected() Lost sight of target: {0}", Actor->GetName());
-		// TODO: 見失ったあとの処理（数秒待機してPatrolに戻るなど）
-		//EnemyState = EEnemyState::EES_Patrolling;
-		//CheckPatrolTarget();
-
-	}
-}
-
-bool AEnemyBase::InTargetRange(AActor* Target, double Radius)
-{
-	if (Target == nullptr) return false;
-
-	// A から B のベクトル : B - A
-	// 自身（敵） から 対象 へのベクトル計算
-	const double DistanceToTarget =
-		(Target->GetActorLocation() - GetActorLocation()).Size();
-
-	DRAW_SPHERE_SingleFrame(GetActorLocation());
-	DRAW_SPHERE_SingleFrame(Target->GetActorLocation())
-
-	// 指定のゾーン（Radius) 内なら true, そうでない（範囲外）なら false
-	return DistanceToTarget <= Radius;
-}
-
-void AEnemyBase::MoveToTarget(AActor* Target)
-{
-	if (EnemyController == nullptr || Target == nullptr) return;
-
-	FAIMoveRequest MoveRequest; // AI に対する移動の要求内容をまとめた Struct
-	MoveRequest.SetGoalActor(Target); // 目的地を特定の Actor に設定（Actor が動けば、併せて追跡するように再計算する）
-	MoveRequest.SetAcceptanceRadius(30.f); // 目的地に着いたと許容する半径
-	EnemyController->MoveTo(MoveRequest); 
-}
-
-AActor* AEnemyBase::ChoosePatrolTarget()
-{
-	// Target 切り替え時、既存の Target を再度対象に選ばないようにする
-	TArray<AActor*> ValidTargets;
-	for (auto Target : PatrolTargets)
-	{
-		if (Target != PatrolTarget)
-		{
-			ValidTargets.AddUnique(Target);
-		}
-	}
-
-	// ランダムに配列から Target を取得
-	const int32 NumPatrolTargets = ValidTargets.Num();
-	if (NumPatrolTargets > 0)
-	{
-		const int32 TargetSelection = FMath::RandRange(0, NumPatrolTargets - 1);
-		return ValidTargets[TargetSelection];
-	}
-
-	return nullptr;
 }
 
 void AEnemyBase::Die()
@@ -432,22 +262,62 @@ void AEnemyBase::OnAttackCollisionNotifyEnd()
 
 void AEnemyBase::OnAttackEnd()
 {
-	// TODO: 分岐させるべきか？
-	if (CombatTarget != nullptr)
-	{
-		EnemyState = EEnemyState::EES_Chasing;
-		MoveToTarget(CombatTarget); // Attack で StopMovement としたので、再開
-	}
-	else
-	{
-		EnemyState = EEnemyState::EES_Patrolling;
-		MoveToTarget(PatrolTarget); // 一応再度実行しておく
-	}
+	// TODO: 
+	// 移動の再開処理は、Behavior Tree にすべて持たせる
+	// なのでこの Anim Notify は不要になったので、後で削除しておこう
+
+	//if (CombatTarget != nullptr)
+	//{
+	//	EnemyState = EEnemyState::EES_Chasing;
+	//	MoveToTarget(CombatTarget); // Attack で StopMovement としたので、再開
+	//}
+	//else
+	//{
+	//	EnemyState = EEnemyState::EES_Patrolling;
+	//	MoveToTarget(PatrolTarget); // 一応再度実行しておく
+	//}
 }
 
 void AEnemyBase::OnTrackingTarget(bool bIsTracking)
 {
 	bIsTrackingTarget = bIsTracking;
+}
+
+AActor* AEnemyBase::GetNextPatrolTarget()
+{
+	// 現在のターゲット以外の Patrol 対象配列作成
+	TArray<AActor*> ValidTargets;
+	for (AActor* Target : PatrolTargets)
+	{
+		if (Target != PatrolTarget)
+		{
+			ValidTargets.AddUnique(Target);
+		}
+	}
+
+	// 現時点のもの以外のデータを格納した配列から選ぶことで、同じポイントを選ばないようにする
+
+	const int32 NumPatrolTargets = ValidTargets.Num();
+	if (NumPatrolTargets > 0)
+	{
+		const int32 TargetSelection = FMath::RandRange(0, NumPatrolTargets - 1);
+		PatrolTarget = ValidTargets[TargetSelection];
+		return PatrolTarget;
+	}
+
+	return nullptr;
+}
+
+void AEnemyBase::PerformAttack()
+{
+	UE_LOGFMT(LogTemp, Log, "AEnemyBase::PerformAttack() Attack!");
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
+	}
 }
 
 
@@ -506,15 +376,18 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
 	}
 
-	// 攻撃された相手
+	// 攻撃された相手を対象にする処理
 	if (EventInstigator != nullptr)
 	{
 		AActor* InstigatorPawn = EventInstigator->GetPawn();
 		if (InstigatorPawn != nullptr)
 		{
-			CombatTarget = InstigatorPawn;
-			EnemyState = EEnemyState::EES_Chasing;
-			MoveToTarget(CombatTarget);
+			// TODO : Blackboard 側の CombatTarget に書き込む処理にする
+
+
+			//CombatTarget = InstigatorPawn;
+			//EnemyState = EEnemyState::EES_Chasing;
+			//MoveToTarget(CombatTarget);
 		}
 	}
 
@@ -575,13 +448,6 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 
 	PlayHitReactionMontage(Section);
-}
-
-// Timer を設定し、指定時間後この関数が発火する
-void AEnemyBase::PatrolTimerFinished()
-{
-	MoveToTarget(PatrolTarget);
-
 }
 
 // 攻撃モーション中に、対象方向にフラグが有効の間振り向かせる
