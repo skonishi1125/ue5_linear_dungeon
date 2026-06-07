@@ -283,7 +283,7 @@ void AEnemyBase::OnTrackingTarget(bool bIsTracking)
 	bIsTrackingTarget = bIsTracking;
 }
 
-AActor* AEnemyBase::GetNextPatrolTarget()
+AActor* AEnemyBase::OnGetNextPatrolTarget()
 {
 	// 現在のターゲット以外の Patrol 対象配列作成
 	TArray<AActor*> ValidTargets;
@@ -308,7 +308,7 @@ AActor* AEnemyBase::GetNextPatrolTarget()
 	return nullptr;
 }
 
-void AEnemyBase::PerformAttack()
+void AEnemyBase::OnPerformAttack()
 {
 	UE_LOGFMT(LogTemp, Log, "AEnemyBase::PerformAttack() Attack!");
 

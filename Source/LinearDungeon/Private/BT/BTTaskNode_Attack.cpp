@@ -18,7 +18,7 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 	if (EnemyPawn == nullptr) return EBTNodeResult::Failed;
 
 	// EnemyBase 側で公開した攻撃関数を呼び出す
-	EnemyPawn->PerformAttack();
+	EnemyPawn->OnPerformAttack();
 
 	// TODO: 設計補足
 	// 本来、攻撃アニメーションの終了を待つ場合はここで EBTNodeResult::InProgress を返し、

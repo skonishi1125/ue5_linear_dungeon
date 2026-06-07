@@ -51,9 +51,9 @@ public:
 	void OnTrackingTarget(bool bIsTracking);
 
 	// 巡回ポイントを、Behavior Tree 等から呼び出すための関数
-	AActor* GetNextPatrolTarget();
-	double GetAttackRadius() const { return AttackRadius; }
-	void PerformAttack();
+	AActor* OnGetNextPatrolTarget();
+	double OnGetAttackRadius() const { return AttackRadius; }
+	void OnPerformAttack();
 
 
 protected:

@@ -57,6 +57,9 @@ void ALinearEnemyAIController::OnPossess(APawn* InPawn)
 	}
 }
 
+// 視覚検知処理
+// AI Controller に紐づけられた Blackboard に対して、指定の Key に取得した情報を入れる
+// BT には BB が紐づいているので、そちらを経由して BB の値を参照できる
 void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Stimulus.WasSuccessfullySensed())

@@ -12,28 +12,29 @@ EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeCompone
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	// AI Controller と Pawn の取得
+	// AI Controller を取得し、その Possess 先から EnemyBase を取得できる
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (AIController == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn());
-	if (EnemyPawn == nullptr)
+	AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
+	if (EnemyBase == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	// EnemyBase から次の巡回先 Actor を取得
-	AActor* NextTarget = EnemyPawn->GetNextPatrolTarget();
+	// Blackboard に位置情報を Vector として書き込む
+	AActor* NextTarget = EnemyBase->OnGetNextPatrolTarget();
 	if (NextTarget != nullptr)
 	{
-		// Blackboard に位置情報を Vector として書き込む
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), NextTarget->GetActorLocation());
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(
+			GetSelectedBlackboardKey(), NextTarget->GetActorLocation()
+		);
 
-		// 成功として Task を終了
-		return EBTNodeResult::Succeeded;
+		return EBTNodeResult::Succeeded; // 成功
 	}
 
 	return EBTNodeResult::Failed;
