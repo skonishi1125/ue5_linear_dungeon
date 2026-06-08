@@ -38,5 +38,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 
+	// “G‚ğŒ©¸‚Á‚½‚Ì—P—\ŠÔ Timer ‚ÆAŒÄ‚Ño‚·ŠÖ”
+	FTimerHandle LoseTargetTimer;
+	UFUNCTION()
+	void ClearCombatTarget();
+
 	
 };

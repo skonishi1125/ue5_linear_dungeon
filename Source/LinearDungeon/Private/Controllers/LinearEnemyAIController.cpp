@@ -76,12 +76,18 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() Lost sight of target: {0}", Actor->GetName());
-		// 視界から外れた場合、CombatTarget の情報をクリアする
-		if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
-		{
-			BlackboardComp->ClearValue(FName("CombatTarget"));
-		}
+		GetWorld()->GetTimerManager().SetTimer(
+			LoseTargetTimer, this, &ALinearEnemyAIController::ClearCombatTarget, 6.0f, false
+		);
+	}
+}
+
+void ALinearEnemyAIController::ClearCombatTarget()
+{
+	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
+	{
+		BlackboardComp->ClearValue(FName("CombatTarget"));
+		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
 	}
 }
 
@@ -98,6 +104,4 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 	}
 
 	UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
-
-
 }
