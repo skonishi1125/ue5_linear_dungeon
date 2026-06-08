@@ -358,6 +358,18 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 		if (bIsStaggered)
 		{
 			UE_LOGFMT(LogTemp, Warning, "Poise Broken!");
+
+			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
+			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
+			if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+			{
+				if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+				{
+					BB->SetValueAsBool(FName("IsStaggered"), true);
+				}
+			}
+
+			// 怯みアニメの再生
 			DirectionalHitReact(ImpactPoint);
 
 			// 攻撃中などに怯んだ場合、タスクが終わらなくなるので AttackEnd Delegate も実行しておく
@@ -389,6 +401,18 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 		);
 	}
 
+}
+
+// 怯みフラグの無効化 Anim Notify 経由で使う
+void AEnemyBase::OnStaggerEnd()
+{
+	if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+		{
+			BB->SetValueAsBool(FName("IsStaggered"), false);
+		}
+	}
 }
 
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

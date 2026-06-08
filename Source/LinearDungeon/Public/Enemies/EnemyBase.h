@@ -57,6 +57,8 @@ public:
 	double OnGetAttackRadius() const { return AttackRadius; }
 	void OnPerformAttack();
 
+	// 怯みモーションから出す、スタン区間通知用
+	void OnStaggerEnd();
 
 protected:
 	virtual void BeginPlay() override;
