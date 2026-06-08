@@ -304,7 +304,7 @@ AActor* AEnemyBase::OnGetNextPatrolTarget()
 
 void AEnemyBase::OnPerformAttack()
 {
-	UE_LOGFMT(LogTemp, Log, "AEnemyBase::PerformAttack() Attack!");
+	//UE_LOGFMT(LogTemp, Log, "AEnemyBase::PerformAttack() Attack!");
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && AttackMontage)
@@ -326,7 +326,7 @@ void AEnemyBase::OnPerformAttack()
 		}
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 
-		UE_LOGFMT(LogTemp, Warning, "Playing AttackMontage {Name}", SectionName);
+		//UE_LOGFMT(LogTemp, Warning, "Playing AttackMontage {Name}", SectionName);
 
 	}
 }
@@ -341,7 +341,6 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
-	//DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
 
 	// HealthBar 表示
 	if (HealthBarWidget && ! HealthBarWidget->IsVisible())
@@ -353,9 +352,23 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 	// アニメ再生
 	if (Attributes && Attributes->IsAlive())
 	{
-		// 生存 のけぞりアニメ再生
-		UE_LOGFMT(LogTemp, Warning, "DirectionalHitReact");
-		DirectionalHitReact(ImpactPoint);
+		// 固定のポイズダメージ値（将来的に Weapon 等から受け取る設計に変更する）
+		const float FixedPoiseDamage = 50.f;
+		const bool bIsStaggered = Attributes->ReceivePoiseDamage(FixedPoiseDamage);
+		if (bIsStaggered)
+		{
+			UE_LOGFMT(LogTemp, Warning, "Poise Broken!");
+			DirectionalHitReact(ImpactPoint);
+
+			// 攻撃中などに怯んだ場合、タスクが終わらなくなるので AttackEnd Delegate も実行しておく
+			OnAttackEndDelegate.Broadcast();
+			Attributes->ResetPoise();// ポイズ値を最大にリセット
+		}
+		else
+		{
+			// ポイズが残っている場合は怯まない（スーパーアーマー状態）
+			UE_LOGFMT(LogTemp, Warning, "Poise intact. No reaction.");
+		}
 	}
 	else
 	{
@@ -383,7 +396,7 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	// Widget 更新処理
 	if (Attributes && HealthBarWidget)
 	{
-		Attributes->ReceiveDamage(DamageAmount);
+		Attributes->ReceiveHealthDamage(DamageAmount);
 		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
 	}
 

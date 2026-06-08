@@ -25,7 +25,7 @@ void UBTService_CheckAttackRange::OnBecomeRelevant(
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 
 	DrawDebugDistanceToTarget(OwnerComp);
-	UE_LOGFMT(LogTemp, Log, "UBTService_CheckAttackRange::OnBecomeRelevant()");
+	//UE_LOGFMT(LogTemp, Log, "UBTService_CheckAttackRange::OnBecomeRelevant()");
 
 }
 
@@ -58,9 +58,9 @@ void UBTService_CheckAttackRange::TickNode(
 	const double DistanceToTarget = (TargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
 	const bool bInAttackRange = DistanceToTarget <= EnemyBase->OnGetAttackRadius();
 
-	UE_LOGFMT(LogTemp, Log, 
-		"Service Tick - Distance: {0}, AttackRadius: {1}, Result: {2}", DistanceToTarget, EnemyBase->OnGetAttackRadius(), bInAttackRange
-	);
+	//UE_LOGFMT(LogTemp, Log, 
+	//	"Service Tick - Distance: {0}, AttackRadius: {1}, Result: {2}", DistanceToTarget, EnemyBase->OnGetAttackRadius(), bInAttackRange
+	//);
 
 	// Œ‹‰Ê‚ð Blackboard ‚É‘‚«ž‚Þ (InAttackRange ‚É•R•t‚¯‚é)
 	BlackboardComp->SetValueAsBool(GetSelectedBlackboardKey(), bInAttackRange);

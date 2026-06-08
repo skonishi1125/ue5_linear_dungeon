@@ -16,17 +16,28 @@ public:
 	UAttributeComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void ReceiveDamage(float Damage);
+	// Health 関連
+	void ReceiveHealthDamage(float Damage);
 	float GetHealthPercent();
 	bool IsAlive();
+
+	// Poise 関連
+	bool ReceivePoiseDamage(float PoiseDamage);
+	void ResetPoise();
 
 protected:
 	virtual void BeginPlay() override;
 private:
+	// Health 関連
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float CurrentHealth;
-
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float MaxHealth;
+
+	// Poise 関連
+	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
+	float CurrentPoise;
+	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
+	float MaxPoise;
 
 };

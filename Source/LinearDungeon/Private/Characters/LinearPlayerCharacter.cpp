@@ -175,21 +175,21 @@ void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
 void ALinearPlayerCharacter::TryJump()
 {
 	// 何かジャンプ前にさせたいことがあれば、ここで書く
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::TryJump()");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::TryJump()");
 	if (ActionState == EActionState::EAS_Unoccupied)
 	{
 		Super::Jump();
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec Super::Jump(). Now Actioning.");
+		//UE_LOGFMT(LogTemp, Warning, "Cannot exec Super::Jump(). Now Actioning.");
 	}
 
 }
 
 void ALinearPlayerCharacter::Attack()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Attack()");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Attack()");
 
 	if (CanAttack())
 	{
@@ -202,7 +202,7 @@ void ALinearPlayerCharacter::Attack()
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayAttackMontage(). Now Actioning or unequipped Weapon.");
+		//UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayAttackMontage(). Now Actioning or unequipped Weapon.");
 	}
 
 }
@@ -285,12 +285,12 @@ void ALinearPlayerCharacter::StartDefense()
 {
 	if (CanDefense())
 	{
-		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
+		//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
 		ActionState = EActionState::EAS_Defensing;
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec StartDefense()");
+		//UE_LOGFMT(LogTemp, Warning, "Cannot exec StartDefense()");
 	}
 }
 
@@ -298,12 +298,12 @@ void ALinearPlayerCharacter::StopDefense()
 {
 	if (ActionState == EActionState::EAS_Defensing)
 	{
-		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
+		//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
 		ActionState = EActionState::EAS_Unoccupied;
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec StopDefense()");
+		//UE_LOGFMT(LogTemp, Warning, "Cannot exec StopDefense()");
 	}
 }
 
@@ -318,7 +318,7 @@ bool ALinearPlayerCharacter::CanDefense()
 
 void ALinearPlayerCharacter::Equip()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
 
 	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
@@ -358,7 +358,7 @@ void ALinearPlayerCharacter::OnWeaponCollisionDisabled(ECollisionEnabled::Type C
 
 void ALinearPlayerCharacter::Rolling()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Rolling()");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Rolling()");
 	if (CanRolling())
 	{
 		ActionState = EActionState::EAS_Rolling;
@@ -368,7 +368,7 @@ void ALinearPlayerCharacter::Rolling()
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayRollingMontage(). Now Actioning.");
+		//UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayRollingMontage(). Now Actioning.");
 	}
 
 }
@@ -439,7 +439,7 @@ float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 
 	if (Attributes)
 	{
-		Attributes->ReceiveDamage(DamageAmount);
+		Attributes->ReceiveHealthDamage(DamageAmount);
 		UE_LOGFMT(
 			LogTemp, Warning, 
 			"ALinearPlayerCharacter::TakeDamage() CurrentHealthPercent: {0}", Attributes->GetHealthPercent()
