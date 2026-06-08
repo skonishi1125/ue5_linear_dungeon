@@ -91,9 +91,6 @@ private:
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
 
-	UPROPERTY(VisibleInstanceOnly)
-	TObjectPtr<AActor> CombatTarget;
-
 	UPROPERTY(EditAnywhere)
 	double AttackRadius = 150.f; // Enemy が攻撃モーションに入るまでの範囲
 
