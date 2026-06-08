@@ -31,15 +31,6 @@ enum class EDeathPose : uint8
 	EDP_Death3 UMETA(DisplayName = "Death3")
 };
 
-// BT に移行してから、不使用かも
-UENUM(BlueprintType)
-enum class EEnemyState : uint8
-{
-	EES_Patrolling UMETA(DisplayName = "Patrolling"),
-	EES_Chasing UMETA(DisplayName = "Chasing"),
-	EES_Attacking UMETA(DisplayName = "Attacking")
-};
-
 UENUM(BlueprintType)
 enum class EAttackCollisionType : uint8
 {

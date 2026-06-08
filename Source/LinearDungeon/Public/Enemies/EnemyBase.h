@@ -86,8 +86,6 @@ protected:
 	void PlayHitReactionMontage(const FName& SectionName);
 
 private:
-	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
-
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
 

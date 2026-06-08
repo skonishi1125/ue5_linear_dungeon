@@ -9,19 +9,14 @@
 #include "Components/HUD/HealthBarComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Controllers/LinearEnemyAIController.h"
+#include "BehaviorTree/BlackboardComponent.h" // BB に CombatTarget を入れるために必要
+
+// 汎用系
+#include "Characters/LinearPlayerCharacter.h"
 
 // 音関連
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
-
-// Navigation
-//#include "AIController.h"
-//#include "NavigationData.h"
-//#include "Navigation/PathFollowingComponent.h"
-//#include "AITypes.h"
-//#include "Perception/AIPerceptionComponent.h"
-//#include "Perception/AISenseConfig_Sight.h"
-#include "Characters/LinearPlayerCharacter.h"
 
 // 攻撃判定
 #include "Components/BoxComponent.h"
@@ -315,7 +310,24 @@ void AEnemyBase::OnPerformAttack()
 	if (AnimInstance && AttackMontage)
 	{
 		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		AnimInstance->Montage_JumpToSection(FName("Attack1"), AttackMontage);
+
+		const int32 Selection = FMath::RandRange(0, 1);
+		FName SectionName = FName();
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+		default:
+			break;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+
+		UE_LOGFMT(LogTemp, Warning, "Playing AttackMontage {Name}", SectionName);
+
 	}
 }
 
@@ -381,12 +393,15 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 		AActor* InstigatorPawn = EventInstigator->GetPawn();
 		if (InstigatorPawn != nullptr)
 		{
-			// TODO : Blackboard 側の CombatTarget に書き込む処理にする
-
-
-			//CombatTarget = InstigatorPawn;
-			//EnemyState = EEnemyState::EES_Chasing;
-			//MoveToTarget(CombatTarget);
+			// Blackboard 側の CombatTarget に書き込む
+			ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController());
+			if (AIController)
+			{
+				if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+				{
+					BB->SetValueAsObject(FName("CombatTarget"), InstigatorPawn);
+				}
+			}
 		}
 	}
 
@@ -413,16 +428,13 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 	{
 		Theta *= -1.f;
 	}
-
-	//UE_LOGFMT(LogTemp, Warning, "%f", Theta); エラーになる
+	
 	/*
+	    UE_LOGFMT(LogTemp, Warning, "%f", Theta); エラーになる
 		UE_LOGFMT(LogTemp, Warning, "{0}", Theta);
 
 		if (GEngine)
-		{
 			GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("%f"), Theta));
-		}
-
 
 		UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60.f, 5.f, FColor::Red, 5.f);
 		UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + ToHit * 60.f, 5.f, FColor::Green, 5.f);
