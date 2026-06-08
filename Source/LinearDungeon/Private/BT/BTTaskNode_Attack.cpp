@@ -5,6 +5,11 @@
 UBTTaskNode_Attack::UBTTaskNode_Attack()
 {
 	NodeName = TEXT("Attack");
+
+	// Task を実行する AI ごとに、専用インスタンスを用意するようにする
+	// （CachedOwnerComp = &OwnerComp; など、各 Task ごとにメンバ変数を弄る設計とする）
+	bCreateNodeInstance = true;
+
 }
 
 EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -17,13 +22,27 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 	AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn());
 	if (EnemyPawn == nullptr) return EBTNodeResult::Failed;
 
-	// EnemyBase 側で公開した攻撃関数を呼び出す
+	// 攻撃処理
+	CachedOwnerComp = &OwnerComp; // AttackEnd で OwnerComp を使うために格納しておく
+	EnemyPawn->OnAttackEndDelegate.AddDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
 	EnemyPawn->OnPerformAttack();
 
-	// TODO: 設計補足
-	// 本来、攻撃アニメーションの終了を待つ場合はここで EBTNodeResult::InProgress を返し、
-	// アニメーション終了のデリゲートを受け取ってから FinishLatentTask() で完了を通知するのがベストプラクティス
-	// 今回は EnemyBase 側の OnAttackEnd() で状態が管理されているため即座に Succeeded を返して BT を進行させる
-	return EBTNodeResult::Succeeded;
+	return EBTNodeResult::InProgress;
 
+}
+
+void UBTTaskNode_Attack::HandleAttackFinished()
+{
+	if (CachedOwnerComp)
+	{
+		AAIController* AIController = CachedOwnerComp->GetAIOwner();
+		if (AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn()))
+		{
+			// 多重実行を防ぐために解除しておく
+			EnemyPawn->OnAttackEndDelegate.RemoveDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
+		}
+
+		// Task の成功を BT に通知
+		FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+	}
 }

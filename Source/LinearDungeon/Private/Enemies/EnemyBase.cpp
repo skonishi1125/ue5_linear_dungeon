@@ -273,20 +273,8 @@ void AEnemyBase::OnAttackCollisionNotifyEnd()
 
 void AEnemyBase::OnAttackEnd()
 {
-	// TODO: 
-	// 移動の再開処理は、Behavior Tree にすべて持たせる
-	// なのでこの Anim Notify は不要になったので、後で削除しておこう
-
-	//if (CombatTarget != nullptr)
-	//{
-	//	EnemyState = EEnemyState::EES_Chasing;
-	//	MoveToTarget(CombatTarget); // Attack で StopMovement としたので、再開
-	//}
-	//else
-	//{
-	//	EnemyState = EEnemyState::EES_Patrolling;
-	//	MoveToTarget(PatrolTarget); // 一応再度実行しておく
-	//}
+	// Delegate に登録したタスクの実行
+	OnAttackEndDelegate.Broadcast();
 }
 
 void AEnemyBase::OnTrackingTarget(bool bIsTracking)

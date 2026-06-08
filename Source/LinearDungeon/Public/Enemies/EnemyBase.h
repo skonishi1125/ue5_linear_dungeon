@@ -20,6 +20,7 @@ class UHealthBarComponent;
 
 // 攻撃
 class UBoxComponent;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
@@ -46,6 +47,7 @@ public:
 
 	// UAnimNotify_EnemyAttackEnd などから呼び出す、攻撃が終わったことを通知する関数
 	void OnAttackEnd();
+	FOnAttackEndDelegate OnAttackEndDelegate; // BT 側でキャッチするための AttackEnd デリゲート
 
 	// UAnimNotifyState_TrackingTarget から呼び出す、どの区間の間 Target に向かせるかを制御する関数
 	void OnTrackingTarget(bool bIsTracking);
@@ -133,5 +135,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double TrackingInterpSpeed = 5.0;
 	void UpdateTrackingRotation(float DeltaTime);
+
 
 };
