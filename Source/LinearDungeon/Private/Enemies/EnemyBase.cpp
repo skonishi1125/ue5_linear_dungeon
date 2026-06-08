@@ -103,7 +103,7 @@ void AEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 攻撃モーション中の特定期間(NotifyState) でフラグが制御されている間、相手に振り向く
-	if (bIsTrackingTarget && CombatTarget != nullptr)
+	if (bIsTrackingTarget)
 	{
 		UpdateTrackingRotation(DeltaTime);
 	}
@@ -275,6 +275,8 @@ void AEnemyBase::OnAttackEnd()
 void AEnemyBase::OnTrackingTarget(bool bIsTracking)
 {
 	bIsTrackingTarget = bIsTracking;
+	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnTrackingTarget: {0}", bIsTracking);
+
 }
 
 AActor* AEnemyBase::OnGetNextPatrolTarget()
@@ -501,10 +503,17 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 // 攻撃モーション中に、対象方向にフラグが有効の間振り向かせる
 void AEnemyBase::UpdateTrackingRotation(float DeltaTime)
 {
-	if (CombatTarget == nullptr) return;
+	ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController());
+	if (AIController == nullptr) return;
+
+	UBlackboardComponent* BB = AIController->GetBlackboardComponent();
+	if (BB == nullptr) return;
+
+	AActor* TargetActor = Cast<AActor>(BB->GetValueAsObject(FName("CombatTarget")));
+	if (TargetActor == nullptr) return;
 
 	FVector StartLocation = GetActorLocation();
-	FVector TargetLocation = CombatTarget->GetActorLocation();
+	FVector TargetLocation = TargetActor->GetActorLocation();
 
 	// Z 軸は無視
 	TargetLocation.Z = StartLocation.Z;
@@ -513,6 +522,9 @@ void AEnemyBase::UpdateTrackingRotation(float DeltaTime)
 	FRotator TargetRotation = (TargetLocation - StartLocation).Rotation();
 	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, TrackingInterpSpeed);
 	SetActorRotation(InterpRotation);
+
+	//UE_LOGFMT(LogTemp, Warning, "TrackingRotation...");
+
 }
 
 void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
