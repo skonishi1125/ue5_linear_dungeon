@@ -18,6 +18,9 @@ class UParticleSystem;
 class UAttributeComponent;
 class UHealthBarComponent;
 
+// BT, BB ìôÇÃåƒÇ—èoÇµóp
+class ALinearEnemyAIController;
+
 // çUåÇ
 class UBoxComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndDelegate);
@@ -31,6 +34,7 @@ public:
 	AEnemyBase();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	// Interface ÇÃ Override
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
@@ -116,6 +120,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+	// BT óp
+	TObjectPtr<ALinearEnemyAIController> CachedAIController;
 
 	// ===== úpújèàóù(Patrol) =====
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")

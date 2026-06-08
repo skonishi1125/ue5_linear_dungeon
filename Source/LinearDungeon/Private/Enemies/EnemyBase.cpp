@@ -127,9 +127,9 @@ void AEnemyBase::Die()
 	}
 
 	// AI Controller 側の 憑依解除
-	if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+	if (CachedAIController)
 	{
-		AIController->HandleEnemyDeath();
+		CachedAIController->HandleEnemyDeath();
 	}
 
 	// 一定時間経過したら、Destroy されるようにする
@@ -340,6 +340,26 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
+void AEnemyBase::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// Controller が憑依したときに一度だけ呼ばれる関数
+	CachedAIController = Cast<ALinearEnemyAIController>(NewController);
+
+	if (CachedAIController)
+	{
+		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Successfully cached ALE_AIController.");
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Failed cached ALE_AIController.");
+	}
+
+	// このタイミングではまだ、AIController は RunBehaviorTree を実行していない
+	// なので、BB のキャッシュ対応などは一旦しない
+}
+
 void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
@@ -363,9 +383,9 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 
 			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
-			if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+			if (CachedAIController)
 			{
-				if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+				if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
 				{
 					BB->SetValueAsBool(FName("IsStaggered"), true);
 				}
@@ -408,9 +428,9 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 // 怯みフラグの無効化 Anim Notify 経由で使う
 void AEnemyBase::OnStaggerEnd()
 {
-	if (ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController()))
+	if (CachedAIController)
 	{
-		if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
 		{
 			BB->SetValueAsBool(FName("IsStaggered"), false);
 		}
@@ -433,10 +453,9 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 		if (InstigatorPawn != nullptr)
 		{
 			// Blackboard 側の CombatTarget に書き込む
-			ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController());
-			if (AIController)
+			if (CachedAIController)
 			{
-				if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+				if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
 				{
 					BB->SetValueAsObject(FName("CombatTarget"), InstigatorPawn);
 				}
@@ -503,10 +522,9 @@ void AEnemyBase::DirectionalHitReact(const FVector& ImpactPoint)
 // 攻撃モーション中に、対象方向にフラグが有効の間振り向かせる
 void AEnemyBase::UpdateTrackingRotation(float DeltaTime)
 {
-	ALinearEnemyAIController* AIController = Cast<ALinearEnemyAIController>(GetController());
-	if (AIController == nullptr) return;
+	if (CachedAIController == nullptr) return;
 
-	UBlackboardComponent* BB = AIController->GetBlackboardComponent();
+	UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent();
 	if (BB == nullptr) return;
 
 	AActor* TargetActor = Cast<AActor>(BB->GetValueAsObject(FName("CombatTarget")));
