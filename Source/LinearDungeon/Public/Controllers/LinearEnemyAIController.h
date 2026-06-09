@@ -43,5 +43,8 @@ private:
 	UFUNCTION()
 	void ClearCombatTarget();
 
+	UFUNCTION()
+	void ResetCharacterDie();
+
 	
 };

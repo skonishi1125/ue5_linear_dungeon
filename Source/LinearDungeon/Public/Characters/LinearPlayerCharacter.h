@@ -30,6 +30,9 @@ class FName;
 class UAnimMontage;
 class USoundBase;
 
+// Die 死亡通知
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeathDelegate);
+
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
 {
@@ -57,6 +60,9 @@ public:
 	void OnCanSaveAttack(bool bCanSave); // ComboWindow 先行入力受付フラグ操作関数
 	void OnCheckCombo();// CheckCombo 先行入力を受け付けたとき、次の Montage_Play を実行する関数
 	void OnAttackSteering(bool bCanSteer); // コンボ中のステアリング制御
+
+	// 死亡処理のデリゲート
+	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
 
 protected:
 	virtual void BeginPlay() override;

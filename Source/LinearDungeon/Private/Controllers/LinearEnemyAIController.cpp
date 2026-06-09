@@ -66,12 +66,27 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	{
 		if (Actor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 		{
+			// タイマーリセット
+			GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
+
+
 			UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
 			// Blackboard コンポーネントを取得し、CombatTarget に Actor をセットする
 			if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 			{
 				BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
 			}
+
+			// Delegate で、Player が死亡したときに CombatTarget をリセットするように登録
+			if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(Actor))
+			{
+				// AddDynamic ではなく AddUniqueDynamic を使って、視界に入るたびに登録されるのを防ぐ
+				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::ResetCharacterDie);
+			}
+		}
+		else
+		{
+			UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() Actor doesn't have Tags ");
 		}
 	}
 	else
@@ -104,4 +119,12 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 	}
 
 	UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
+}
+
+void ALinearEnemyAIController::ResetCharacterDie()
+{
+	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
+	{
+		BlackboardComp->SetValueAsBool(FName("IsTargetDied"), true);
+	}
 }

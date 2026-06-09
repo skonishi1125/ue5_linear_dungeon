@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/AttributeComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // 扱う Actor
 #include "Items/ItemBase.h"
@@ -501,7 +502,16 @@ void ALinearPlayerCharacter::Die()
 	PlayDeathMontage();
 	ActionState = EActionState::EAS_Dying; // 死亡時は、この EAS から変わることはない
 
-	// Collision とかの無効化、Enemy の Target を外すなど
+	// Collision 無効化 
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	// Tag を外す
+	Tags.Remove(GetTag());
+
+	// Enemy の CombatTarget を外す, カメラズーム（死亡シーンのカメラ画角にするなど）
+	// そのあたりはデリゲートでやる
+	OnCharacterDeathDelegate.Broadcast();
 
 }
 

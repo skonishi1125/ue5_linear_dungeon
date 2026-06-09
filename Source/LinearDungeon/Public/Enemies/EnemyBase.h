@@ -140,5 +140,9 @@ private:
 	double TrackingInterpSpeed = 5.0;
 	void UpdateTrackingRotation(float DeltaTime);
 
+	// Character ‚Ì Die ƒfƒŠƒQ[ƒg‚É•R‚Ã‚¯‚éŠÖ”
+	UFUNCTION()
+	void ResetCharacterDie();
+
 
 };

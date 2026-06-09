@@ -460,6 +460,16 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 					BB->SetValueAsObject(FName("CombatTarget"), InstigatorPawn);
 				}
 			}
+
+			// InstigatorPawn->ActorHasTag(ALinearPlayerCharacter::GetTag()) とどちらがいいだろう
+			// 上記で設置した場合も Cast は必要だが、攻撃以外の要因でダメージを食らう場合は Tag で分けてもいい
+			if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(InstigatorPawn))
+			{
+				// Delegate 登録
+				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &AEnemyBase::ResetCharacterDie);
+			}
+
+
 		}
 	}
 
@@ -554,5 +564,19 @@ void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
 		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
 	}
 
+}
+
+
+void AEnemyBase::ResetCharacterDie()
+{
+	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::ResetCharacterDie()");
+
+	if (CachedAIController)
+	{
+		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
+		{
+			BB->SetValueAsBool(FName("IsTargetDied"), true);
+		}
+	}
 }
 
