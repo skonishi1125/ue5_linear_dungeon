@@ -22,7 +22,7 @@ public:
 	bool IsAlive();
 
 	// Poise ŠÖ˜A
-	bool ReceivePoiseDamage(float PoiseDamage);
+	bool IsStaggeredWithPoise(float PoiseDamage);
 	void ResetPoise();
 
 protected:

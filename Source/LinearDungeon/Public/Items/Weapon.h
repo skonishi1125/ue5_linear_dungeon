@@ -58,7 +58,9 @@ private:
 	TObjectPtr<UBoxComponent> WeaponBox;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	float Damage = 20.f; // •Ší‚»‚ê‚¼‚ê‚ÌUŒ‚—Í
+	float BaseDamage = 20.f; // Šî‘bUŒ‚—Í
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	float BasePoiseDamage = 20.f; // Šî‘bƒ|ƒCƒY’l
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> BoxTraceStart;

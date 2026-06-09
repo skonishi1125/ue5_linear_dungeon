@@ -35,7 +35,7 @@ bool UAttributeComponent::IsAlive()
 }
 
 // 0ˆÈ‰º‚É‚È‚Á‚½‚ç true ‚ğ•Ô‚µ‚ÄA‹¯‚İƒAƒjƒÄ¶‚È‚Ç‚Ìˆ—‚ÉˆÚ‚é
-bool UAttributeComponent::ReceivePoiseDamage(float PoiseDamage)
+bool UAttributeComponent::IsStaggeredWithPoise(float PoiseDamage)
 {
 	CurrentPoise = FMath::Clamp(CurrentPoise - PoiseDamage, 0.f, MaxPoise);
 	UE_LOGFMT(LogTemp, Warning, "UAttributeComponent::ReceivePoiseDamage() CurrentPoise: {0}", CurrentPoise);

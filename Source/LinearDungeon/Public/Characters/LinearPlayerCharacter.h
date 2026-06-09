@@ -54,7 +54,9 @@ public:
 		float DamageAmount, struct FDamageEvent const& DamageEvent,
 		class AController* EventInstigator, AActor* DamageCauser
 	) override;
-	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+	virtual void GetHit_Implementation(
+		const FVector& ImpactPoint, const float FinalPoiseDamage
+	) override;
 
 	// AM_Attack Notify から呼び出す、コンボ攻撃用関数
 	void OnCanSaveAttack(bool bCanSave); // ComboWindow 先行入力受付フラグ操作関数

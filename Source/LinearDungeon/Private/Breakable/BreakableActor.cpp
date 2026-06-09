@@ -70,7 +70,9 @@ void ABreakableActor::Tick(float DeltaTime)
 }
 
 // Weapon から GetHit を呼ぶ時の固有仕様設定用
-void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint)
+void ABreakableActor::GetHit_Implementation(
+	const FVector& ImpactPoint, const float PoiseDamage
+)
 {
 	UE_LOGFMT(LogTemp, Warning, " ABreakableActor::GetHit_Implementation()");
 	//if (DropItemClassToSpawn && GetWorld())

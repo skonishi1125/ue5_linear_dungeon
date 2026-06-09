@@ -119,7 +119,9 @@ void AEnemyBase::Die()
 	GetCharacterMovement()->DisableMovement();
 
 	// 判定, HealthBar 非表示
+	// TODO: Weapon と Overlap が検知しないようにする
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	if (HealthBarWidget)
 	{
 		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget OFF");
@@ -177,16 +179,21 @@ void AEnemyBase::OnRightHandOverlap(
 	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
-		// とりあえず固定で 10.0 のダメージ
+	
+		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
+		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
+
 		UGameplayStatics::ApplyDamage(
-			OtherActor, 10.f, GetController(), this, UDamageType::StaticClass()
+			OtherActor, BaseDamage, GetController(), this, UDamageType::StaticClass()
 		);
 
 		// Interface に応じた固有処理
 		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
 		if (HitInterface)
 		{
-			HitInterface->Execute_GetHit(OtherActor, OtherActor->GetActorLocation());
+			HitInterface->Execute_GetHit(
+				OtherActor, OtherActor->GetActorLocation(), FinalPoiseDamage
+			);
 		}
 	}
 }
@@ -201,15 +208,21 @@ void AEnemyBase::OnLeftHandOverlap(
 	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
 		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+
+		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
+		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
+
 		UGameplayStatics::ApplyDamage(
-			OtherActor, 10.f, GetController(), this, UDamageType::StaticClass()
+			OtherActor, BaseDamage, GetController(), this, UDamageType::StaticClass()
 		);
 
 		// Interface に応じた固有処理
 		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
 		if (HitInterface)
 		{
-			HitInterface->Execute_GetHit(OtherActor, OtherActor->GetActorLocation());
+			HitInterface->Execute_GetHit(
+				OtherActor, OtherActor->GetActorLocation(), FinalPoiseDamage
+			);
 		}
 	}
 }
@@ -243,8 +256,14 @@ void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
 	}
 }
 
-void AEnemyBase::OnAttackCollisionNotifyBegin(EAttackCollisionType CollisionType)
+void AEnemyBase::OnAttackCollisionNotifyBegin(
+	EAttackCollisionType CollisionType,
+	float DamageMultiplier, float PoiseMultiplier
+)
 {
+	CurrentDamageMultiplier = CurrentDamageMultiplier * DamageMultiplier;
+	CurrentPoiseMultiplier = CurrentPoiseMultiplier * PoiseMultiplier;
+
 	ActivateAttackCollision(CollisionType);
 }
 
@@ -264,6 +283,8 @@ void AEnemyBase::DeactivateAttackCollision()
 void AEnemyBase::OnAttackCollisionNotifyEnd()
 {
 	DeactivateAttackCollision();
+	CurrentDamageMultiplier = 1.0f;
+	CurrentPoiseMultiplier = 1.0f;
 }
 
 void AEnemyBase::OnAttackEnd()
@@ -360,7 +381,9 @@ void AEnemyBase::PossessedBy(AController* NewController)
 	// なので、BB のキャッシュ対応などは一旦しない
 }
 
-void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
+void AEnemyBase::GetHit_Implementation(
+	const FVector& ImpactPoint, const float FinalPoiseDamage
+)
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
 
@@ -374,9 +397,8 @@ void AEnemyBase::GetHit_Implementation(const FVector& ImpactPoint)
 	// アニメ再生
 	if (Attributes && Attributes->IsAlive())
 	{
-		// 固定のポイズダメージ値（将来的に Weapon 等から受け取る設計に変更する）
-		const float FixedPoiseDamage = 50.f;
-		const bool bIsStaggered = Attributes->ReceivePoiseDamage(FixedPoiseDamage);
+		// ポイズ値を差し引きして、怯みチェック
+		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
 		if (bIsStaggered)
 		{
 			UE_LOGFMT(LogTemp, Warning, "Poise Broken!");

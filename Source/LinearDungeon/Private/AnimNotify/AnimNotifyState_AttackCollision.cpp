@@ -13,7 +13,9 @@ void UAnimNotifyState_AttackCollision::NotifyBegin(
 		AEnemyBase* EnemyBase = Cast<AEnemyBase>(MeshComp->GetOwner());
 		if (EnemyBase)
 		{
-			EnemyBase->OnAttackCollisionNotifyBegin(CollisionType);
+			EnemyBase->OnAttackCollisionNotifyBegin(
+				CollisionType, DamageMultiplier, PoiseMultiplier
+			);
 		}
 	}
 

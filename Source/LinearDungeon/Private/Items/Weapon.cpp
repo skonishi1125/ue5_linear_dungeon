@@ -101,7 +101,7 @@ void AWeapon::OnBoxOverlap(
 	if (BoxHit.GetActor())
 	{
 		// 1. ダメージ処理
-		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), Damage,
+		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), BaseDamage,
 			GetInstigator()->GetController(), this, UDamageType::StaticClass()
 		);
 
@@ -110,7 +110,9 @@ void AWeapon::OnBoxOverlap(
 		if (HitInterface)
 		{
 			//HitInterface->GetHit(BoxHit.ImpactPoint);
-			HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
+			HitInterface->Execute_GetHit(
+				BoxHit.GetActor(), BoxHit.ImpactPoint, BasePoiseDamage
+			);
 		}
 		// 武器を振った時、同じ敵に複数回当たらないようにする
 		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)

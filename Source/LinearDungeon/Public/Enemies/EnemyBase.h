@@ -37,7 +37,9 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	// Interface の Override
-	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
+	virtual void GetHit_Implementation(
+		const FVector& ImpactPoint, const float FinalPoiseDamage
+	) override;
 
 	// AActor の持つ TakeDamage Override
 	float TakeDamage(
@@ -46,7 +48,10 @@ public:
 	) override;
 
 	// UAnimNotifyState_AttackCollision などから呼び出す、攻撃判定管理関数
-	void OnAttackCollisionNotifyBegin(EAttackCollisionType CollisionType);
+	void OnAttackCollisionNotifyBegin(
+		EAttackCollisionType CollisionType,
+		float DamageMultiplier = 1.0f, float PoiseMultiplier = 1.0f
+	);
 	void OnAttackCollisionNotifyEnd();
 
 	// UAnimNotify_EnemyAttackEnd などから呼び出す、攻撃が終わったことを通知する関数
@@ -139,6 +144,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double TrackingInterpSpeed = 5.0;
 	void UpdateTrackingRotation(float DeltaTime);
+	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float BaseDamage = 20.f; // 基礎攻撃力
+	float CurrentDamageMultiplier = 1.0f; // 攻撃倍率
+	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float BasePoiseDamage = 20.f; // 基礎ポイズ値
+	float CurrentPoiseMultiplier = 1.0f; // ポイズ倍率
 
 	// Character の Die デリゲートに紐づける関数
 	UFUNCTION()

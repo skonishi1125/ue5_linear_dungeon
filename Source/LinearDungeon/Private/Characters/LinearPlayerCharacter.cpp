@@ -450,19 +450,30 @@ float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 }
 
 // ダメージ後、状況に応じた処理
-void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+void ALinearPlayerCharacter::GetHit_Implementation(
+	const FVector& ImpactPoint, const float FinalPoiseDamage
+)
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
-	// TODO: 防御中かどうかで Anime を調整
-
-	// HealthBar 反映
+	// TODO: 防御中かどうかで Anime を調整。外積などで前方180°なら... というようにしたい
+	// TODO: HealthBar を作って反映する
 
 	// アニメ再生 （やられ or 死亡）
 	if (Attributes && Attributes->IsAlive())
 	{
-		// 生存 のけぞりアニメ再生
-		PlayHitReactionMontage();
-		ActionState = EActionState::EAS_Hitting;
+		// 生存 Poise に応じて 怯みアニメ再生
+		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
+		if (bIsStaggered)
+		{
+			UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Broken!");
+			PlayHitReactionMontage(); // 怯みアニメの再生
+			ActionState = EActionState::EAS_Hitting;
+			Attributes->ResetPoise(); // ポイズ値を最大にリセット
+		}
+		else
+		{
+			UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Intaract: No reaction.");
+		}
 	}
 	else
 	{
@@ -475,10 +486,6 @@ void ALinearPlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 	}
-
-	// State を作って、他の行動が食らいでキャンセルされないようにする
-	// （State が切り替わらず、キャラが止まってしまうので）
-
 }
 
 void ALinearPlayerCharacter::PlayHitReactionMontage()
