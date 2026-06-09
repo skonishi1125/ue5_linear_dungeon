@@ -339,12 +339,15 @@ void ALinearPlayerCharacter::Equip()
 	}
 }
 
-void ALinearPlayerCharacter::OnWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
+	ECollisionEnabled::Type CollisionEnabled, float DamageMultiplier, float PoiseMultiplier
+)
 {
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
 		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
 		EquippedWeapon->BoxIgnoreActors.Empty();
+		EquippedWeapon->SetMultipliers(DamageMultiplier, PoiseMultiplier);
 	}
 }
 
@@ -353,6 +356,7 @@ void ALinearPlayerCharacter::OnWeaponCollisionDisabled(ECollisionEnabled::Type C
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
 		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionDisabled);
+		EquippedWeapon->ResetMultipliers();
 	}
 }
 
@@ -441,10 +445,10 @@ float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 	if (Attributes)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
-		UE_LOGFMT(
-			LogTemp, Warning, 
-			"ALinearPlayerCharacter::TakeDamage() CurrentHealthPercent: {0}", Attributes->GetHealthPercent()
-		);
+		//UE_LOGFMT(
+		//	LogTemp, Warning, 
+		//	"ALinearPlayerCharacter::TakeDamage() CurrentHealthPercent: {0}", Attributes->GetHealthPercent()
+		//);
 	}
 	return DamageAmount;
 }
@@ -454,7 +458,7 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	const FVector& ImpactPoint, const float FinalPoiseDamage
 )
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
 	// TODO: 防御中かどうかで Anime を調整。外積などで前方180°なら... というようにしたい
 	// TODO: HealthBar を作って反映する
 
@@ -465,14 +469,14 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
 		if (bIsStaggered)
 		{
-			UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Broken!");
+			//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Broken!");
 			PlayHitReactionMontage(); // 怯みアニメの再生
 			ActionState = EActionState::EAS_Hitting;
 			Attributes->ResetPoise(); // ポイズ値を最大にリセット
 		}
 		else
 		{
-			UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Intaract: No reaction.");
+			//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Intaract: No reaction.");
 		}
 	}
 	else

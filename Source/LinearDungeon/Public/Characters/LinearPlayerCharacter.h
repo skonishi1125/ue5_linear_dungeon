@@ -58,7 +58,13 @@ public:
 		const FVector& ImpactPoint, const float FinalPoiseDamage
 	) override;
 
-	// AM_Attack Notify から呼び出す、コンボ攻撃用関数
+	// AM_Attack Notify から呼び出す関数
+	// 武器の判定有効 - 無効化
+	void OnWeaponCollisionEnabled(
+		ECollisionEnabled::Type CollisionEnabled, float DamageMultiplier, float PoiseMultiplier
+	);
+	void OnWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled);
+	// コンボ攻撃用関数
 	void OnCanSaveAttack(bool bCanSave); // ComboWindow 先行入力受付フラグ操作関数
 	void OnCheckCombo();// CheckCombo 先行入力を受け付けたとき、次の Montage_Play を実行する関数
 	void OnAttackSteering(bool bCanSteer); // コンボ中のステアリング制御
@@ -131,14 +137,6 @@ protected:
 	void PlayDeathMontage();
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive; // 死亡時のポーズ
-
-	// ===== 武器判定操作 =====
-	UFUNCTION(BlueprintCallable)
-	void OnWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
-	UFUNCTION(BlueprintCallable)
-	void OnWeaponCollisionDisabled(ECollisionEnabled::Type CollisionDisabled);
-
-
 
 private:
 	// ===== Character 設定 =====

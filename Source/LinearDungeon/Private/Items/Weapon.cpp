@@ -101,7 +101,14 @@ void AWeapon::OnBoxOverlap(
 	if (BoxHit.GetActor())
 	{
 		// 1. ƒ_ƒ[ƒWˆ—
-		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), BaseDamage,
+		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
+		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
+		UE_LOGFMT(
+			LogTemp, Warning,
+			"AWeapon::OnBoxOverlap() finalDmg: {0} finalPoise: {1}", FinalDamage, FinalPoiseDamage
+		);
+
+		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), FinalDamage,
 			GetInstigator()->GetController(), this, UDamageType::StaticClass()
 		);
 
@@ -111,7 +118,7 @@ void AWeapon::OnBoxOverlap(
 		{
 			//HitInterface->GetHit(BoxHit.ImpactPoint);
 			HitInterface->Execute_GetHit(
-				BoxHit.GetActor(), BoxHit.ImpactPoint, BasePoiseDamage
+				BoxHit.GetActor(), BoxHit.ImpactPoint, FinalPoiseDamage
 			);
 		}
 		// •Ší‚ğU‚Á‚½A“¯‚¶“G‚É•¡”‰ñ“–‚½‚ç‚È‚¢‚æ‚¤‚É‚·‚é
@@ -120,7 +127,6 @@ void AWeapon::OnBoxOverlap(
 
 		// Geometry Collections “™‚ğ”j‰ó‚·‚é‚½‚ß‚Ì—Í Field ì¬
 		CreateFields(BoxHit.ImpactPoint);
-
 
 	}
 	
@@ -163,5 +169,17 @@ void AWeapon::Equip(
 		NSEffect->Deactivate();
 	}
 
+}
+
+void AWeapon::SetMultipliers(float DamageMultiplier, float PoiseMultiplier)
+{
+	CurrentDamageMultiplier = DamageMultiplier;
+	CurrentPoiseMultiplier = PoiseMultiplier;
+}
+
+void AWeapon::ResetMultipliers()
+{
+	CurrentDamageMultiplier = 1.f;
+	CurrentPoiseMultiplier = 1.f;
 }
 

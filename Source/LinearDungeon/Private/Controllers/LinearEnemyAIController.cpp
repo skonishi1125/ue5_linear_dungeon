@@ -70,7 +70,7 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 			GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
 
 
-			UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+			//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
 			// Blackboard コンポーネントを取得し、CombatTarget に Actor をセットする
 			if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 			{
@@ -86,7 +86,7 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 		}
 		else
 		{
-			UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() Actor doesn't have Tags ");
+			//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() Actor doesn't have Tags ");
 		}
 	}
 	else
@@ -102,7 +102,7 @@ void ALinearEnemyAIController::ClearCombatTarget()
 	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 	{
 		BlackboardComp->ClearValue(FName("CombatTarget"));
-		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
+		//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
 	}
 }
 
@@ -118,7 +118,7 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 		AIPerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
 	}
 
-	UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
+	//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
 }
 
 void ALinearEnemyAIController::ResetCharacterDie()

@@ -178,13 +178,13 @@ void AEnemyBase::OnRightHandOverlap(
 {
 	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
-		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
+		//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
 	
 		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
 
 		UGameplayStatics::ApplyDamage(
-			OtherActor, BaseDamage, GetController(), this, UDamageType::StaticClass()
+			OtherActor, FinalDamage, GetController(), this, UDamageType::StaticClass()
 		);
 
 		// Interface に応じた固有処理
@@ -207,13 +207,13 @@ void AEnemyBase::OnLeftHandOverlap(
 {
 	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
-		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+		//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
 
 		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
 
 		UGameplayStatics::ApplyDamage(
-			OtherActor, BaseDamage, GetController(), this, UDamageType::StaticClass()
+			OtherActor, FinalDamage, GetController(), this, UDamageType::StaticClass()
 		);
 
 		// Interface に応じた固有処理
@@ -386,11 +386,13 @@ void AEnemyBase::GetHit_Implementation(
 )
 {
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
+	UE_LOGFMT(LogTemp, Warning, "FinalPoiseDamage: {0}", FinalPoiseDamage);
+
 
 	// HealthBar 表示
 	if (HealthBarWidget && ! HealthBarWidget->IsVisible())
 	{
-		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget ON");
+		//UE_LOGFMT(LogTemp, Warning, "HealthBarWidget ON");
 		HealthBarWidget->SetVisibility(true);
 	}
 
@@ -401,7 +403,7 @@ void AEnemyBase::GetHit_Implementation(
 		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
 		if (bIsStaggered)
 		{
-			UE_LOGFMT(LogTemp, Warning, "Poise Broken!");
+			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
 
 			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
@@ -423,7 +425,7 @@ void AEnemyBase::GetHit_Implementation(
 		else
 		{
 			// ポイズが残っている場合は怯まない（スーパーアーマー状態）
-			UE_LOGFMT(LogTemp, Warning, "Poise intact. No reaction.");
+			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise intact(No reaction)");
 		}
 	}
 	else

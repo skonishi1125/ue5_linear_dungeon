@@ -19,6 +19,9 @@ public:
 		AActor* NewOwner, APawn* NewInstigator
 	);
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; } // Character 側で操作する
+	void SetMultipliers(float DamageMultiplier, float PoiseMultiplier);
+	void ResetMultipliers();
+
 	// 武器判定で考慮しない Actor の配列
 	TArray<AActor*> BoxIgnoreActors; // 攻撃モーション中の一時的なリストなので、生ポインタで良い
 
@@ -59,8 +62,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float BaseDamage = 20.f; // 基礎攻撃力
+	float CurrentDamageMultiplier = 1.f;
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float BasePoiseDamage = 20.f; // 基礎ポイズ値
+	float CurrentPoiseMultiplier = 1.f;
+
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> BoxTraceStart;
