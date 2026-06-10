@@ -50,7 +50,7 @@ void UAttributeComponent::TickComponent(
 	// 計算した値を、Max まで上限として増やす
 	// (DeltaTime を使って、フレームレートに依存せず増やしていく)
 	CurrentPoise = FMath::Min(CurrentPoise + RegenRate * DeltaTime, MaxPoise);
-	BroadcastPoisePercent(); // Poise が変わったことの通知
+	BroadcastPoisePercent(); // Poise が変わっていくことを Tick で通知
 	UpdatePoiseRecoveryTickEnabled(); // CurrentPoise が Max になったら Tick() を切る
 }
 

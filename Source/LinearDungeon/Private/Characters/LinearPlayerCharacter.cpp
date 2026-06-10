@@ -104,6 +104,7 @@ void ALinearPlayerCharacter::BindOverlayToAttributes()
 
 void ALinearPlayerCharacter::OnPoisePercentChanged(float NewPercent)
 {
+	// Poise が回復していく描写を Overlay に反映
 	if (LinearDungeonOverlay)
 	{
 		LinearDungeonOverlay->SetPoiseBarPercent(NewPercent);
