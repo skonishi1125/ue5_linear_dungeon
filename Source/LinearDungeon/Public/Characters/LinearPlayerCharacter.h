@@ -209,5 +209,8 @@ private:
 	void InitLinearDungeonOverlay();
 	UPROPERTY()
 	TObjectPtr<ULinearDungeonOverlay> LinearDungeonOverlay;
+	void BindOverlayToAttributes();
+	UFUNCTION()
+	void OnPoisePercentChanged(float NewPercent);
 
 };

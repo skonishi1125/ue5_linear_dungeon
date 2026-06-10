@@ -60,6 +60,7 @@ void ALinearPlayerCharacter::BeginPlay()
 	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
 
 	InitLinearDungeonOverlay();
+	BindOverlayToAttributes();
 }
 
 // HUD 初期値の記入
@@ -75,10 +76,37 @@ void ALinearPlayerCharacter::InitLinearDungeonOverlay()
 			if (LinearDungeonOverlay && Attributes)
 			{
 				LinearDungeonOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
-				LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
+
+				// Poise の設定は、BindOverlayToAttributes() で対応
+				// LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
 
 			}
 		}
+	}
+}
+
+void ALinearPlayerCharacter::BindOverlayToAttributes()
+{
+	if (Attributes)
+	{
+		// Poise 値が削れた時に反応する Delegate
+		// Remove は安全な処理なので、多重登録を防ぐために Remove を一度しておく形をとる
+		// Attributes->OnPoisePercentChanged.RemoveDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
+		// Attributes->OnPoisePercentChanged.AddDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
+
+		// ↑でもいいが、楽にやるなら UniqueDynamic を使う
+		Attributes->OnPoisePercentChanged.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
+		
+		// Poise 初期値の % を渡して通知して反映
+		OnPoisePercentChanged(Attributes->GetPoisePercent());
+	}
+}
+
+void ALinearPlayerCharacter::OnPoisePercentChanged(float NewPercent)
+{
+	if (LinearDungeonOverlay)
+	{
+		LinearDungeonOverlay->SetPoiseBarPercent(NewPercent);
 	}
 }
 
@@ -498,7 +526,7 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 			//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Broken!");
 			PlayHitReactionMontage(); // 怯みアニメの再生
 			ActionState = EActionState::EAS_Hitting;
-			Attributes->ResetPoise(); // ポイズ値を最大にリセット
+			Attributes->ResetPoise(); // 怯んだときは、Poise を最大にリセット
 		}
 		else
 		{
