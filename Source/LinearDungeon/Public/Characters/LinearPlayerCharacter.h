@@ -206,10 +206,12 @@ private:
 	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
 
 	// HUD, Overlay 関連
-	void InitLinearDungeonOverlay();
+	void CacheLinearDungeonOverlay();
 	UPROPERTY()
 	TObjectPtr<ULinearDungeonOverlay> LinearDungeonOverlay;
 	void BindOverlayToAttributes();
+	UFUNCTION()
+	void OnHealthPercentChanged(float NewPercent);
 	UFUNCTION()
 	void OnPoisePercentChanged(float NewPercent);
 

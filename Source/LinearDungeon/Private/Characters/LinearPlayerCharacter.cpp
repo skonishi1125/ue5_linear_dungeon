@@ -59,12 +59,12 @@ void ALinearPlayerCharacter::BeginPlay()
 	Tags.Add(TagName);
 	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
 
-	InitLinearDungeonOverlay();
+	CacheLinearDungeonOverlay();
 	BindOverlayToAttributes();
 }
 
-// HUD 初期値の記入
-void ALinearPlayerCharacter::InitLinearDungeonOverlay()
+// Overlay をメンバ変数に格納する
+void ALinearPlayerCharacter::CacheLinearDungeonOverlay()
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
@@ -73,14 +73,6 @@ void ALinearPlayerCharacter::InitLinearDungeonOverlay()
 		if (LinearDungeonHUD)
 		{
 			LinearDungeonOverlay = LinearDungeonHUD->GetOverlay();
-			if (LinearDungeonOverlay && Attributes)
-			{
-				LinearDungeonOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
-
-				// Poise の設定は、BindOverlayToAttributes() で対応
-				// LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
-
-			}
 		}
 	}
 }
@@ -89,22 +81,34 @@ void ALinearPlayerCharacter::BindOverlayToAttributes()
 {
 	if (Attributes)
 	{
-		// Poise 値が削れた時に反応する Delegate
+		// Health / Poise 値が削れた時に反応する Delegate
 		// Remove は安全な処理なので、多重登録を防ぐために Remove を一度しておく形をとる
 		// Attributes->OnPoisePercentChanged.RemoveDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
 		// Attributes->OnPoisePercentChanged.AddDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
-
 		// ↑でもいいが、楽にやるなら UniqueDynamic を使う
+
+		Attributes->OnHealthPercentChanged.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnHealthPercentChanged);
 		Attributes->OnPoisePercentChanged.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnPoisePercentChanged);
 		
 		// Poise 初期値の % を渡して通知して反映
+		OnHealthPercentChanged(Attributes->GetHealthPercent());
 		OnPoisePercentChanged(Attributes->GetPoisePercent());
+	}
+}
+
+// Health, Poise が Attribute で変動があったとき、
+// Overlay 側にも変更値を反映させる
+// ※本クラス Character が仲介しているが、理想は Overlay 側だけで済ませたほうが疎結合になる
+void ALinearPlayerCharacter::OnHealthPercentChanged(float NewPercent)
+{
+	if (LinearDungeonOverlay)
+	{
+		LinearDungeonOverlay->SetHealthBarPercent(NewPercent);
 	}
 }
 
 void ALinearPlayerCharacter::OnPoisePercentChanged(float NewPercent)
 {
-	// Poise が回復していく描写を Overlay に反映
 	if (LinearDungeonOverlay)
 	{
 		LinearDungeonOverlay->SetPoiseBarPercent(NewPercent);
@@ -540,12 +544,8 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 		Die();
 	}
 
-	// HUD の HealthBar, PoiseBar を反映
-	if (Attributes && LinearDungeonOverlay)
-	{
-		LinearDungeonOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
-		LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
-	}
+	// Overlay への HealthBar, PoiseBar 反映はデリゲートで対応済
+	// Attribute の値が変わった時、Overlay に反映される設計に BeginPlay() でしている
 
 	// HitSoundなど
  	if (HitSound)

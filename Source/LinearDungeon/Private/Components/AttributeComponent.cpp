@@ -58,6 +58,9 @@ void UAttributeComponent::ReceiveHealthDamage(float Damage)
 {
 	// 0 - MaxHealth の間の数値で返す（ - になっても、Clamp して 0 を返すようにしている）
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, MaxHealth);
+
+	// HP が変更されたことを通知する
+	OnHealthPercentChanged.Broadcast(GetHealthPercent());
 }
 
 float UAttributeComponent::GetHealthPercent() const

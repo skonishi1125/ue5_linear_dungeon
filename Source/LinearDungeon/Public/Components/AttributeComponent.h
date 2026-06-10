@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "AttributeComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthPercentChangedDelegate, float, NewPercent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPoisePercentChangedDelegate, float, NewPercent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -25,6 +26,7 @@ public:
 	bool IsStaggeredWithPoise(float PoiseDamage);
 	void ResetPoise();
 
+	FOnHealthPercentChangedDelegate OnHealthPercentChanged;
 	FOnPoisePercentChangedDelegate OnPoisePercentChanged;
 
 protected:
