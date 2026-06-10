@@ -33,6 +33,11 @@ class USoundBase;
 // Die 死亡通知
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeathDelegate);
 
+
+// HUD, Overlay 関連
+class ULinearDungeonOverlay;
+
+
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
 {
@@ -199,5 +204,10 @@ private:
 	TObjectPtr<UAnimMontage> DeathMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
+
+	// HUD, Overlay 関連
+	void InitLinearDungeonOverlay();
+	UPROPERTY()
+	TObjectPtr<ULinearDungeonOverlay> LinearDungeonOverlay;
 
 };

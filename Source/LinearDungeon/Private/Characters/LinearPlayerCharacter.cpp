@@ -21,6 +21,10 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
+// HUD
+#include "Components/HUD/LinearDungeonHUD.h"
+#include "Components/HUD/LinearDungeonOverlay.h"
+
 const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
@@ -54,6 +58,28 @@ void ALinearPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	Tags.Add(TagName);
 	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
+
+	InitLinearDungeonOverlay();
+}
+
+// HUD 初期値の記入
+void ALinearPlayerCharacter::InitLinearDungeonOverlay()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		ALinearDungeonHUD* LinearDungeonHUD = Cast<ALinearDungeonHUD>(PlayerController->GetHUD());
+		if (LinearDungeonHUD)
+		{
+			LinearDungeonOverlay = LinearDungeonHUD->GetOverlay();
+			if (LinearDungeonOverlay && Attributes)
+			{
+				LinearDungeonOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
+				LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
+
+			}
+		}
+	}
 }
 
 void ALinearPlayerCharacter::Tick(float DeltaTime)
@@ -459,8 +485,8 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 )
 {
 	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
+
 	// TODO: 防御中かどうかで Anime を調整。外積などで前方180°なら... というようにしたい
-	// TODO: HealthBar を作って反映する
 
 	// アニメ再生 （やられ or 死亡）
 	if (Attributes && Attributes->IsAlive())
@@ -483,6 +509,13 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	{
 		// 死亡 アニメ再生、State 変更
 		Die();
+	}
+
+	// HUD の HealthBar, PoiseBar を反映
+	if (Attributes && LinearDungeonOverlay)
+	{
+		LinearDungeonOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
+		LinearDungeonOverlay->SetPoiseBarPercent(Attributes->GetPoisePercent());
 	}
 
 	// HitSoundなど

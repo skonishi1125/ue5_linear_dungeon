@@ -11,6 +11,9 @@ class LINEARDUNGEON_API ALinearDungeonHUD : public AHUD
 {
 	GENERATED_BODY()
 
+public:
+	FORCEINLINE ULinearDungeonOverlay* GetOverlay() const { return Overlay; }
+
 protected:
 	virtual void BeginPlay() override;
 

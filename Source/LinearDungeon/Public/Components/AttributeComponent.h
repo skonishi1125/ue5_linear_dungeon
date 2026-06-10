@@ -22,6 +22,7 @@ public:
 	bool IsAlive();
 
 	// Poise ŠÖ˜A
+	float GetPoisePercent();
 	bool IsStaggeredWithPoise(float PoiseDamage);
 	void ResetPoise();
 

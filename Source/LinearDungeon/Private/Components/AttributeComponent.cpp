@@ -34,6 +34,12 @@ bool UAttributeComponent::IsAlive()
 	return CurrentHealth > 0.f;
 }
 
+float UAttributeComponent::GetPoisePercent()
+{
+	return CurrentPoise / MaxPoise;
+}
+
+// CurrentPoise の計算も兼ねているので分けてもいいかも？
 // 0以下になったら true を返して、怯みアニメ再生などの処理に移る
 bool UAttributeComponent::IsStaggeredWithPoise(float PoiseDamage)
 {
