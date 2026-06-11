@@ -10,6 +10,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PlayerTargetingComponent.h"
 
 // 扱う Actor
 #include "Items/ItemBase.h"
@@ -50,6 +51,7 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 	Camera->SetupAttachment(SpringArm);
 
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+	PlayerTargeting = CreateDefaultSubobject<UPlayerTargetingComponent>(TEXT("PlayerTargeting"));
 
 }
 
@@ -175,7 +177,11 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		if (RollingAction)
 		{
 			EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Rolling);
+		}
 
+		if (TargetAction)
+		{
+			EnhancedInputComponent->BindAction(TargetAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Target);
 		}
 
 	}
@@ -612,4 +618,9 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 		}
 		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
 	}
+}
+
+void ALinearPlayerCharacter::Target()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Target()");
 }

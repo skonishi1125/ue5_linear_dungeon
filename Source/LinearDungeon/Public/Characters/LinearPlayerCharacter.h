@@ -33,10 +33,11 @@ class USoundBase;
 // Die 死亡通知
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeathDelegate);
 
-
 // HUD, Overlay 関連
 class ULinearDungeonOverlay;
 
+// ターゲットカメラ
+class UPlayerTargetingComponent;
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
@@ -121,6 +122,10 @@ protected:
 	void Rolling();
 	bool CanRolling();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> TargetAction;
+	void Target();
+
 	// ===== Montages 関連 =====
 	// Attack
 	void PlayAttackMontage();
@@ -161,6 +166,8 @@ private:
 	TObjectPtr<UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPlayerTargetingComponent> PlayerTargeting;
 
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
