@@ -435,11 +435,9 @@ void AEnemyBase::GetHit_Implementation(
 		Die();
 	}
 
-	// 怯む or 怯んでリセット後に OverheadStatus Poise 反映
-	if (OverheadStatusWidgetComponent)
-	{
-		OverheadStatusWidgetComponent->SetPoisePercent(Attributes->GetPoisePercent());
-	}
+	// 怯んだときの OverheadWidget PoiseBar は、Attributes が自動で反映する
+	//if (OverheadStatusWidgetComponent)
+	//	OverheadStatusWidgetComponent->SetPoisePercent(Attributes->GetPoisePercent());
 
 	if (HitSound)
 	{
@@ -469,11 +467,12 @@ void AEnemyBase::OnStaggerEnd()
 
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// Widget 更新処理
-	if (Attributes && OverheadStatusWidgetComponent)
+	// Attributes 更新
+	// OverheadWidget は、Attributes が自動で反映する
+	if (Attributes)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
-		OverheadStatusWidgetComponent->SetHealthPercent(Attributes->GetHealthPercent());
+		//OverheadStatusWidgetComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	}
 
 	// 攻撃された相手を対象にする処理
