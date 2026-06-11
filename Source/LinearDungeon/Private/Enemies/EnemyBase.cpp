@@ -6,7 +6,7 @@
 // Component 関連
 #include "Components/CapsuleComponent.h"
 #include "Components/AttributeComponent.h"
-#include "Components/HUD/HealthBarComponent.h"
+#include "Components/OverheadStatusWidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Controllers/LinearEnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h" // BB に CombatTarget を入れるために必要
@@ -34,8 +34,8 @@ AEnemyBase::AEnemyBase()
 
 	// Components 追加
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
-	HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(GetRootComponent());
+	OverheadStatusWidgetComponent = CreateDefaultSubobject<UOverheadStatusWidgetComponent>(TEXT("OverheadStatusWidget"));
+	OverheadStatusWidgetComponent->SetupAttachment(GetRootComponent());
 
 	// AIController クラスを自作したものに置き換える
 	AIControllerClass = ALinearEnemyAIController::StaticClass();
@@ -82,10 +82,10 @@ void AEnemyBase::BeginPlay()
 	}
 
 
-	// 初期は、HP bar は消しておく（被弾したら表示する）
-	if (HealthBarWidget)
+	// 初期は、OverheadStatusWidget は消しておく（被弾したら表示する）
+	if (OverheadStatusWidgetComponent)
 	{
-		HealthBarWidget->SetVisibility(false);
+		OverheadStatusWidgetComponent->SetVisibility(false);
 	}
 
 	// PatrolTarget を初期決定していなければ、[0]を初期対象とする
@@ -122,10 +122,10 @@ void AEnemyBase::Die()
 	// TODO: Weapon と Overlap が検知しないようにする
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (HealthBarWidget)
+	if (OverheadStatusWidgetComponent)
 	{
-		UE_LOGFMT(LogTemp, Warning, "HealthBarWidget OFF");
-		HealthBarWidget->SetVisibility(false);
+		UE_LOGFMT(LogTemp, Warning, "OverheadStatusWidgetComponent OFF");
+		OverheadStatusWidgetComponent->SetVisibility(false);
 	}
 
 	// AI Controller 側の 憑依解除
@@ -389,11 +389,11 @@ void AEnemyBase::GetHit_Implementation(
 	UE_LOGFMT(LogTemp, Warning, "FinalPoiseDamage: {0}", FinalPoiseDamage);
 
 
-	// HealthBar 表示
-	if (HealthBarWidget && ! HealthBarWidget->IsVisible())
+	// OverheadStatusWidgetComponent 表示
+	if (OverheadStatusWidgetComponent && !OverheadStatusWidgetComponent->IsVisible())
 	{
 		//UE_LOGFMT(LogTemp, Warning, "HealthBarWidget ON");
-		HealthBarWidget->SetVisibility(true);
+		OverheadStatusWidgetComponent->SetVisibility(true);
 	}
 
 	// アニメ再生
@@ -435,6 +435,12 @@ void AEnemyBase::GetHit_Implementation(
 		Die();
 	}
 
+	// 怯む or 怯んでリセット後に OverheadStatus Poise 反映
+	if (OverheadStatusWidgetComponent)
+	{
+		OverheadStatusWidgetComponent->SetPoisePercent(Attributes->GetPoisePercent());
+	}
+
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
@@ -464,10 +470,10 @@ void AEnemyBase::OnStaggerEnd()
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Widget 更新処理
-	if (Attributes && HealthBarWidget)
+	if (Attributes && OverheadStatusWidgetComponent)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
-		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+		OverheadStatusWidgetComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	}
 
 	// 攻撃された相手を対象にする処理

@@ -16,7 +16,7 @@ class UParticleSystem;
 
 // Component
 class UAttributeComponent;
-class UHealthBarComponent;
+class UOverheadStatusWidgetComponent;
 
 // BT, BB 等の呼び出し用
 class ALinearEnemyAIController;
@@ -106,9 +106,10 @@ private:
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等の情報
-
+	//UPROPERTY(VisibleAnywhere)
+	//TObjectPtr<UHealthBarComponent> HealthBarComponent; // 敵情報 HUD
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UHealthBarComponent> HealthBarWidget; // 体力バー Widget
+	TObjectPtr<UOverheadStatusWidgetComponent> OverheadStatusWidgetComponent; // 頭上に出すための Component
 
 	// ===== Montages =====
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
