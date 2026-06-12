@@ -1,5 +1,7 @@
 #include "Components/PlayerTargetingComponent.h"
 #include "Logging/StructuredLog.h"
+#include "Blueprint/UserWidget.h"
+
 
 #include "Enemies/EnemyBase.h"
 #include "Components/AttributeComponent.h"
@@ -125,6 +127,25 @@ void UPlayerTargetingComponent::OnLockOnPressed()
 	SetComponentTickEnabled(true);// Tick 有効化（敵を追従するような処理）
 	ApplySpringArmProfile(); // SpringArm の設定を、ロック中専用のものに更新
 
+	// 押された時に、マーカーがまだ作られていなければ作成
+	// BeginPlay で、Component との紐づけ前に走るのを防止するという意図がある
+	if (TargetMarkerWidget == nullptr && TargetMarkerClass != nullptr)
+	{
+		AActor* OwnerActor = GetOwner();
+		if (APawn* OwnerPawn = Cast<APawn>(OwnerActor))
+		{
+			if (APlayerController* PC = Cast<APlayerController>(OwnerPawn->GetController()))
+			{
+				TargetMarkerWidget = CreateWidget<UUserWidget>(PC, TargetMarkerClass);
+				if (TargetMarkerWidget)
+				{
+					TargetMarkerWidget->AddToViewport();
+				}
+			}
+		}
+	}
+
+
 	//DrawDebugSphere(GetWorld(), CurrentTarget->GetActorLocation(), MaxLockDistance, 12, FColor::Red, true);
 	//UE_LOGFMT(LogTemp, Warning, "Target: {0}", CurrentTarget->GetActorLabel());
 	//UE_LOGFMT(LogTemp, Warning, "UPlayerTargetingComponent::OnLockOnPressed() bIslocked = {0}", bIsLocked ? TEXT("true") : TEXT("false"));
@@ -136,6 +157,7 @@ void UPlayerTargetingComponent::ClearLock()
 	CurrentTarget = nullptr;
 	SetComponentTickEnabled(false); // Tick も切る
 	RestoreSpringArmProfile(); // SpringArm の設定も、元々のものに
+	TargetMarkerWidget->SetVisibility(ESlateVisibility::Hidden); // マーカーも切る
 	UE_LOGFMT(LogTemp, Warning, "ClearLock(): Target Remove");
 }
 
@@ -284,7 +306,31 @@ void UPlayerTargetingComponent::UpdateLockOnCamera(USpringArmComponent* SpringAr
 	PC->SetControlRotation(NewRotation);
 }
 
+// 対象に Marker を付与し続ける処理
+void UPlayerTargetingComponent::UpdateTargetWidgetPosition()
+{
+	if (!bIsLocked || !CurrentTarget.IsValid() || !TargetMarkerWidget)
+	{
+		return;
+	}
 
+	APlayerController* PC = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+	if (PC)
+	{
+		FVector2D ScreenPosition;
+		// ターゲットの3D座標を、画面上の2D座標に変換する
+		const bool bIsOnScreen = PC->ProjectWorldLocationToScreen(CurrentTarget->GetActorLocation(), ScreenPosition);
 
-
-
+		if (bIsOnScreen)
+		{
+			// 画面内にいる場合は Widget の位置を更新
+			TargetMarkerWidget->SetPositionInViewport(ScreenPosition);
+			TargetMarkerWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
+		else
+		{
+			// 画面外（カメラの背後など）にいる場合は隠す
+			TargetMarkerWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}

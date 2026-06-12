@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "PlayerTargetingComponent.generated.h"
 
 class USpringArmComponent;
@@ -22,6 +23,7 @@ public:
 	void SetSpringArm(USpringArmComponent* SpringArm);
 
 	void UpdateLockOnCamera(class USpringArmComponent* SpringArm, float DeltaTime); // Player 側 Tick で動かす
+	void UpdateTargetWidgetPosition(); //  Player 側 Tick で Marker を Target に追従させる処理
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
 	FORCEINLINE AActor* GetCurrentTarget() const { return CurrentTarget.Get(); }
 
@@ -41,6 +43,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Targeting")
 	float CameraRotationInterpSpeed = 5.f; // カメラ 回転速度
 
+	// Marker
+	UPROPERTY(EditAnywhere, Category = "Targeting")
+	TSubclassOf<UUserWidget> TargetMarkerClass;
+	TObjectPtr<UUserWidget> TargetMarkerWidget;
+
 private:
 	// 索敵して、条件に合う相手を CurrentTarget に入れる処理
 	AActor* FindBestTarget() const;
@@ -51,6 +58,8 @@ private:
 	// Target / デフォルト の設定値切り替え用
 	void ApplySpringArmProfile();
 	void RestoreSpringArmProfile();
+
+
 
 	// 距離、死亡状況などをチェックして、ターゲット状態を維持するかを決める関数
 	void IsTargetValid();

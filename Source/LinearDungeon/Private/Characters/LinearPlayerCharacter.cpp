@@ -130,6 +130,7 @@ void ALinearPlayerCharacter::Tick(float DeltaTime)
 	if (PlayerTargeting && PlayerTargeting->IsLocked())
 	{
 		PlayerTargeting->UpdateLockOnCamera(SpringArm, DeltaTime);
+		PlayerTargeting->UpdateTargetWidgetPosition();
 	}
 }
 
