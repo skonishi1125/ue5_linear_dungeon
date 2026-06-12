@@ -43,9 +43,9 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 	// Component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmBlankCharacter"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 400.f;
+	SpringArm->TargetArmLength = DefaultArmLength;
 	SpringArm->bUsePawnControlRotation = true; // Controler の回転を SpringArmに反映させる
-	SpringArm->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	SpringArm->SetRelativeRotation(DefaultArmRotation);
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
@@ -60,6 +60,11 @@ void ALinearPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	Tags.Add(TagName);
 	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
+
+	if (PlayerTargeting)
+	{
+		PlayerTargeting->SetSpringArm(SpringArm);
+	}
 
 	CacheLinearDungeonOverlay();
 	BindOverlayToAttributes();
@@ -120,6 +125,12 @@ void ALinearPlayerCharacter::OnPoisePercentChanged(float NewPercent)
 void ALinearPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// ロック中、カメラを敵に準拠した動きにする
+	if (PlayerTargeting && PlayerTargeting->IsLocked())
+	{
+		PlayerTargeting->UpdateLockOnCamera(SpringArm, DeltaTime);
+	}
 }
 
 
@@ -226,6 +237,12 @@ bool ALinearPlayerCharacter::CanMove()
 
 void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
 {
+	// ターゲットカメラ中は、マウス操作を切る
+	if (PlayerTargeting && PlayerTargeting->IsLocked())
+	{
+		return;
+	}
+
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
@@ -623,4 +640,8 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 void ALinearPlayerCharacter::Target()
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Target()");
+	if (PlayerTargeting)
+	{
+		PlayerTargeting->OnLockOnPressed();
+	}
 }

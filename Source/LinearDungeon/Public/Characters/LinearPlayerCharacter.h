@@ -169,6 +169,13 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UPlayerTargetingComponent> PlayerTargeting;
 
+	// ===== SpringArm/Camera 設定値 =====
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float DefaultArmLength = 400.f;
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	FRotator DefaultArmRotation = FRotator(-20.f, 0.f, 0.f);
+
+
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
