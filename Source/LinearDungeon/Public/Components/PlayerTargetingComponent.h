@@ -18,22 +18,16 @@ public:
 	// Target ボタンが押された時の処理
 	void OnLockOnPressed();
 
-	// PlayerCharacter から 各情報は読みたいので、public にする
-	void UpdateLockOnCamera(class USpringArmComponent* SpringArm, float DeltaTime);
-	FORCEINLINE bool IsLocked() const { return bIsLocked; }
-	FORCEINLINE AActor* GetCurrentTarget() const { return CurrentTarget.Get(); }
-
 	// SpringArm 初期設定用
 	void SetSpringArm(USpringArmComponent* SpringArm);
+
+	void UpdateLockOnCamera(class USpringArmComponent* SpringArm, float DeltaTime); // Player 側 Tick で動かす
+	FORCEINLINE bool IsLocked() const { return bIsLocked; }
+	FORCEINLINE AActor* GetCurrentTarget() const { return CurrentTarget.Get(); }
 
 protected:
 	virtual void BeginPlay() override;
 
-	AActor* FindBestTarget() const;
-
-
-	void ApplySpringArmProfile();
-	void RestoreSpringArmProfile();
 	UPROPERTY()
 	TObjectPtr<USpringArmComponent> CachedPlayerSpringArm;
 	float DefaultArmLength;
@@ -45,19 +39,24 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Targeting")
 	FRotator LockOnArmRotation = FRotator(-20.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, Category = "Targeting")
-	float CameraZoomInterpSpeed = 5.f; // カメラ ズーム速度
-	UPROPERTY(EditAnywhere, Category = "Targeting")
 	float CameraRotationInterpSpeed = 5.f; // カメラ 回転速度
 
 private:
-	bool bIsLocked = false; // ロック中かどうかを示す
-
-	// TWeakObjectPtr: 弱い参照
-	// いつ破棄されるか予測できない Actor の参照を保持するときに使う。
+	// 索敵して、条件に合う相手を CurrentTarget に入れる処理
+	AActor* FindBestTarget() const;
+	// TWeakObjectPtr: 弱い参照(いつ破棄されるか予測できない参照を保持するときに使う)
 	UPROPERTY()
 	TWeakObjectPtr<AActor> CurrentTarget;
 
-	void ClearLock();
+	// Target / デフォルト の設定値切り替え用
+	void ApplySpringArmProfile();
+	void RestoreSpringArmProfile();
+
+	// 距離、死亡状況などをチェックして、ターゲット状態を維持するかを決める関数
 	void IsTargetValid();
-		
+
+	// ターゲティングの解除
+	void ClearLock();
+
+	bool bIsLocked = false;
 };
