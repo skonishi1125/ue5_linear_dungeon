@@ -18,6 +18,10 @@
 #include "Items/Shield.h"
 #include "Animation/AnimMontage.h"
 
+// 会話関連
+#include "Interfaces/InteractInterface.h"
+#include "Components/LinearDialogueComponent.h"
+
 // 音関連
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -134,6 +138,10 @@ void ALinearPlayerCharacter::Tick(float DeltaTime)
 	}
 }
 
+void ALinearPlayerCharacter::SetOverlappingInteractableActor(AActor* Actor)
+{
+	OverlappingInteractableActor = Actor;
+}
 
 void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -357,11 +365,11 @@ void ALinearPlayerCharacter::OnAttackAnimEnded()
 
 bool ALinearPlayerCharacter::CanAttack()
 {
-	return 
+	return
 		ActionState == EActionState::EAS_Unoccupied &&
 		EquippedWeapon != nullptr
 		//CharacterState != ECharacterState::ECS_Unequipped
-	;
+		;
 }
 
 // Defense は ABP State で管理する
@@ -396,7 +404,7 @@ bool ALinearPlayerCharacter::CanDefense()
 	return
 		ActionState == EActionState::EAS_Unoccupied &&
 		EquippedShield != nullptr
-	;
+		;
 }
 
 
@@ -406,8 +414,42 @@ void ALinearPlayerCharacter::Interact()
 
 	// Early Return で対応
 	// 1.会話中ならセリフを進める
+	if (ActionState == EActionState::EAS_InDialogue)
+	{
+		if (OverlappingInteractableActor)
+		{
+			ULinearDialogueComponent* DialogueComp = OverlappingInteractableActor->FindComponentByClass<ULinearDialogueComponent>();
+			if (DialogueComp)
+			{
+				DialogueComp->AdvanceDialogue();
+			}
+		}
+		return;
+	}
 
 	// 2. 目の前に IInteractInterface を持った Actor があれば、会話開始
+	if (OverlappingInteractableActor)
+	{
+		if (OverlappingInteractableActor->Implements<UInteractInterface>()) 
+		{
+			// 第一引数: 対象Actor 第二引数以降は定義した関数を渡す
+			// Interact 時の処理自体は、BP_Prisoner の場合、BP 側だけで設計している
+			// C++ で作ることもできるが、BP だけの設計にも慣れておこう
+			IInteractInterface::Execute_Interact(OverlappingInteractableActor, this);
+
+			// 会話状態
+			ActionState = EActionState::EAS_InDialogue;
+
+			// Dialogue の持つ、会話終了 Delegate に購読しておく
+			ULinearDialogueComponent* DialogueComp = OverlappingInteractableActor->FindComponentByClass<ULinearDialogueComponent>();
+			if (DialogueComp)
+			{
+				// 会話が終了したとき、EAS が 戻るような関数を紐づけておく
+				DialogueComp->OnDialogueFinished.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnDialogueEnd);
+			}
+		}
+		return;
+	}
 
 	// 3. 装備処理
 	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
@@ -428,6 +470,11 @@ void ALinearPlayerCharacter::Interact()
 		EquippedShield = OverlappingShield;
 		return;
 	}
+}
+
+void ALinearPlayerCharacter::OnDialogueEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 void ALinearPlayerCharacter::OnWeaponCollisionEnabled(

@@ -17,7 +17,8 @@ enum class EActionState : uint8
 	EAS_Defensing UMETA(DisplayName = "Defensing"),
 	EAS_Rolling UMETA(DisplayName = "Rolling"),
 	EAS_Hitting UMETA(DisplayName = "Hitting"), // ”í’e
-	EAS_Dying UMETA(DisplayName = "Dying")
+	EAS_Dying UMETA(DisplayName = "Dying"),
+	EAS_InDialogue UMETA(DisplayName = "InDialogue"), // ‰ï˜b’†
 
 };
 

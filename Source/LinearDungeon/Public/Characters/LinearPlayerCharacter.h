@@ -47,6 +47,10 @@ public:
 	ALinearPlayerCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline 関数の強制
+
+	// BP に慣れるために、↑の ItemBase と同じ処理だが、Actor を格納処理は BP で 作ってみる
+	UFUNCTION(BlueprintCallable)
+	void SetOverlappingInteractableActor(AActor* Actor);
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
@@ -116,6 +120,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
 	void Interact();
+	UFUNCTION()
+	void OnDialogueEnd();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> RollingAction;
@@ -185,6 +191,10 @@ private:
 	TObjectPtr<AShield> EquippedShield;
 	FName RightHandSocketName = "RightHandSocket";
 	FName LeftHandSocketName = "LeftHandSocket";
+
+	// ===== Overlap している Interactable な Actor 情報を格納する変数
+	UPROPERTY(VisibleInstanceOnly)
+	TObjectPtr<AActor> OverlappingInteractableActor;
 
 	// ======= Anim Montages =======
 	// Attack

@@ -70,6 +70,6 @@ void ULinearDialogueComponent::EndDialogue()
 	DialogueQueue.Empty();
 	CurrentDialogueIndex = 0;
 
-	// 外部（Level BlueprintやSequencer等）に終了を通知
+	// 外部（Level Blueprint や Sequencer 等）に終了を通知
 	OnDialogueFinished.Broadcast();
 }
