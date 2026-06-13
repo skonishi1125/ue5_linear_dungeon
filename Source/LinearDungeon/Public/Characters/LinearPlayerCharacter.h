@@ -114,8 +114,8 @@ protected:
 	bool CanDefense();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> EquipAction;
-	void Equip();
+	TObjectPtr<UInputAction> InteractAction;
+	void Interact();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> RollingAction;

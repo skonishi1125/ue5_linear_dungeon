@@ -181,9 +181,9 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			EnhancedInputComponent->BindAction(DefenseAction, ETriggerEvent::Completed, this, &ALinearPlayerCharacter::StopDefense);
 		}
 
-		if (EquipAction)
+		if (InteractAction)
 		{
-			EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Equip);
+			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Interact);
 		}
 
 		if (RollingAction)
@@ -400,10 +400,16 @@ bool ALinearPlayerCharacter::CanDefense()
 }
 
 
-void ALinearPlayerCharacter::Equip()
+void ALinearPlayerCharacter::Interact()
 {
 	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
 
+	// Early Return で対応
+	// 1.会話中ならセリフを進める
+
+	// 2. 目の前に IInteractInterface を持った Actor があれば、会話開始
+
+	// 3. 装備処理
 	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	AShield* OverlappingShield = Cast<AShield>(OverlappingItem);
@@ -413,12 +419,14 @@ void ALinearPlayerCharacter::Equip()
 		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// 暫定で全て片手武器
 		EquippedWeapon = OverlappingWeapon;
+		return;
 	}
 	else if (OverlappingShield)
 	{
 		OverlappingShield->Equip(GetMesh(), LeftHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作る
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作ってもよい
 		EquippedShield = OverlappingShield;
+		return;
 	}
 }
 
