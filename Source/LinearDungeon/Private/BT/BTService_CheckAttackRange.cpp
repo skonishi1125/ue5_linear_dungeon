@@ -24,7 +24,7 @@ void UBTService_CheckAttackRange::OnBecomeRelevant(
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 
-	DrawDebugDistanceToTarget(OwnerComp);
+	//DrawDebugDistanceToTarget(OwnerComp);
 	//UE_LOGFMT(LogTemp, Log, "UBTService_CheckAttackRange::OnBecomeRelevant()");
 
 }
