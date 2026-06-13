@@ -39,6 +39,9 @@ class ULinearDungeonOverlay;
 // ターゲットカメラ
 class UPlayerTargetingComponent;
 
+// テキスト関連
+class ULinearDialogueComponent;
+
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
 {
@@ -47,13 +50,19 @@ public:
 	ALinearPlayerCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	FORCEINLINE void SetOverlappingItem(AItemBase* Item) { OverlappingItem = Item; } // inline 関数の強制
-
-	// BP に慣れるために、↑の ItemBase と同じ処理だが、Actor を格納処理は BP で 作ってみる
-	UFUNCTION(BlueprintCallable)
-	void SetOverlappingInteractableActor(AActor* Actor);
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
+	FORCEINLINE void SetCharacterActionState(EActionState NewActionState) { ActionState = NewActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
+
+	// インタラクト DialogueComponent 関連
+	// ↑の ItemBase と同じ処理だが、 BP に慣れるためにActor を格納処理は BP で 作ってみる
+	UFUNCTION(BlueprintCallable)
+	void SetOverlappingInteractableActor(AActor* Actor);
+	UFUNCTION(BlueprintCallable)
+	void SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent);
+	UFUNCTION()
+	void OnDialogueEnd();
 
 	// AM_Rolling Notify から呼び出す、FieldSystem 操作関数
 	void OnRollingFieldNotifyBegin();
@@ -120,8 +129,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
 	void Interact();
-	UFUNCTION()
-	void OnDialogueEnd();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> RollingAction;
@@ -238,5 +245,12 @@ private:
 	void OnHealthPercentChanged(float NewPercent);
 	UFUNCTION()
 	void OnPoisePercentChanged(float NewPercent);
+
+	// Dialogue Text 関連
+	// 現在アクティブなダイアログ表示の情報
+	// Overlap されたものを Interact() する以外でも、ムービーシーン等でもダイアログは発生する
+	// そういったものも含めて、今処理すべきダイアログを格納したもの
+	UPROPERTY()
+	TObjectPtr<ULinearDialogueComponent> ActiveDialogueComponent;
 
 };

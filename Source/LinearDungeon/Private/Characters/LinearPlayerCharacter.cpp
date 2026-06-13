@@ -143,6 +143,12 @@ void ALinearPlayerCharacter::SetOverlappingInteractableActor(AActor* Actor)
 	OverlappingInteractableActor = Actor;
 }
 
+void ALinearPlayerCharacter::SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent)
+{
+	ActiveDialogueComponent = DialogueComponent;
+}
+
+
 void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -414,16 +420,9 @@ void ALinearPlayerCharacter::Interact()
 
 	// Early Return で対応
 	// 1.会話中ならセリフを進める
-	if (ActionState == EActionState::EAS_InDialogue)
+	if (ActiveDialogueComponent)
 	{
-		if (OverlappingInteractableActor)
-		{
-			ULinearDialogueComponent* DialogueComp = OverlappingInteractableActor->FindComponentByClass<ULinearDialogueComponent>();
-			if (DialogueComp)
-			{
-				DialogueComp->AdvanceDialogue();
-			}
-		}
+		ActiveDialogueComponent->AdvanceDialogue();
 		return;
 	}
 
@@ -475,6 +474,7 @@ void ALinearPlayerCharacter::Interact()
 void ALinearPlayerCharacter::OnDialogueEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;
+	ActiveDialogueComponent = nullptr;
 }
 
 void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
