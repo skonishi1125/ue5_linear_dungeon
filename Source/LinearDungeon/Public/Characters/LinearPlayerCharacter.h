@@ -58,9 +58,9 @@ public:
 	// インタラクト DialogueComponent 関連
 	// ↑の ItemBase と同じ処理だが、 BP に慣れるためにActor を格納処理は BP で 作ってみる
 	UFUNCTION(BlueprintCallable)
-	void SetOverlappingInteractableActor(AActor* Actor);
+	void SetOverlappingInteractableActor(AActor* Actor); // BP_Prisoner などの Overlap イベントから呼べるようにしておく
 	UFUNCTION(BlueprintCallable)
-	void SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent);
+	void SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent); // ↑と同じ
 	UFUNCTION()
 	void OnDialogueEnd();
 
