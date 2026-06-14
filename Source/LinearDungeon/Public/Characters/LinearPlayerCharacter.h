@@ -96,8 +96,12 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	// ===== Enhanced Input 関連メソッド =====
+	// 基本 IMC
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+	// Dialogue 表示時 IMC
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> DialogueMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
@@ -138,6 +142,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> TargetAction;
 	void Target();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> AdvanceDialogueAction;
+	void AdvanceDialogue();
 
 	// ===== Montages 関連 =====
 	// Attack

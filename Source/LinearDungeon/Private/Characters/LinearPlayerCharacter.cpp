@@ -146,6 +146,24 @@ void ALinearPlayerCharacter::SetOverlappingInteractableActor(AActor* Actor)
 void ALinearPlayerCharacter::SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent)
 {
 	ActiveDialogueComponent = DialogueComponent;
+
+	// このセッタが呼ばれる = 会話が始まったということなので、IMC も切り替える
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+		{
+			if (ActiveDialogueComponent)
+			{
+				// 優先度 1 で登録して、DefaultMappingContext の 0 より 優先度を上げておく
+				Subsystem->AddMappingContext(DialogueMappingContext, 1);
+			}
+			else
+			{
+				// 無い場合は外しておく
+				Subsystem->RemoveMappingContext(DialogueMappingContext);
+			}
+		}
+	}
 }
 
 
@@ -208,6 +226,11 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		if (TargetAction)
 		{
 			EnhancedInputComponent->BindAction(TargetAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Target);
+		}
+
+		if (AdvanceDialogueAction)
+		{
+			EnhancedInputComponent->BindAction(AdvanceDialogueAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::AdvanceDialogue);
 		}
 
 	}
@@ -416,17 +439,7 @@ bool ALinearPlayerCharacter::CanDefense()
 
 void ALinearPlayerCharacter::Interact()
 {
-	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Equip()");
-
-	// Early Return で対応
-	// 1.会話中ならセリフを進める
-	if (ActiveDialogueComponent)
-	{
-		ActiveDialogueComponent->AdvanceDialogue();
-		return;
-	}
-
-	// 2. 目の前に IInteractInterface を持った Actor があれば、会話開始
+	// 1. 目の前に IInteractInterface を持った Actor があれば、会話開始
 	if (OverlappingInteractableActor)
 	{
 		if (OverlappingInteractableActor->Implements<UInteractInterface>()) 
@@ -450,7 +463,7 @@ void ALinearPlayerCharacter::Interact()
 		return;
 	}
 
-	// 3. 装備処理
+	// 2. 装備処理
 	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	AShield* OverlappingShield = Cast<AShield>(OverlappingItem);
@@ -475,6 +488,15 @@ void ALinearPlayerCharacter::OnDialogueEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;
 	ActiveDialogueComponent = nullptr;
+
+	// 会話中 IMC の解除
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->RemoveMappingContext(DialogueMappingContext);
+		}
+	}
 }
 
 void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
@@ -699,5 +721,14 @@ void ALinearPlayerCharacter::Target()
 	if (PlayerTargeting)
 	{
 		PlayerTargeting->OnLockOnPressed();
+	}
+}
+
+void ALinearPlayerCharacter::AdvanceDialogue()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::AdvanceDialogue()");
+	if (ActiveDialogueComponent)
+	{
+		ActiveDialogueComponent->AdvanceDialogue();
 	}
 }
