@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "LinearDialogueComponent.generated.h"
 
+class UDataTable;
 class ULinearDialogueWidget;
 
 // セリフが完全に終了したことを通知するDelegate
@@ -17,8 +18,9 @@ class LINEARDUNGEON_API ULinearDialogueComponent : public UActorComponent
 public:	
 	ULinearDialogueComponent();
 
+	// 渡された DataTable の Name から、テキスト配列を引っ張ってくる
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
-	void StartDialogueSequence(const TArray<FText>& PassedDialogueArray);
+	void StartDialogueSequenceById(FName RowName);
 
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
 	void AdvanceDialogue();
@@ -31,6 +33,10 @@ protected:
 	// 表示するWidgetのクラス指定
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TSubclassOf<ULinearDialogueWidget> DialogueWidgetClass;
+
+	// 使用する会話情報が入った DataTable
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
+	TObjectPtr<UDataTable> DialogueDataTable;
 
 private:
 	void ShowNextDialogue();

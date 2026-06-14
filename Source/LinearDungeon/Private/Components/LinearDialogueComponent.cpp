@@ -2,6 +2,7 @@
 #include "Components/HUD/LinearDialogueWidget.h"
 #include "Characters/LinearPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "DataTables/LinearDialogueRow.h"
 
 ULinearDialogueComponent::ULinearDialogueComponent()
 {
@@ -10,23 +11,38 @@ ULinearDialogueComponent::ULinearDialogueComponent()
 
 // 会話処理の初期設定
 // 表示すべきテキスト情報の配列を受け取り、ダイアログ Widget 自体の生成なども行う
-void ULinearDialogueComponent::StartDialogueSequence(const TArray<FText>& PassedDialogueArray)
+void ULinearDialogueComponent::StartDialogueSequenceById(FName RowName)
 {
-	if (PassedDialogueArray.IsEmpty() || !DialogueWidgetClass) return;
+	// DataTable の登録無し / RowName 未指定 / WidgetClass 未登録
+	if (!DialogueDataTable || RowName.IsNone() || !DialogueWidgetClass) return;
+		
 
-	DisplayingDialogueArray = PassedDialogueArray;
+	// DataTable からの検索
+	FLinearDialogueRow* DialogueRow = 
+		DialogueDataTable->FindRow<FLinearDialogueRow>(
+			RowName, TEXT("ULinearDialogueComponent::StartDialogueSequenceById")
+		);
+
+	// Row が存在しない / 空の場合
+	if (!DialogueRow) return;
+	if (DialogueRow->DialogueLines.IsEmpty()) return;
+
+	// メンバ変数に登録して、これから処理すべきテキスト配列という対象として扱う
+	DisplayingDialogueArray = DialogueRow->DialogueLines;
 	CurrentDialogueIndex = 0;
 
-	// Widgetがまだ生成されていなければ生成する
+	// Widgetがまだ生成されていなければ生成 / 画面に出てなければ出す
 	if (!CurrentDialogueWidget)
 	{
 		CurrentDialogueWidget = CreateWidget<ULinearDialogueWidget>(GetWorld(), DialogueWidgetClass);
 	}
-
 	if (CurrentDialogueWidget && !CurrentDialogueWidget->IsInViewport())
 	{
 		CurrentDialogueWidget->AddToViewport();
 	}
+
+	// TODO: Widget を調整して、話し手の名前を出す
+	// DialogueRow から取り出してみよう
 
 	// 会話開始時、Player のクラス変数に自分を登録
 	// これで、会話を進めたい時は Player が ボタンを押す -> Component->AdvancedDialogue() が呼べる形になる
