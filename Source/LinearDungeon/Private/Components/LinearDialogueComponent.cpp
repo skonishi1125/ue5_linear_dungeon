@@ -8,11 +8,13 @@ ULinearDialogueComponent::ULinearDialogueComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void ULinearDialogueComponent::StartDialogueSequence(const TArray<FText>& InDialogues)
+// 会話処理の初期設定
+// 表示すべきテキスト情報の配列を受け取り、ダイアログ Widget 自体の生成なども行う
+void ULinearDialogueComponent::StartDialogueSequence(const TArray<FText>& PassedDialogueArray)
 {
-	if (InDialogues.IsEmpty() || !DialogueWidgetClass) return;
+	if (PassedDialogueArray.IsEmpty() || !DialogueWidgetClass) return;
 
-	DialogueQueue = InDialogues;
+	DisplayingDialogueArray = PassedDialogueArray;
 	CurrentDialogueIndex = 0;
 
 	// Widgetがまだ生成されていなければ生成する
@@ -26,10 +28,8 @@ void ULinearDialogueComponent::StartDialogueSequence(const TArray<FText>& InDial
 		CurrentDialogueWidget->AddToViewport();
 	}
 
-	ShowNextDialogue();
-
-	// 会話開始時、Player に対して自信を登録して、会話中状態にする
-	// movie シーンなどであっても同様。
+	// 会話開始時、Player のクラス変数に自分を登録
+	// これで、会話を進めたい時は Player が ボタンを押す -> Component->AdvancedDialogue() が呼べる形になる
 	ALinearPlayerCharacter* Player = Cast<ALinearPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	if (Player)
 	{
@@ -40,7 +40,25 @@ void ULinearDialogueComponent::StartDialogueSequence(const TArray<FText>& InDial
 		OnDialogueFinished.AddUniqueDynamic(Player, &ALinearPlayerCharacter::OnDialogueEnd);
 	}
 
+	// [0] つめの会話（最初の会話）を出す
+	ShowNextDialogue();
 }
+
+void ULinearDialogueComponent::ShowNextDialogue()
+{
+	// 全てのページを表示し終えた場合、処理終了
+	if (CurrentDialogueIndex >= DisplayingDialogueArray.Num())
+	{
+		EndDialogue();
+		return;
+	}
+
+	if (CurrentDialogueWidget)
+	{
+		CurrentDialogueWidget->StartDialogueText(DisplayingDialogueArray[CurrentDialogueIndex]);
+	}
+}
+
 
 void ULinearDialogueComponent::AdvanceDialogue()
 {
@@ -59,20 +77,6 @@ void ULinearDialogueComponent::AdvanceDialogue()
 	}
 }
 
-void ULinearDialogueComponent::ShowNextDialogue()
-{
-	// 全てのページを表示し終えた場合
-	if (CurrentDialogueIndex >= DialogueQueue.Num())
-	{
-		EndDialogue();
-		return;
-	}
-
-	if (CurrentDialogueWidget)
-	{
-		CurrentDialogueWidget->StartDialogueText(DialogueQueue[CurrentDialogueIndex]);
-	}
-}
 
 void ULinearDialogueComponent::EndDialogue()
 {
@@ -81,7 +85,7 @@ void ULinearDialogueComponent::EndDialogue()
 		CurrentDialogueWidget->RemoveFromParent();
 	}
 
-	DialogueQueue.Empty();
+	DisplayingDialogueArray.Empty();
 	CurrentDialogueIndex = 0;
 
 	// プレイヤーの参照解除

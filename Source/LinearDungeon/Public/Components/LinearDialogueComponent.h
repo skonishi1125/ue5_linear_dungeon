@@ -18,7 +18,7 @@ public:
 	ULinearDialogueComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
-	void StartDialogueSequence(const TArray<FText>& InDialogues);
+	void StartDialogueSequence(const TArray<FText>& PassedDialogueArray);
 
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
 	void AdvanceDialogue();
@@ -39,7 +39,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<ULinearDialogueWidget> CurrentDialogueWidget;
 
-	TArray<FText> DialogueQueue;
+	TArray<FText> DisplayingDialogueArray;
 	int32 CurrentDialogueIndex = 0;
 
 		

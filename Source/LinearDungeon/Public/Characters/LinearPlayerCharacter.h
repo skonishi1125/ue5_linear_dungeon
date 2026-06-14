@@ -250,7 +250,7 @@ private:
 	// 現在アクティブなダイアログ表示の情報
 	// Overlap されたものを Interact() する以外でも、ムービーシーン等でもダイアログは発生する
 	// そういったものも含めて、今処理すべきダイアログを格納したもの
-	UPROPERTY()
+	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<ULinearDialogueComponent> ActiveDialogueComponent;
 
 };
