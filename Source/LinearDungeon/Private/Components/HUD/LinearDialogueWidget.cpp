@@ -3,8 +3,7 @@
 #include "TimerManager.h"
 
 // Component から呼ぶ想定の、渡された会話を画面に出す処理
-// 
-void ULinearDialogueWidget::StartDialogueText(const FText& DisplayText)
+void ULinearDialogueWidget::StartDialogueText(const FText& DisplayText, const FText& DisplaySpeakerName)
 {
 	if (!MessageText) return;
 
@@ -21,6 +20,7 @@ void ULinearDialogueWidget::StartDialogueText(const FText& DisplayText)
 
 	// 空文字列をセットして、何も文字が表示されていない初期状態を作る
 	MessageText->SetText(FText::GetEmpty());
+	SpeakerName->SetText(DisplaySpeakerName);
 
 	// タイピング処理
 	if (UWorld* World = GetWorld())

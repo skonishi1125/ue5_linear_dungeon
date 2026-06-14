@@ -12,13 +12,16 @@ class LINEARDUNGEON_API ULinearDialogueWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void StartDialogueText(const FText& DisplayText);
+	void StartDialogueText(const FText& DisplayText, const FText& DisplaySpeakerName);
 	void SkipTyping(); // 1文字ずつ出てくる描写をスキップして、全文を出す
 	FORCEINLINE bool IsTyping() const { return bIsTyping; }
 
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> MessageText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> SpeakerName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	float TypewriterSpeed = 0.05f;

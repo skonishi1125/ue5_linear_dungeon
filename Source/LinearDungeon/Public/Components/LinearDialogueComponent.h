@@ -25,7 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
 	void AdvanceDialogue();
 
-	UPROPERTY(BlueprintAssignable, Category = "DIalogue")
+	UPROPERTY(BlueprintAssignable, Category = "Dialogue")
 	FOnDialogueFinishedSignature OnDialogueFinished;
 
 
@@ -46,6 +46,7 @@ private:
 	TObjectPtr<ULinearDialogueWidget> CurrentDialogueWidget;
 
 	TArray<FText> DisplayingDialogueArray;
+	FText DisplayingSpeakerName;
 	int32 CurrentDialogueIndex = 0;
 
 		

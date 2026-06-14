@@ -16,7 +16,6 @@ void ULinearDialogueComponent::StartDialogueSequenceById(FName RowName)
 	// DataTable の登録無し / RowName 未指定 / WidgetClass 未登録
 	if (!DialogueDataTable || RowName.IsNone() || !DialogueWidgetClass) return;
 		
-
 	// DataTable からの検索
 	FLinearDialogueRow* DialogueRow = 
 		DialogueDataTable->FindRow<FLinearDialogueRow>(
@@ -42,7 +41,8 @@ void ULinearDialogueComponent::StartDialogueSequenceById(FName RowName)
 	}
 
 	// TODO: Widget を調整して、話し手の名前を出す
-	// DialogueRow から取り出してみよう
+	// DialogueRow から取り出してみよう]
+	DisplayingSpeakerName = DialogueRow->SpeakerName;
 
 	// 会話開始時、Player のクラス変数に自分を登録
 	// これで、会話を進めたい時は Player が ボタンを押す -> Component->AdvancedDialogue() が呼べる形になる
@@ -71,7 +71,7 @@ void ULinearDialogueComponent::ShowNextDialogue()
 
 	if (CurrentDialogueWidget)
 	{
-		CurrentDialogueWidget->StartDialogueText(DisplayingDialogueArray[CurrentDialogueIndex]);
+		CurrentDialogueWidget->StartDialogueText(DisplayingDialogueArray[CurrentDialogueIndex], DisplayingSpeakerName);
 	}
 }
 
