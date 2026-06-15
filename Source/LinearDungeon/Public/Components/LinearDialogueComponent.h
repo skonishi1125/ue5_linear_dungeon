@@ -7,7 +7,8 @@
 class UDataTable;
 class ULinearDialogueWidget;
 
-// セリフが完全に終了したことを通知するDelegate
+// 会話開始 / 終了通知 のDelegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDialogueStartedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDialogueFinishedSignature);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -24,6 +25,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
 	void AdvanceDialogue();
+
+	// 会話開始 / 終了 通知
+	UPROPERTY(BlueprintAssignable, Category = "Dialogue")
+	FOnDialogueStartedSignature OnDialogueStarted;
 
 	UPROPERTY(BlueprintAssignable, Category = "Dialogue")
 	FOnDialogueFinishedSignature OnDialogueFinished;

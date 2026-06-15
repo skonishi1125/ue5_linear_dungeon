@@ -3,6 +3,7 @@
 #include "Characters/LinearPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "DataTables/LinearDialogueRow.h"
+#include "Subsystems/DialogueEventSubsystem.h"
 
 ULinearDialogueComponent::ULinearDialogueComponent()
 {
@@ -58,6 +59,18 @@ void ULinearDialogueComponent::StartDialogueSequenceById(FName RowName)
 
 	// [0] つめの会話（最初の会話）を出す
 	ShowNextDialogue();
+
+	// 
+	OnDialogueStarted.Broadcast();
+
+	// Subsystem 経由でもイベントを発行する
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld()))
+	{
+		if (UDialogueEventSubsystem* Subsystem = GameInstance->GetSubsystem<UDialogueEventSubsystem>())
+		{
+			Subsystem->OnDialogueStarted.Broadcast();
+		}
+	}
 }
 
 void ULinearDialogueComponent::ShowNextDialogue()
@@ -113,4 +126,14 @@ void ULinearDialogueComponent::EndDialogue()
 
 	// 外部（Level Blueprint や Sequencer 等）に終了を通知
 	OnDialogueFinished.Broadcast();
+
+	// Subsystem 経由でもイベントを発行する
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld()))
+	{
+		if (UDialogueEventSubsystem* Subsystem = GameInstance->GetSubsystem<UDialogueEventSubsystem>())
+		{
+			Subsystem->OnDialogueFinished.Broadcast();
+		}
+	}
+
 }
