@@ -26,10 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dialogue")
 	void AdvanceDialogue();
 
-	// 会話開始 / 終了 通知
-	UPROPERTY(BlueprintAssignable, Category = "Dialogue")
-	FOnDialogueStartedSignature OnDialogueStarted;
-
+	// Component 自体が持つ会話開始 / 終了の通知
+	// LPCharacter 側の State を戻すなどの役割がある
+	// TODO: Subsystem 側の通知と統合したほうがいいかも？
 	UPROPERTY(BlueprintAssignable, Category = "Dialogue")
 	FOnDialogueFinishedSignature OnDialogueFinished;
 

@@ -60,10 +60,7 @@ void ULinearDialogueComponent::StartDialogueSequenceById(FName RowName)
 	// [0] つめの会話（最初の会話）を出す
 	ShowNextDialogue();
 
-	// 
-	OnDialogueStarted.Broadcast();
-
-	// Subsystem 経由でもイベントを発行する
+	// Subsystem 経由で 開始イベントを発行
 	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld()))
 	{
 		if (UDialogueEventSubsystem* Subsystem = GameInstance->GetSubsystem<UDialogueEventSubsystem>())
@@ -124,10 +121,12 @@ void ULinearDialogueComponent::EndDialogue()
 		Player->SetActiveDialogueComponent(nullptr);
 	}
 
-	// 外部（Level Blueprint や Sequencer 等）に終了を通知
+	// 終了を通知
+	// LPCharacter 側の State を変更するなど(AddDynamic で登録中)。
 	OnDialogueFinished.Broadcast();
 
-	// Subsystem 経由でもイベントを発行する
+	// Subsystem 経由でもイベントを通知
+	// Sequencer の 再生再開処理など。
 	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld()))
 	{
 		if (UDialogueEventSubsystem* Subsystem = GameInstance->GetSubsystem<UDialogueEventSubsystem>())
