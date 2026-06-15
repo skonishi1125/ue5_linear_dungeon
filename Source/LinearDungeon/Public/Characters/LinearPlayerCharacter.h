@@ -54,6 +54,7 @@ public:
 	FORCEINLINE EActionState GetCharacterActionState() const { return ActionState; }
 	FORCEINLINE void SetCharacterActionState(EActionState NewActionState) { ActionState = NewActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
+	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; }
 
 	// インタラクト DialogueComponent 関連
 	// ↑の ItemBase と同じ処理だが、 BP に慣れるためにActor を格納処理は BP で 作ってみる
@@ -90,6 +91,12 @@ public:
 
 	// 死亡処理のデリゲート
 	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
+
+	// ===== Debug =====
+	UFUNCTION(Exec)
+	void DebugSaveGame();
+	UFUNCTION(Exec)
+	void DebugLoadGame();
 
 protected:
 	virtual void BeginPlay() override;

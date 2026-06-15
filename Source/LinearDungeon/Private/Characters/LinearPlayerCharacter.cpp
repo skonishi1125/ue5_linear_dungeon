@@ -30,6 +30,9 @@
 #include "Components/HUD/LinearDungeonHUD.h"
 #include "Components/HUD/LinearDungeonOverlay.h"
 
+// Save 機能
+#include "Subsystems/LinearSaveSubsystem.h"
+
 const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
@@ -730,5 +733,29 @@ void ALinearPlayerCharacter::AdvanceDialogue()
 	if (ActiveDialogueComponent)
 	{
 		ActiveDialogueComponent->AdvanceDialogue();
+	}
+}
+
+
+// ===== Debug =====
+void ALinearPlayerCharacter::DebugSaveGame()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+		{
+			SaveSubsystem->SaveGame(this, 0);
+		}
+	}
+}
+
+void ALinearPlayerCharacter::DebugLoadGame()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+		{
+			SaveSubsystem->LoadGame(this, 0);
+		}
 	}
 }

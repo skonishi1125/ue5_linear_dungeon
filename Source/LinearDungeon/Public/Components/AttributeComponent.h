@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "AttributeComponent.generated.h"
 
+// Health, Poise ‚ª•Ï‚í‚Á‚½‚±‚Æ‚ð’Ê’m‚·‚é Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthPercentChangedDelegate, float, NewPercent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPoisePercentChangedDelegate, float, NewPercent);
 
@@ -17,6 +18,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Health ŠÖ˜A
+	FORCEINLINE float GetCurrentHealth() { return CurrentHealth; }
+	FORCEINLINE void SetCurrentHealth(float SavedHealth) { CurrentHealth = SavedHealth; }
 	void ReceiveHealthDamage(float Damage);
 	float GetHealthPercent() const;
 	bool IsAlive() const;
