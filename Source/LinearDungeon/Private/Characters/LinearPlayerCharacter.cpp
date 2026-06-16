@@ -32,6 +32,7 @@
 
 // Save 機能
 #include "Subsystems/LinearSaveSubsystem.h"
+#include "Controllers/LinearPlayerController.h"
 
 const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
 
@@ -235,32 +236,6 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		{
 			EnhancedInputComponent->BindAction(AdvanceDialogueAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::AdvanceDialogue);
 		}
-
-		if (OpenMenuAction)
-		{
-			EnhancedInputComponent->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::OpenMenu);
-		}
-
-		if (MenuUpAction)
-		{
-			EnhancedInputComponent->BindAction(MenuUpAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::MenuUp);
-		}
-
-		if (MenuDownAction)
-		{
-			EnhancedInputComponent->BindAction(MenuDownAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::MenuDown);
-		}
-
-		if (MenuConfirmAction)
-		{
-			EnhancedInputComponent->BindAction(MenuConfirmAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::MenuConfirm);
-		}
-
-		if (MenuCancelAction)
-		{
-			EnhancedInputComponent->BindAction(MenuCancelAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::MenuCancel);
-		}
-
 	}
 }
 
@@ -759,44 +734,6 @@ void ALinearPlayerCharacter::AdvanceDialogue()
 	{
 		ActiveDialogueComponent->AdvanceDialogue();
 	}
-}
-
-void ALinearPlayerCharacter::OpenMenu()
-{
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OpenMenu()");
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			// 優先度 1 で登録して、DefaultMappingContext の 0 より 優先度を上げておく
-			Subsystem->AddMappingContext(MenuMappingContext, 1);
-			Subsystem->RemoveMappingContext(DefaultMappingContext);
-
-		}
-	}
-}
-
-void ALinearPlayerCharacter::MenuUp()
-{
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::MenuUp()");
-}
-
-void ALinearPlayerCharacter::MenuDown()
-{
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::MenuDown()");
-
-}
-
-void ALinearPlayerCharacter::MenuConfirm()
-{
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::MenuConfirm()");
-
-}
-
-void ALinearPlayerCharacter::MenuCancel()
-{
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::MenuCancel()");
-
 }
 
 
