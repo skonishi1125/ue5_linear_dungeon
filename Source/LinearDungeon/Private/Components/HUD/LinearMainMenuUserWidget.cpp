@@ -24,6 +24,17 @@ bool ULinearMainMenuUserWidget::Initialize()
 	return true;
 }
 
+void ULinearMainMenuUserWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (SaveButton)
+	{
+		SaveButton->SetKeyboardFocus(); // ‰Šú‚Å‘I‚Î‚ê‚Ä‚¢‚éƒ{ƒ^ƒ“‚Ìİ’è
+		UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::NativeConstruct()");
+	}
+}
+
 void ULinearMainMenuUserWidget::OnSaveButtonClicked()
 {
 	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSaveButtonClicked()");

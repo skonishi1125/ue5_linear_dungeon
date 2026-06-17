@@ -8,6 +8,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
 
+// UI Navigation のキー操作調整用
+#include "Framework/Application/NavigationConfig.h"
+#include "Framework/Application/SlateApplication.h"
+
 void ALinearPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,6 +24,20 @@ void ALinearPlayerController::BeginPlay()
 	{
 		SaveLoadMenuWidgetInstance = CreateWidget<USaveLoadMenuWidget>(this, SaveLoadMenuWidgetClass);
 	}
+
+	// UMGナビゲーションキーのカスタマイズ
+	if (FSlateApplication::IsInitialized())
+	{
+		TSharedRef<FNavigationConfig> NavConfig = FSlateApplication::Get().GetNavigationConfig();
+		NavConfig->bKeyNavigation = true;
+
+		// 既存の設定にW/S/A/Dのルールを追加する
+		NavConfig->KeyEventRules.Emplace(EKeys::W, EUINavigation::Up);
+		NavConfig->KeyEventRules.Emplace(EKeys::S, EUINavigation::Down);
+		NavConfig->KeyEventRules.Emplace(EKeys::A, EUINavigation::Left);
+		NavConfig->KeyEventRules.Emplace(EKeys::D, EUINavigation::Right);
+	}
+
 }
 
 void ALinearPlayerController::SetupInputComponent()
@@ -48,8 +66,12 @@ void ALinearPlayerController::ToggleMenu()
 		MainMenuWidgetInstance->AddToViewport();
 
 		// 入力モードを UI 対応に変更し、カーソルを表示
-		FInputModeGameAndUI InputMode;
-		InputMode.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
+		// TODO: 読み解く。
+		//FInputModeGameAndUI InputMode;
+		//InputMode.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
+		//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		//SetInputMode(InputMode);
+		FInputModeUIOnly InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		SetInputMode(InputMode);
 
