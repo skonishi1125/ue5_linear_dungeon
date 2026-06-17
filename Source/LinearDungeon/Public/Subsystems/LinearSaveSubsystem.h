@@ -14,10 +14,10 @@ class LINEARDUNGEON_API ULinearSaveSubsystem : public UGameInstanceSubsystem
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "SaveSystem")
-	void SaveGame(ALinearPlayerCharacter* PlayerCharacter, int32 SlotIndex);
+	void SaveGame(int32 SlotIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "SaveSystem")
-	void LoadGame(ALinearPlayerCharacter* PlayerCharacter, int32 SlotIndex);
+	void LoadGame(int32 SlotIndex);
 	
 private:
 	// å≈íËÇÃÉXÉçÉbÉgñº

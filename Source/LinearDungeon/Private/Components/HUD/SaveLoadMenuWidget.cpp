@@ -118,7 +118,7 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
 		UE_LOGFMT(LogTemp, Warning, "Executing SAVE to Slot: {0}", SlotIndex);
-		SaveSubsystem->SaveGame(PlayerCharacter, SlotIndex);
+		SaveSubsystem->SaveGame(SlotIndex);
 		
 		// タイムスタンプなど、セーブ後の設定に更新
 		RefreshSlotDisplay();
@@ -126,7 +126,7 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		UE_LOGFMT(LogTemp, Warning, "Executing LOAD from Slot: {0}", SlotIndex);
-		SaveSubsystem->LoadGame(PlayerCharacter, SlotIndex);
+		SaveSubsystem->LoadGame(SlotIndex);
 		
 		// ロードを実行時、メニューを閉じるようにする処理を親に飛ばすなどする
 		OnLoadButtonPressedDelegate.Broadcast();

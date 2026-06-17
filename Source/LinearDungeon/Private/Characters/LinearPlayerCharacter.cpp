@@ -33,6 +33,7 @@
 // Save 機能
 #include "Subsystems/LinearSaveSubsystem.h"
 #include "Controllers/LinearPlayerController.h"
+#include "SaveGames/LinearSaveGame.h"
 
 const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
 
@@ -658,6 +659,35 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	}
 }
 
+void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
+{
+	if (!SaveGameObj) return;
+
+	// 自身のデータをSaveGameObj に格納する
+	// (Player の情報は、Player が書き込むというような責務を持たせる）
+	SaveGameObj->PlayerTransform = GetActorTransform();
+	if (Attributes)
+	{
+		SaveGameObj->PlayerHealth = Attributes->GetCurrentHealth();
+	}
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnSaveGame() Data extracted successfully.");
+}
+
+void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
+{
+	if (!SaveGameObj) return;
+
+	// SaveGameObj の情報を自身に反映
+	// (Player に関する情報は自分が取り出して、自分で設定）
+	SetActorTransform(SaveGameObj->PlayerTransform);
+	if (Attributes)
+	{
+		Attributes->SetCurrentHealth(SaveGameObj->PlayerHealth);
+	}
+
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnLoadGame() Data applied successfully.");
+}
+
 void ALinearPlayerCharacter::PlayHitReactionMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -738,24 +768,24 @@ void ALinearPlayerCharacter::AdvanceDialogue()
 
 
 // ===== Debug =====
-void ALinearPlayerCharacter::DebugSaveGame()
-{
-	if (UGameInstance* GI = GetGameInstance())
-	{
-		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
-		{
-			SaveSubsystem->SaveGame(this, 0);
-		}
-	}
-}
-
-void ALinearPlayerCharacter::DebugLoadGame()
-{
-	if (UGameInstance* GI = GetGameInstance())
-	{
-		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
-		{
-			SaveSubsystem->LoadGame(this, 0);
-		}
-	}
-}
+//void ALinearPlayerCharacter::DebugSaveGame()
+//{
+//	if (UGameInstance* GI = GetGameInstance())
+//	{
+//		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+//		{
+//			SaveSubsystem->SaveGame(this, 0);
+//		}
+//	}
+//}
+//
+//void ALinearPlayerCharacter::DebugLoadGame()
+//{
+//	if (UGameInstance* GI = GetGameInstance())
+//	{
+//		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+//		{
+//			SaveSubsystem->LoadGame(this, 0);
+//		}
+//	}
+//}

@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "Characters/CharacterTypes.h"
 #include "Interfaces/HitInterface.h"
+#include "Interfaces/SaveInterface.h"
 
 #include "LinearPlayerCharacter.generated.h"
 
@@ -43,7 +44,7 @@ class UPlayerTargetingComponent;
 class ULinearDialogueComponent;
 
 UCLASS()
-class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface
+class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface, public ISaveInterface
 {
 	GENERATED_BODY()
 public:
@@ -55,6 +56,15 @@ public:
 	FORCEINLINE void SetCharacterActionState(EActionState NewActionState) { ActionState = NewActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; }
+
+	// ===== Interface Override ===== 
+	virtual void GetHit_Implementation(
+		const FVector& ImpactPoint, const float FinalPoiseDamage
+	) override;
+	virtual void OnSaveGame(ULinearSaveGame* SaveGameObj) override;
+	virtual void OnLoadGame(ULinearSaveGame* SaveGameObj) override;
+
+
 
 	// インタラクト DialogueComponent 関連
 	// ↑の ItemBase と同じ処理だが、 BP に慣れるためにActor を格納処理は BP で 作ってみる
@@ -74,9 +84,7 @@ public:
 		float DamageAmount, struct FDamageEvent const& DamageEvent,
 		class AController* EventInstigator, AActor* DamageCauser
 	) override;
-	virtual void GetHit_Implementation(
-		const FVector& ImpactPoint, const float FinalPoiseDamage
-	) override;
+
 
 	// AM_Attack Notify から呼び出す関数
 	// 武器の判定有効 - 無効化
@@ -92,11 +100,12 @@ public:
 	// 死亡処理のデリゲート
 	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
 
+
 	// ===== Debug =====
-	UFUNCTION(Exec)
-	void DebugSaveGame();
-	UFUNCTION(Exec)
-	void DebugLoadGame();
+	//UFUNCTION(Exec)
+	//void DebugSaveGame();
+	//UFUNCTION(Exec)
+	//void DebugLoadGame();
 
 protected:
 	virtual void BeginPlay() override;
