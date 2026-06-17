@@ -10,6 +10,7 @@ class UMenuContainerWidget;
 // Enhanced Input
 class UInputMappingContext;
 class UInputAction;
+class UEnhancedInputLocalPlayerSubsystem;
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerController : public APlayerController
@@ -40,6 +41,9 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UMenuContainerWidget> MenuContainerWidgetInstance;
+
+	UFUNCTION()
+	void CloseMenu();
 
 	bool bIsMenuOpen = false;
 

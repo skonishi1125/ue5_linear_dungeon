@@ -16,5 +16,9 @@ public:
     // プレイヤーの体力
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     float PlayerHealth;
+
+    // セーブ日時
+    UPROPERTY(VisibleAnywhere, Category = "SaveData")
+    FDateTime SaveDate;
 	
 };

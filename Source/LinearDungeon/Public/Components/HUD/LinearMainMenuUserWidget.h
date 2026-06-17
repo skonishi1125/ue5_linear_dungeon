@@ -15,6 +15,8 @@ class LINEARDUNGEON_API ULinearMainMenuUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	void FocusFirstButton();
+
 	// 親が購読する、各ボタン押下時のデリゲート
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSaveMenuRequestedDelegate OnSaveMenuRequestedDelegate;

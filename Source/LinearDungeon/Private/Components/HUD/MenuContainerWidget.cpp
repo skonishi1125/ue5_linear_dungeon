@@ -21,10 +21,9 @@ void UMenuContainerWidget::ResetToMainMenu()
 {
 	if (MenuSwitcher && WBP_LinearMainMenu)
 	{
-		// WidgetSwitcherのインデックスをMainMenu（通常は0番目）に切り替える
-		MenuSwitcher->SetActiveWidget(WBP_LinearMainMenu);
-		// メインメニューの初期フォーカスを再設定
-		WBP_LinearMainMenu->SetKeyboardFocus();
+		
+		MenuSwitcher->SetActiveWidget(WBP_LinearMainMenu); // WidgetSwitcher の Index を 0(MainMenu) に切り替えておく
+		WBP_LinearMainMenu->FocusFirstButton(); // メインメニューの初期キーフォーカス先ボタンを再度設定
 	}
 }
 
@@ -32,10 +31,8 @@ void UMenuContainerWidget::HandleSaveMenuRequested()
 {
 	if (MenuSwitcher && WBP_SaveLoadMenu)
 	{
-		// WidgetSwitcherの表示をSaveLoadMenuに切り替える
+		// WidgetSwitcherの表示をSaveLoadMenuに切り替え、セーブモードとして軌道
 		MenuSwitcher->SetActiveWidget(WBP_SaveLoadMenu);
-
-		// Saveモードとしてアクティベート
 		WBP_SaveLoadMenu->ActivateMenu(ESaveLoadMode::ESL_Save);
 	}
 }
@@ -44,10 +41,7 @@ void UMenuContainerWidget::HandleLoadMenuRequested()
 {
 	if (MenuSwitcher && WBP_SaveLoadMenu)
 	{
-		// WidgetSwitcherの表示をSaveLoadMenuに切り替える
 		MenuSwitcher->SetActiveWidget(WBP_SaveLoadMenu);
-
-		// Loadモードとしてアクティベート
 		WBP_SaveLoadMenu->ActivateMenu(ESaveLoadMode::ESL_Load);
 	}
 }

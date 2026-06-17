@@ -8,6 +8,7 @@
 
 // Widget 
 #include "Components/HUD/MenuContainerWidget.h"
+#include "Components/HUD/SaveLoadMenuWidget.h"
 
 // UI Navigation のキー操作調整用
 #include "Framework/Application/NavigationConfig.h"
@@ -20,6 +21,12 @@ void ALinearPlayerController::BeginPlay()
 	if (MenuContainerWidgetClass)
 	{
 		MenuContainerWidgetInstance = CreateWidget<UMenuContainerWidget>(this, MenuContainerWidgetClass);
+	}
+
+	// LoadMenu のロードが済んだときに通知されるデリゲートに登録。
+	if (MenuContainerWidgetInstance->GetWBPSaveLoadMenu())
+	{
+		MenuContainerWidgetInstance->GetWBPSaveLoadMenu()->OnLoadButtonPressedDelegate.AddDynamic(this, &ALinearPlayerController::CloseMenu);
 	}
 
 	// UMGナビゲーションキーのカスタマイズ
@@ -53,12 +60,16 @@ void ALinearPlayerController::ToggleMenu()
 	if (!MenuContainerWidgetInstance) return;
 
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::ToggleMenu()");
-	bIsMenuOpen = !bIsMenuOpen;
-	// サブシステムの取得
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 
 	if (bIsMenuOpen)
 	{
+		CloseMenu();
+	}
+	else
+	{
+		// OpenMenu() としてしまってもよいが。
+
+		bIsMenuOpen = true;
 		// メニューを開く処理
 		MenuContainerWidgetInstance->AddToViewport();
 
@@ -69,6 +80,8 @@ void ALinearPlayerController::ToggleMenu()
 
 		bShowMouseCursor = true;
 
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+
 		// メニュー用操作に切り替え
 		if (Subsystem && DefaultMappingContext && MenuMappingContext)
 		{
@@ -76,30 +89,34 @@ void ALinearPlayerController::ToggleMenu()
 			Subsystem->AddMappingContext(MenuMappingContext, 1);
 		}
 
-		// アクションゲームであればポーズをかける
+		// ポーズ処理 なくてもいいかも。
 		UGameplayStatics::SetGamePaused(this, true);
 	}
-	else
+}
+
+void ALinearPlayerController::CloseMenu()
+{
+	bIsMenuOpen = false;
+
+	// メニューを閉じる処理
+	MenuContainerWidgetInstance->RemoveFromParent();
+	MenuContainerWidgetInstance->ResetToMainMenu(); // メニュー初期状態化
+
+	// 入力モードをゲームプレイのみに戻し、カーソルを非表示
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	bShowMouseCursor = false;
+
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+
+	// 通常操作に切り替え
+	if (Subsystem && DefaultMappingContext && MenuMappingContext)
 	{
-		// メニューを閉じる処理
-		MenuContainerWidgetInstance->RemoveFromParent();
-		MenuContainerWidgetInstance->ResetToMainMenu(); // 次にメニューを開いたとき、初期状態になるようにする
-
-		// 入力モードをゲームプレイのみに戻し、カーソルを非表示
-		FInputModeGameOnly InputMode;
-		SetInputMode(InputMode);
-		bShowMouseCursor = false;
-
-		// 通常操作に切り替え
-		if (Subsystem && DefaultMappingContext && MenuMappingContext)
-		{
-			Subsystem->RemoveMappingContext(MenuMappingContext);
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-
-		}
-
-		UGameplayStatics::SetGamePaused(this, false);
+		Subsystem->RemoveMappingContext(MenuMappingContext);
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 
 	}
 
+	// ポーズ解除処理
+	UGameplayStatics::SetGamePaused(this, false);
 }

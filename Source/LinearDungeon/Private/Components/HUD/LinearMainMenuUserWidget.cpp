@@ -24,15 +24,19 @@ bool ULinearMainMenuUserWidget::Initialize()
 	return true;
 }
 
+void ULinearMainMenuUserWidget::FocusFirstButton()
+{
+	if (SaveButton)
+	{
+		SaveButton->SetKeyboardFocus(); // 初期で選ばれているボタンの設定
+	}
+}
+
 void ULinearMainMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (SaveButton)
-	{
-		SaveButton->SetKeyboardFocus(); // 初期で選ばれているボタンの設定
-		UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::NativeConstruct()");
-	}
+	FocusFirstButton();
 }
 
 void ULinearMainMenuUserWidget::OnSaveButtonClicked()

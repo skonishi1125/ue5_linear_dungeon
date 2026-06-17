@@ -17,6 +17,7 @@ void ULinearSaveSubsystem::SaveGame(ALinearPlayerCharacter* PlayerCharacter, int
         // ゲーム内からデータを抽出し、セーブオブジェクトに格納
         SaveGameObj->PlayerTransform = PlayerCharacter->GetActorTransform();
         SaveGameObj->PlayerHealth = PlayerCharacter->GetAttributeComponent()->GetCurrentHealth();
+        SaveGameObj->SaveDate = FDateTime::Now();
 
         // ディスクへの書き込み実行 
         // TODO: AsyncSaveGameToSlot を使うと、セーブ時のかくつきがなくなる

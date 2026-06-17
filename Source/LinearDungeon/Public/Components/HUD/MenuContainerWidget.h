@@ -17,6 +17,9 @@ public:
 	// メニューを閉じた後再度開くとき、再び MainMenu に切り替えておく関数
 	void ResetToMainMenu();
 
+	// PlayerController などに、WBP_SaveLoadMenu のデリゲートを読ませるためのもの
+	FORCEINLINE USaveLoadMenuWidget* GetWBPSaveLoadMenu() { return WBP_SaveLoadMenu; }
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -36,5 +39,5 @@ private:
 
 	UFUNCTION()
 	void HandleLoadMenuRequested();
-	
+
 };
