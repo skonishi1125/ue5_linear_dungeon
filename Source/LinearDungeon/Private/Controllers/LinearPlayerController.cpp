@@ -1,12 +1,13 @@
 #include "Controllers/LinearPlayerController.h"
 #include "Logging/StructuredLog.h"
 
-
-#include "Components/HUD/LinearMainMenuUserWidget.h"
-#include "Components/HUD/SaveLoadMenuWidget.h"
+// Enhanced Input
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
+
+// Widget 
+#include "Components/HUD/MenuContainerWidget.h"
 
 // UI Navigation のキー操作調整用
 #include "Framework/Application/NavigationConfig.h"
@@ -16,13 +17,9 @@ void ALinearPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (MainMenuWidgetClass)
+	if (MenuContainerWidgetClass)
 	{
-		MainMenuWidgetInstance = CreateWidget<ULinearMainMenuUserWidget>(this, MainMenuWidgetClass);
-	}
-	if (SaveLoadMenuWidgetClass)
-	{
-		SaveLoadMenuWidgetInstance = CreateWidget<USaveLoadMenuWidget>(this, SaveLoadMenuWidgetClass);
+		MenuContainerWidgetInstance = CreateWidget<UMenuContainerWidget>(this, MenuContainerWidgetClass);
 	}
 
 	// UMGナビゲーションキーのカスタマイズ
@@ -53,7 +50,7 @@ void ALinearPlayerController::SetupInputComponent()
 
 void ALinearPlayerController::ToggleMenu()
 {
-	if (!MainMenuWidgetInstance) return;
+	if (!MenuContainerWidgetInstance) return;
 
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::ToggleMenu()");
 	bIsMenuOpen = !bIsMenuOpen;
@@ -63,17 +60,12 @@ void ALinearPlayerController::ToggleMenu()
 	if (bIsMenuOpen)
 	{
 		// メニューを開く処理
-		MainMenuWidgetInstance->AddToViewport();
+		MenuContainerWidgetInstance->AddToViewport();
 
-		// 入力モードを UI 対応に変更し、カーソルを表示
-		// TODO: 読み解く。
-		//FInputModeGameAndUI InputMode;
-		//InputMode.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget());
-		//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		//SetInputMode(InputMode);
-		FInputModeUIOnly InputMode;
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		SetInputMode(InputMode);
+		// メニューの操作を キー入力で受け付ける
+		FInputModeGameAndUI InputMode; // FInputModeUIOnly とすると、メニューを閉じれないので GameAndUI
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // マウスカーソルがゲームウィンドウ外に出られるようにする
+		SetInputMode(InputMode); // PlayerController に設定適用
 
 		bShowMouseCursor = true;
 
@@ -82,17 +74,16 @@ void ALinearPlayerController::ToggleMenu()
 		{
 			Subsystem->RemoveMappingContext(DefaultMappingContext);
 			Subsystem->AddMappingContext(MenuMappingContext, 1);
-			UE_LOGFMT(LogTemp, Warning, "ToggleMenu(): Setting Context");
 		}
 
 		// アクションゲームであればポーズをかける
 		UGameplayStatics::SetGamePaused(this, true);
-		UE_LOGFMT(LogTemp, Warning, "ToggleMenu(): Open!");
 	}
 	else
 	{
 		// メニューを閉じる処理
-		MainMenuWidgetInstance->RemoveFromParent();
+		MenuContainerWidgetInstance->RemoveFromParent();
+		MenuContainerWidgetInstance->ResetToMainMenu(); // 次にメニューを開いたとき、初期状態になるようにする
 
 		// 入力モードをゲームプレイのみに戻し、カーソルを非表示
 		FInputModeGameOnly InputMode;
@@ -104,12 +95,10 @@ void ALinearPlayerController::ToggleMenu()
 		{
 			Subsystem->RemoveMappingContext(MenuMappingContext);
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			UE_LOGFMT(LogTemp, Warning, "ToggleMenu(): Removing Context");
 
 		}
 
 		UGameplayStatics::SetGamePaused(this, false);
-		UE_LOGFMT(LogTemp, Warning, "ToggleMenu(): Close!");
 
 	}
 

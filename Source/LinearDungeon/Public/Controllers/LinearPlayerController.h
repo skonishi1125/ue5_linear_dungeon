@@ -5,8 +5,7 @@
 #include "LinearPlayerController.generated.h"
 
 // Controller Ç™ä«óùÇ∑ÇÈ Widget
-class ULinearMainMenuUserWidget;
-class USaveLoadMenuWidget;
+class UMenuContainerWidget;
 
 // Enhanced Input
 class UInputMappingContext;
@@ -25,9 +24,7 @@ protected:
 
 	// ===== Widget =====
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ULinearMainMenuUserWidget> MainMenuWidgetClass;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<USaveLoadMenuWidget> SaveLoadMenuWidgetClass;
+	TSubclassOf<UMenuContainerWidget> MenuContainerWidgetClass;
 
 	// ===== Enhanced Input ä÷òA =====
 	virtual void SetupInputComponent() override;
@@ -42,9 +39,7 @@ protected:
 
 private:
 	UPROPERTY()
-	TObjectPtr<ULinearMainMenuUserWidget> MainMenuWidgetInstance;
-	UPROPERTY()
-	TObjectPtr<USaveLoadMenuWidget> SaveLoadMenuWidgetInstance;
+	TObjectPtr<UMenuContainerWidget> MenuContainerWidgetInstance;
 
 	bool bIsMenuOpen = false;
 

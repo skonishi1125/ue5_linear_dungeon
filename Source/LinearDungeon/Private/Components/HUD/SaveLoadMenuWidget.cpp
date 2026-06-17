@@ -5,12 +5,30 @@
 #include "Characters/LinearPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 
-void USaveLoadMenuWidget::SetMenuMode(ESaveLoadMode InMode)
+void USaveLoadMenuWidget::ActivateMenu(ESaveLoadMode InMode)
 {
+	// Save / Load どちらのモードか、呼ばれた時に指定する
 	CurrentMode = InMode;
 
-	// UI のテキストを LOAD GAME / とか、SAVE GAME とかに設定するのはここで決める
+	if (InfoText)
+	{
+		if (CurrentMode == ESaveLoadMode::ESL_Save)
+		{
+			InfoText->SetText(FText::FromString("SELECT SAVE SLOTS"));
+		}
+		else
+		{
+			InfoText->SetText(FText::FromString("SELECT LOAD SLOTS"));
+		}
+	}
+
+	// スロットボタンへ UI Focus を移す
+	if (SlotButton_0)
+	{
+		SlotButton_0->SetKeyboardFocus();
+	}
 }
 
 bool USaveLoadMenuWidget::Initialize()

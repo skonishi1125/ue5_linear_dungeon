@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SaveLoadMenuWidget.generated.h"
 
+class UTextBlock;
 class UButton;
 
 UENUM(BlueprintType)
@@ -18,8 +19,8 @@ class LINEARDUNGEON_API USaveLoadMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	// 外部からモードを指定して、この Widget を開くための関数
-	void SetMenuMode(ESaveLoadMode InMode);
+	// 画面切り替え時、親から呼ばれる関数
+	void ActivateMenu(ESaveLoadMode InMode);
 
 protected:
 	virtual bool Initialize() override;
@@ -28,6 +29,8 @@ private:
 	// 現在のモードを保持する変数
 	ESaveLoadMode CurrentMode = ESaveLoadMode::ESL_Save;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> InfoText;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SlotButton_0;
 	UPROPERTY(meta = (BindWidget))

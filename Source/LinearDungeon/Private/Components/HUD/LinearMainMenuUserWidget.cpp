@@ -38,9 +38,11 @@ void ULinearMainMenuUserWidget::NativeConstruct()
 void ULinearMainMenuUserWidget::OnSaveButtonClicked()
 {
 	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSaveButtonClicked()");
+	OnSaveMenuRequestedDelegate.Broadcast();
 }
 
 void ULinearMainMenuUserWidget::OnLoadButtonClicked()
 {
 	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnLoadButtonClicked()");
+	OnLoadMenuRequestedDelegate.Broadcast();
 }
