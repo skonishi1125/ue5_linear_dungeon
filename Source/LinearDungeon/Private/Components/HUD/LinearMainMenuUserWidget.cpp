@@ -13,12 +13,12 @@ bool ULinearMainMenuUserWidget::Initialize()
 	// C++ ŠÖ”‚ðAƒ{ƒ^ƒ“‚ÌOnClicked ‚É“o˜^
 	if (SaveButton)
 	{
-		SaveButton->OnClicked.AddDynamic(this, &ULinearMainMenuUserWidget::OnSaveButtonClicked);
+		SaveButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnSaveButtonClicked);
 	}
 
 	if (LoadButton)
 	{
-		LoadButton->OnClicked.AddDynamic(this, &ULinearMainMenuUserWidget::OnLoadButtonClicked);
+		LoadButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnLoadButtonClicked);
 	}
 
 	return true;

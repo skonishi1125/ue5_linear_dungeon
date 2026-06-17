@@ -11,8 +11,8 @@ void UMenuContainerWidget::NativeConstruct()
 
 	if (WBP_LinearMainMenu)
 	{
-		WBP_LinearMainMenu->OnSaveMenuRequestedDelegate.AddDynamic(this, &UMenuContainerWidget::HandleSaveMenuRequested);
-		WBP_LinearMainMenu->OnLoadMenuRequestedDelegate.AddDynamic(this, &UMenuContainerWidget::HandleLoadMenuRequested);
+		WBP_LinearMainMenu->OnSaveMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleSaveMenuRequested);
+		WBP_LinearMainMenu->OnLoadMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleLoadMenuRequested);
 	}
 
 }
