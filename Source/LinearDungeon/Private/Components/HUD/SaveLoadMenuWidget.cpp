@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/CircularThrobber.h"
 
 bool USaveLoadMenuWidget::Initialize()
 {
@@ -56,8 +57,31 @@ void USaveLoadMenuWidget::NativeConstruct()
 	SlotTimeStamps.Add(SlotTimeStamp_0);
 	SlotTimeStamps.Add(SlotTimeStamp_1);
 
+	Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
+	Text_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
+	Circular_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
+
 	// 画面が出る度、最新状態にする
 	RefreshSlotDisplay();
+}
+
+void USaveLoadMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	// Pause 中は TimerHandle のような、待ってから関数を実行する処理が使えない
+	// なので、NativeTick を使って 1 秒間の経過を観察して、関数を実行。関連する情報もリセット。
+	if (bIsProcessingWait)
+	{
+		ProcessingWaitTime += InDeltaTime;
+
+		if (ProcessingWaitTime >= 1.0f)
+		{
+			bIsProcessingWait = false;
+			ProcessingWaitTime = 0.0f;
+			FinishProcessingUI();
+		}
+	}
 
 }
 
@@ -125,32 +149,104 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	UGameInstance* GI = GetGameInstance();
 	if (!GI) return;
 
+	// 実行時点で、セーブ用の Widget を出す為の処理を行う
+	if (Overlay_Processing)
+	{
+		Overlay_Processing->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (Text_ProcessingInfo)
+	{
+		Text_ProcessingInfo->SetVisibility(ESlateVisibility::Visible);
+		FString InfoStr = (CurrentMode == ESaveLoadMode::ESL_Save) ? TEXT("SAVING...") : TEXT("LOADING...");
+		Text_ProcessingInfo->SetText(FText::FromString(InfoStr));
+	}
+	if (Circular_ProcessingInfo)
+	{
+		Circular_ProcessingInfo->SetVisibility(ESlateVisibility::Visible);
+	}
+	for (UButton* Btn : SlotButtons)
+	{
+		// 全てのボタンを無効化して、連打を防止する
+		if (Btn)
+		{
+			Btn->SetIsEnabled(false);
+		}
+	}
+
 	ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>();
 	if (!SaveSubsystem) return;
 
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
-		UE_LOGFMT(LogTemp, Warning, "Executing SAVE to Slot: {0}", SlotIndex);
 		SaveSubsystem->SaveGame(SlotIndex);
 	}
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
-		UE_LOGFMT(LogTemp, Warning, "Executing LOAD from Slot: {0}", SlotIndex);
 		SaveSubsystem->LoadGame(SlotIndex);
 	}
 
 }
 
+// Subsystem の SaveGame / LoadGame を受け取った後、UI を閉じる処理をタイマーで実行
+// (爆速のセーブ / ロードでも、一定のロードがかかるような形にする)
 void USaveLoadMenuWidget::OnSaveLoadCompleted()
 {
-	// セーブ完了時は画面のタイムスタンプを最新に更新する
+
+	// Pause 中は TimerHandle を使った処理ができないので、Tick でやる
+	bIsProcessingWait = true;
+	ProcessingWaitTime = 0.0f;
+
+	//UWorld* World = GetWorld();
+	//if (World)
+	//{
+	//	// セーブロードは最低 1.0f かかるようにする
+	//	World->GetTimerManager().SetTimer(
+	//		ProcessingTimerHandle,this,	&USaveLoadMenuWidget::FinishProcessingUI,1.0f,false // ループさせない
+	//	);
+	//}
+}
+
+// 通知完了後、1秒後に呼ばれる関数
+void USaveLoadMenuWidget::FinishProcessingUI()
+{
+	UE_LOGFMT(LogTemp, Warning, "USaveLoadMenuWidget::FinishProcessingUI()");
+
+	// Overlay 無効化、ボタン最有効化
+	if (Overlay_Processing)
+	{
+		Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (Text_ProcessingInfo)
+	{
+		Text_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (Circular_ProcessingInfo)
+	{
+		Circular_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
+	}
+	for (UButton* Btn : SlotButtons)
+	{
+		if (Btn) Btn->SetIsEnabled(true);
+	}
+
+	// 処理に応じた元の後処理を実行
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
 		RefreshSlotDisplay();
+
+		// 再びスロットにフォーカスを戻す
+		if (SlotButton_0)
+		{
+			SlotButton_0->SetKeyboardFocus();
+		}
+		UE_LOGFMT(LogTemp, Warning, "ESL_Save");
+
 	}
-	// ロード完了時は親コンテナ（MenuContainerWidget）に通知してメニューを閉じるなどの処理を行わせる
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		OnLoadButtonPressedDelegate.Broadcast();
+		UE_LOGFMT(LogTemp, Warning, "ESL_Load");
+
 	}
 }
+

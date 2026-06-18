@@ -6,6 +6,7 @@
 
 class UTextBlock;
 class UButton;
+class UCircularThrobber;
 
 // ロードが押されたことを親に通知するためのDelegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoadButtonPressedDelegate);
@@ -35,41 +36,51 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
 	// 現在のモードを保持する変数
 	ESaveLoadMode CurrentMode = ESaveLoadMode::ESL_Save;
 
+	// ===== Widget 内に設置する要素 =====
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> InfoText;
-	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SlotButton_0;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SlotButton_1;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock>SlotTimeStamp_0;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock>SlotTimeStamp_1;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UWidget> Overlay_Processing;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_ProcessingInfo;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UCircularThrobber> Circular_ProcessingInfo;
 
-	 UPROPERTY()
-	 TArray<TObjectPtr<UButton>> SlotButtons;
-	 UPROPERTY()
-	 TArray<TObjectPtr<UTextBlock>> SlotTimeStamps;
+	// ボタン, タイムスタンプの配列
+	UPROPERTY()
+	TArray<TObjectPtr<UButton>> SlotButtons;
+	UPROPERTY()
+	TArray<TObjectPtr<UTextBlock>> SlotTimeStamps;
+	
+	// ボタンクリックイベントのラッパーと、実際行うコア関数
+	UFUNCTION() void OnSlot0Clicked() { ExecuteSaveOrLoad(0); }
+	UFUNCTION() void OnSlot1Clicked() { ExecuteSaveOrLoad(1); }
+	void ExecuteSaveOrLoad(int32 SlotIndex);
 
 	 // 全てのスロットの表示を最新にする関数
 	 void RefreshSlotDisplay();
-
-	// ボタンクリックイベントのラッパー
-	UFUNCTION() void OnSlot0Clicked() { ExecuteSaveOrLoad(0); }
-	UFUNCTION() void OnSlot1Clicked() { ExecuteSaveOrLoad(1); }
-
-	// 実際の処理を行うコア関数
-	void ExecuteSaveOrLoad(int32 SlotIndex);
 
 	// SaveSubsystem の  セーブ / ロード完了時の処理 Delegate と紐づける
 	UFUNCTION()
 	void OnSaveLoadCompleted();
 	
+	// セーブロード実行時のUIを操作するための変数, 関数など
+	bool bIsProcessingWait = false;
+	float ProcessingWaitTime = 0.0f;
+	void FinishProcessingUI();
+
 };
