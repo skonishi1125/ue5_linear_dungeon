@@ -112,8 +112,19 @@ void USaveLoadMenuWidget::RefreshSlotDisplay()
 		}
 		else
 		{
-			// セーブデータが存在しない場合は「NO DATA」と表示
+			// セーブデータが存在しない場合
+			// TimeStamp にメッセージと、ロード画面ならボタンを押せなくする
 			SlotTimeStamps[i]->SetText(FText::FromString(TEXT("NO DATA")));
+			if (CurrentMode == ESaveLoadMode::ESL_Load)
+			{
+				UE_LOGFMT(LogTemp, Warning, "ESaveLoadMode::ESL_Load Mode");
+				SlotButtons[i]->SetIsEnabled(false);
+			}
+			else
+			{
+				// ロード -> セーブと開いたとき、有効化されるようにしておく
+				SlotButtons[i]->SetIsEnabled(true);
+			}
 		}
 	}
 }

@@ -90,7 +90,7 @@ void ALinearPlayerController::ToggleMenu()
 		}
 
 		// ポーズ処理 なくてもいいかも。
-		UGameplayStatics::SetGamePaused(this, true);
+		//UGameplayStatics::SetGamePaused(this, true);
 	}
 }
 
@@ -118,5 +118,5 @@ void ALinearPlayerController::CloseMenu()
 	}
 
 	// ポーズ解除処理
-	UGameplayStatics::SetGamePaused(this, false);
+	//UGameplayStatics::SetGamePaused(this, false);
 }
