@@ -33,6 +33,7 @@ public:
 
 protected:
 	virtual bool Initialize() override;
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 
 private:
@@ -60,12 +61,15 @@ private:
 	 // 全てのスロットの表示を最新にする関数
 	 void RefreshSlotDisplay();
 
-
 	// ボタンクリックイベントのラッパー
 	UFUNCTION() void OnSlot0Clicked() { ExecuteSaveOrLoad(0); }
 	UFUNCTION() void OnSlot1Clicked() { ExecuteSaveOrLoad(1); }
 
 	// 実際の処理を行うコア関数
 	void ExecuteSaveOrLoad(int32 SlotIndex);
+
+	// SaveSubsystem の  セーブ / ロード完了時の処理 Delegate と紐づける
+	UFUNCTION()
+	void OnSaveLoadCompleted();
 	
 };

@@ -28,10 +28,26 @@ bool USaveLoadMenuWidget::Initialize()
 	return true;
 }
 
+void USaveLoadMenuWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	UGameInstance* GI = GetGameInstance();
+	if (GI)
+	{
+		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+		{
+			SaveSubsystem->OnSaveLoadCompleted.RemoveDynamic(this, &USaveLoadMenuWidget::OnSaveLoadCompleted);
+			SaveSubsystem->OnSaveLoadCompleted.AddDynamic(this, &USaveLoadMenuWidget::OnSaveLoadCompleted);
+		}
+	}
+}
+
 void USaveLoadMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// NativeInitialized に移行しても良いかも。
 	SlotButtons.Empty();
 	SlotButtons.Add(SlotButton_0);
 	SlotButtons.Add(SlotButton_1);
@@ -112,24 +128,29 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>();
 	if (!SaveSubsystem) return;
 
-	// セーブしたい要素の取得
-	ALinearPlayerCharacter* PlayerCharacter = Cast<ALinearPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
 		UE_LOGFMT(LogTemp, Warning, "Executing SAVE to Slot: {0}", SlotIndex);
 		SaveSubsystem->SaveGame(SlotIndex);
-		
-		// タイムスタンプなど、セーブ後の設定に更新
-		RefreshSlotDisplay();
 	}
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		UE_LOGFMT(LogTemp, Warning, "Executing LOAD from Slot: {0}", SlotIndex);
 		SaveSubsystem->LoadGame(SlotIndex);
-		
-		// ロードを実行時、メニューを閉じるようにする処理を親に飛ばすなどする
-		OnLoadButtonPressedDelegate.Broadcast();
 	}
 
+}
+
+void USaveLoadMenuWidget::OnSaveLoadCompleted()
+{
+	// セーブ完了時は画面のタイムスタンプを最新に更新する
+	if (CurrentMode == ESaveLoadMode::ESL_Save)
+	{
+		RefreshSlotDisplay();
+	}
+	// ロード完了時は親コンテナ（MenuContainerWidget）に通知してメニューを閉じるなどの処理を行わせる
+	else if (CurrentMode == ESaveLoadMode::ESL_Load)
+	{
+		OnLoadButtonPressedDelegate.Broadcast();
+	}
 }
