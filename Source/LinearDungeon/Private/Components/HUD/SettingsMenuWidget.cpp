@@ -1,6 +1,10 @@
 #include "Components/HUD/SettingsMenuWidget.h"
+#include "Logging/StructuredLog.h"
+
 #include "Components/ComboBoxString.h"
 #include "Subsystems/LinearSettingsSubsystem.h"
+#include "Components/Slider.h"
+#include "Subsystems/LinearAudioSubsystem.h"
 
 void USettingsMenuWidget::NativeOnInitialized()
 {
@@ -27,7 +31,11 @@ void USettingsMenuWidget::NativeOnInitialized()
 
 		// UI ‚ÅÝ’è‚ð•ÏX‚µ‚½‚Æ‚«‚É”­‰Î‚·‚éŠÖ”‚ð•R‚Ã‚¯‚é
 		ComboBox_GraphicsQuality->OnSelectionChanged.AddDynamic(this, &USettingsMenuWidget::OnGraphicsQualityChanged);
+	}
 
+	if (BGMSlider)
+	{
+		BGMSlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnBGMSliderValueChanged);
 	}
 
 }
@@ -48,6 +56,19 @@ void USettingsMenuWidget::OnGraphicsQualityChanged(FString SelectedItem, ESelect
 		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
 		{
 			SettingsSubsystem->SetGraphicsQuality(QualityLevel);
+		}
+	}
+}
+
+void USettingsMenuWidget::OnBGMSliderValueChanged(float Value)
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
+		{
+			float ClampedVolume = FMath::Clamp(Value, 0.01f, 1.0f);
+			AudioSubsystem->SetBGMVolume(ClampedVolume);
+			UE_LOGFMT(LogTemp, Warning, "USettingsMenuWidget::OnBGMSliderValueChanged() {0}", ClampedVolume);
 		}
 	}
 }

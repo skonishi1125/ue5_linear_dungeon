@@ -5,6 +5,7 @@
 #include "SettingsMenuWidget.generated.h"
 
 class UComboBoxString;
+class USlider;
 
 UCLASS()
 class LINEARDUNGEON_API USettingsMenuWidget : public UUserWidget
@@ -17,9 +18,14 @@ protected:
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_GraphicsQuality;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USlider> BGMSlider;
 
 	// ESelectInfo を使うためには、SlateCore モジュールを Build.cs に入れる必要あり
 	UFUNCTION()
 	void OnGraphicsQualityChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+	UFUNCTION()
+	void OnBGMSliderValueChanged(float Value);
 	
 };
