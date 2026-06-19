@@ -1,4 +1,6 @@
 #include "Subsystems/LinearSettingsSubsystem.h"
+#include "Logging/StructuredLog.h"
+
 #include "GameFramework/GameUserSettings.h"
 
 void ULinearSettingsSubsystem::SetGraphicsQuality(int32 QualityLevel)
@@ -37,4 +39,10 @@ int32 ULinearSettingsSubsystem::GetGraphicsQuality() const
 	// 取得失敗時は、デフォルトとして Medium を返す
 	return 1;
 
+}
+
+void ULinearSettingsSubsystem::SetMouseSensitivity(float ClampedInSensitivity)
+{
+	MouseSensitivity = ClampedInSensitivity;
+	UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetMouseSensitivity(), {0}", ClampedInSensitivity);
 }

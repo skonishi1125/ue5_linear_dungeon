@@ -18,5 +18,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Settings")
 	int32 GetGraphicsQuality() const;
 
+	// マウス感度の設定と取得
+	UFUNCTION(BlueprintPure, Category = "Settings|Input")
+	FORCEINLINE float GetMouseSensitivity() const { return MouseSensitivity; }
+
+	UFUNCTION(BlueprintCallable, Category = "Settings|Input")
+	void SetMouseSensitivity(float ClampedInSensitivity);
+
+private:
+	// マウス感度 デフォルト値 1.0f
+	UPROPERTY()
+	float MouseSensitivity = 1.0f;
 	
 };

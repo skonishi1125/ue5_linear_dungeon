@@ -35,6 +35,10 @@
 #include "Controllers/LinearPlayerController.h"
 #include "SaveGames/LinearSaveGame.h"
 
+// Subsystem
+#include "Subsystems/LinearSettingsSubsystem.h" // マウス感度など
+
+
 const FName ALinearPlayerCharacter::TagName = FName(TEXT("LinearPlayerCharacter"));
 
 ALinearPlayerCharacter::ALinearPlayerCharacter()
@@ -289,10 +293,21 @@ void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
+		float Sensitivity = 1.0f;
+		// Subsystemから設定されたマウス感度を取得する
+		// ゲッタの参照がメインなので、参照先のメモリアドレスから値を読むだけなので処理負荷などはそこまでない
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+			{
+				Sensitivity = SettingsSubsystem->GetMouseSensitivity();
+			}
+		}
+
 		// Controller (画面には描写されないもの)に回転を加える
 		// Controller に追従するように傾く設定フラグなどがあるので、今回これに追従させたいので true としておくこと
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * Sensitivity);
+		AddControllerPitchInput(LookAxisVector.Y * Sensitivity);
 	}
 }
 

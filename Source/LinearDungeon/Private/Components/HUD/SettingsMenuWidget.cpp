@@ -10,7 +10,9 @@ void USettingsMenuWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (ComboBox_GraphicsQuality)
+	UGameInstance* GI = GetGameInstance();
+
+	if (ComboBox_GraphicsQuality && GI)
 	{
 		ComboBox_GraphicsQuality->ClearOptions();
 		ComboBox_GraphicsQuality->AddOption(TEXT("Low"));
@@ -19,35 +21,39 @@ void USettingsMenuWidget::NativeOnInitialized()
 		ComboBox_GraphicsQuality->AddOption(TEXT("Epic"));
 
 		// Subsystem ‚©‚çŒ»Ý‚ÌÝ’è‚ðŽæ“¾‚µ‚ÄAUI ‚É”½‰f
-		if (UGameInstance* GI = GetGameInstance())
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
 		{
-			if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
-			{
-				int32 CurrentQuality = SettingsSubsystem->GetGraphicsQuality();
-				CurrentQuality = FMath::Clamp(CurrentQuality, 0, 3); // —\Šú‚µ‚È‚¢”’l‚ª“ü‚Á‚½Žž‚ÍA”ÍˆÍ“à‚É—}‚¦‚é
-				ComboBox_GraphicsQuality->SetSelectedIndex(CurrentQuality);
-			}
+			int32 CurrentQuality = SettingsSubsystem->GetGraphicsQuality();
+			CurrentQuality = FMath::Clamp(CurrentQuality, 0, 3); // —\Šú‚µ‚È‚¢”’l‚ª“ü‚Á‚½Žž‚ÍA”ÍˆÍ“à‚É—}‚¦‚é
+			ComboBox_GraphicsQuality->SetSelectedIndex(CurrentQuality);
 		}
 
 		// UI ‚ÅÝ’è‚ð•ÏX‚µ‚½‚Æ‚«‚É”­‰Î‚·‚éŠÖ”‚ð•R‚Ã‚¯‚é
 		ComboBox_GraphicsQuality->OnSelectionChanged.AddDynamic(this, &USettingsMenuWidget::OnGraphicsQualityChanged);
 	}
 
-	if (BGMSlider)
+	if (BGMSlider && GI)
 	{
 		// w“Ç
 		BGMSlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnBGMSliderValueChanged);
 
 		// Slider ‚É‰Šú’l”½‰f
-		if (UGameInstance* GI = GetGameInstance())
+		if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
 		{
-			if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
-			{
-				BGMSlider->SetValue(AudioSubsystem->GetCurrentBGMVolume());
-			}
+			BGMSlider->SetValue(AudioSubsystem->GetCurrentBGMVolume());
 		}
 	}
 
+	if (MouseSensitivitySlider && GI)
+	{
+		// w“ÇA‰Šú’l”½‰f
+		MouseSensitivitySlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnMouseSensitivitySliderValueChanged);
+		if (ULinearSettingsSubsystem* SettingsSubSystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			MouseSensitivitySlider->SetValue(SettingsSubSystem->GetMouseSensitivity());
+		}
+
+	}
 }
 
 // SettingsMenu ComboBox ‚ÅÝ’è•ÏXŽž‚É”­‰Î‚·‚éŠÖ”
@@ -79,6 +85,18 @@ void USettingsMenuWidget::OnBGMSliderValueChanged(float Value)
 			float ClampedVolume = FMath::Clamp(Value, 0.01f, 1.0f);
 			AudioSubsystem->SetBGMVolume(ClampedVolume);
 			UE_LOGFMT(LogTemp, Warning, "USettingsMenuWidget::OnBGMSliderValueChanged() {0}", ClampedVolume);
+		}
+	}
+}
+
+void USettingsMenuWidget::OnMouseSensitivitySliderValueChanged(float Value)
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			float ClampedValue = FMath::Clamp(Value, 0.1f, 5.0f);
+			SettingsSubsystem->SetMouseSensitivity(ClampedValue);
 		}
 	}
 }

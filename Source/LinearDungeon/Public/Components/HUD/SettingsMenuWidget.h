@@ -20,6 +20,8 @@ private:
 	TObjectPtr<UComboBoxString> ComboBox_GraphicsQuality;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USlider> BGMSlider;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USlider> MouseSensitivitySlider;
 
 	// ESelectInfo を使うためには、SlateCore モジュールを Build.cs に入れる必要あり
 	UFUNCTION()
@@ -27,5 +29,8 @@ private:
 
 	UFUNCTION()
 	void OnBGMSliderValueChanged(float Value);
+
+	UFUNCTION()
+	void OnMouseSensitivitySliderValueChanged(float Value);
 	
 };
