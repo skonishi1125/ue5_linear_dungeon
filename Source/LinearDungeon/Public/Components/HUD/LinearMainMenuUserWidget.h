@@ -9,6 +9,7 @@ class UButton;
 // サブメニュー群にボタンが押されたことを通知するデリゲート
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSaveMenuRequestedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoadMenuRequestedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSettingsMenuRequestedDelegate);
 
 UCLASS()
 class LINEARDUNGEON_API ULinearMainMenuUserWidget : public UUserWidget
@@ -24,6 +25,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnLoadMenuRequestedDelegate OnLoadMenuRequestedDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSettingsMenuRequestedDelegate OnSettingsMenuRequestedDelegate;
 
 protected:
 	// ボタンの OnClick と、押された時の関数を紐づける用途の初期化処理
@@ -35,13 +38,18 @@ protected:
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SaveButton;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> LoadButton;
-
 	UFUNCTION()
 	void OnSaveButtonClicked();
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> LoadButton;
 	UFUNCTION()
 	void OnLoadButtonClicked();
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SettingsButton;
+	UFUNCTION()
+	void OnSettingsButtonClicked();
+
 	
 };

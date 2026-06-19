@@ -10,7 +10,8 @@ public class LinearDungeon : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { 
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
-			"GeometryCollectionEngine", "ChaosSolverEngine", "Niagara", "UMG", "AIModule", "Slate"
+			"GeometryCollectionEngine", "ChaosSolverEngine", "Niagara", "UMG", "AIModule", "Slate",
+			"SlateCore"
         });
 	}
 }

@@ -7,7 +7,7 @@
 class UWidgetSwitcher;
 class ULinearMainMenuUserWidget;
 class USaveLoadMenuWidget;
-
+class USettingsMenuWidget;
 
 UCLASS()
 class LINEARDUNGEON_API UMenuContainerWidget : public UUserWidget
@@ -33,11 +33,15 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USaveLoadMenuWidget> WBP_SaveLoadMenu;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USettingsMenuWidget> WBP_SettingsMenu;
+
 	// ===== MainMenu ‚©‚ç‚Ì Delegate ‚ğó‚¯æ‚èˆ—‚·‚éŠÖ” =====
 	UFUNCTION()
 	void HandleSaveMenuRequested();
-
 	UFUNCTION()
 	void HandleLoadMenuRequested();
+	UFUNCTION()
+	void HandleSettingsMenuRequested();
 
 };

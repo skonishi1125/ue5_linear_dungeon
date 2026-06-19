@@ -21,6 +21,11 @@ bool ULinearMainMenuUserWidget::Initialize()
 		LoadButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnLoadButtonClicked);
 	}
 
+	if (SettingsButton)
+	{
+		SettingsButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnSettingsButtonClicked);
+	}
+
 	return true;
 }
 
@@ -41,12 +46,17 @@ void ULinearMainMenuUserWidget::NativeConstruct()
 
 void ULinearMainMenuUserWidget::OnSaveButtonClicked()
 {
-	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSaveButtonClicked()");
+	//UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSaveButtonClicked()");
 	OnSaveMenuRequestedDelegate.Broadcast();
 }
 
 void ULinearMainMenuUserWidget::OnLoadButtonClicked()
 {
-	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnLoadButtonClicked()");
 	OnLoadMenuRequestedDelegate.Broadcast();
+}
+
+void ULinearMainMenuUserWidget::OnSettingsButtonClicked()
+{
+	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSettingsButtonClicked()");
+	OnSettingsMenuRequestedDelegate.Broadcast();
 }
