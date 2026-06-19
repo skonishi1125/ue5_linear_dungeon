@@ -43,6 +43,7 @@ void ULinearAudioSubsystem::SetBGMVolume(float ClampedVolume)
 	if (BGMAudioComponent && BGMAudioComponent->IsPlaying())
 	{
 		BGMAudioComponent->SetVolumeMultiplier(ClampedVolume);
+		CurrentBGMVolume = ClampedVolume;
 	}
 
 }

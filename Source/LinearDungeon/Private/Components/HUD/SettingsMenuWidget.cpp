@@ -35,7 +35,17 @@ void USettingsMenuWidget::NativeOnInitialized()
 
 	if (BGMSlider)
 	{
+		// w“Ç
 		BGMSlider->OnValueChanged.AddDynamic(this, &USettingsMenuWidget::OnBGMSliderValueChanged);
+
+		// Slider ‚É‰Šú’l”½‰f
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
+			{
+				BGMSlider->SetValue(AudioSubsystem->GetCurrentBGMVolume());
+			}
+		}
 	}
 
 }

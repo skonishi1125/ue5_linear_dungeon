@@ -13,6 +13,8 @@ class LINEARDUNGEON_API ULinearAudioSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 public:
+	FORCEINLINE float GetCurrentBGMVolume() { return CurrentBGMVolume; }
+
 	// BGMÇÃçƒê∂
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayBGM(USoundBase* InBGM);
