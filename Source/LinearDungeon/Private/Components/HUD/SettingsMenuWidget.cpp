@@ -72,6 +72,24 @@ void USettingsMenuWidget::NativeOnInitialized()
 		ComboBox_WindowMode->OnSelectionChanged.AddDynamic(this, &USettingsMenuWidget::OnWindowModeChanged);
 	}
 
+	if (ComboBox_Resolution && GI)
+	{
+		ComboBox_Resolution->ClearOptions();
+		ComboBox_Resolution->AddOption(TEXT("1920 x 1080"));
+		ComboBox_Resolution->AddOption(TEXT("2560 x 1440"));
+		ComboBox_Resolution->AddOption(TEXT("3840 x 2160"));
+		ComboBox_Resolution->AddOption(TEXT("1280 x 720"));
+
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			int32 CurrentResIndex = SettingsSubsystem->GetResolutionIndex();
+			CurrentResIndex = FMath::Clamp(CurrentResIndex, 0, 3);
+			ComboBox_Resolution->SetSelectedIndex(CurrentResIndex);
+		}
+
+		ComboBox_Resolution->OnSelectionChanged.AddDynamic(this, &USettingsMenuWidget::OnResolutionChanged);
+	}
+
 
 }
 
@@ -131,6 +149,22 @@ void USettingsMenuWidget::OnWindowModeChanged(FString SelectedItem, ESelectInfo:
 		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
 		{
 			SettingsSubsystem->SetWindowMode(ModeIndex);
+		}
+	}
+}
+
+void USettingsMenuWidget::OnResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	int32 ResIndex = 0; // Default: 1920x1080
+	if (SelectedItem == TEXT("2560 x 1440")) ResIndex = 1;
+	else if (SelectedItem == TEXT("3840 x 2160")) ResIndex = 2;
+	else if (SelectedItem == TEXT("1280 x 720")) ResIndex = 3;
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			SettingsSubsystem->SetResolutionByIndex(ResIndex);
 		}
 	}
 }

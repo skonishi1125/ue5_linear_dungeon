@@ -81,3 +81,41 @@ int32 ULinearSettingsSubsystem::GetWindowMode() const
 	}
 	return 0;
 }
+
+void ULinearSettingsSubsystem::SetResolutionByIndex(int32 Index)
+{
+	if (GEngine)
+	{
+		if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+		{
+			// Index に応じた、解像度 FIntPoint 設定。デフォルト 1920 * 1080
+			FIntPoint TargetRes(1920, 1080);
+			if (Index == 0) TargetRes = FIntPoint(1920, 1080);
+			else if (Index == 1) TargetRes = FIntPoint(2560, 1440); // WQHD
+			else if (Index == 2) TargetRes = FIntPoint(3840, 2160); // 4K
+			else if (Index == 3) TargetRes = FIntPoint(1280, 720);  // HD
+
+			UserSettings->SetScreenResolution(TargetRes);
+			UserSettings->ApplySettings(false);
+		}
+	}
+}
+
+int32 ULinearSettingsSubsystem::GetResolutionIndex() const
+{
+	if (GEngine)
+	{
+		if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+		{
+			FIntPoint CurrentRes = UserSettings->GetScreenResolution();
+
+			if (CurrentRes == FIntPoint(1920, 1080)) return 0;
+			if (CurrentRes == FIntPoint(2560, 1440)) return 1;
+			if (CurrentRes == FIntPoint(3840, 2160)) return 2;
+			if (CurrentRes == FIntPoint(1280, 720))  return 3;
+
+			return 0; // 該当しない場合はデフォルト (1920x1080) のインデックスを返す
+		}
+	}
+	return 0;
+}

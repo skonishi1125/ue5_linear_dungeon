@@ -28,6 +28,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Settings|Display")
 	int32 GetWindowMode() const;
 
+	// 解像度
+	UFUNCTION(BlueprintCallable, Category = "Settings|Display")
+	void SetResolutionByIndex(int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "Settings|Display")
+	int32 GetResolutionIndex() const;
+
+
 
 private:
 	// マウス感度 デフォルト値 1.0f
