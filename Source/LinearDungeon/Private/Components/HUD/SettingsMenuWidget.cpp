@@ -54,6 +54,25 @@ void USettingsMenuWidget::NativeOnInitialized()
 		}
 
 	}
+
+	if (ComboBox_WindowMode && GI)
+	{
+		ComboBox_WindowMode->ClearOptions();
+		ComboBox_WindowMode->AddOption(TEXT("Fullscreen"));
+		ComboBox_WindowMode->AddOption(TEXT("Windowed Fullscreen"));
+		ComboBox_WindowMode->AddOption(TEXT("Windowed"));
+
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			int32 CurrentMode = SettingsSubsystem->GetWindowMode();
+			CurrentMode = FMath::Clamp(CurrentMode, 0, 2);
+			ComboBox_WindowMode->SetSelectedIndex(CurrentMode);
+		}
+
+		ComboBox_WindowMode->OnSelectionChanged.AddDynamic(this, &USettingsMenuWidget::OnWindowModeChanged);
+	}
+
+
 }
 
 // SettingsMenu ComboBox で設定変更時に発火する関数
@@ -95,8 +114,23 @@ void USettingsMenuWidget::OnMouseSensitivitySliderValueChanged(float Value)
 	{
 		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
 		{
-			float ClampedValue = FMath::Clamp(Value, 0.1f, 5.0f);
+			float ClampedValue = FMath::Clamp(Value, 0.01f, 2.0f);
 			SettingsSubsystem->SetMouseSensitivity(ClampedValue);
+		}
+	}
+}
+
+void USettingsMenuWidget::OnWindowModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	int32 ModeIndex = 0; // デフォルトでフルスクリーン
+	if (SelectedItem == TEXT("Windowed Fullscreen")) ModeIndex = 1;
+	else if (SelectedItem == TEXT("Windowed")) ModeIndex = 2;
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSettingsSubsystem* SettingsSubsystem = GI->GetSubsystem<ULinearSettingsSubsystem>())
+		{
+			SettingsSubsystem->SetWindowMode(ModeIndex);
 		}
 	}
 }

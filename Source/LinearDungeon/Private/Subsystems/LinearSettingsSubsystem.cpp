@@ -46,3 +46,38 @@ void ULinearSettingsSubsystem::SetMouseSensitivity(float ClampedInSensitivity)
 	MouseSensitivity = ClampedInSensitivity;
 	UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetMouseSensitivity(), {0}", ClampedInSensitivity);
 }
+
+void ULinearSettingsSubsystem::SetWindowMode(int32 ModeIndex)
+{
+	if (GEngine)
+	{
+		if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+		{
+			// 0: FullSC 1: Windowed FullSC 2: Windowed
+			EWindowMode::Type TargetMode = EWindowMode::Fullscreen;
+
+			if (ModeIndex == 1) TargetMode = EWindowMode::WindowedFullscreen;
+			else if (ModeIndex == 2) TargetMode = EWindowMode::Windowed;
+
+			UserSettings->SetFullscreenMode(TargetMode);
+			UserSettings->ApplySettings(false);
+		}
+	}
+}
+
+int32 ULinearSettingsSubsystem::GetWindowMode() const
+{
+	if (GEngine)
+	{
+		if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+		{
+			EWindowMode::Type CurrentMode = UserSettings->GetFullscreenMode();
+
+			if (CurrentMode == EWindowMode::WindowedFullscreen) return 1;
+			if (CurrentMode == EWindowMode::Windowed) return 2;
+
+			return 0; // FullScreen ‚Ìê‡‚ÍA0 ‚ğ•Ô‚·
+		}
+	}
+	return 0;
+}
