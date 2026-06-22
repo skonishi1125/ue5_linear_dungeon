@@ -26,6 +26,6 @@ public:
 
 	// InteractMarker ‚É‘‚«‚Ş•¶š—ñ‚ğİ’è‚µ‚Ä•Ô‚·
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
-	FText GetInteractPrompt() const;
+	FText GetInteractPrompt();
 
 };

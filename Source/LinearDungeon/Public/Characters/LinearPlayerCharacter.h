@@ -101,6 +101,10 @@ public:
 	// 死亡処理のデリゲート
 	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
 
+	// InteractInterface 実行時から盾 / 剣等から呼べるように、public で装備処理を用意しておく
+	void EquipWeapon(AWeapon* InWeapon);
+	void EquipShield(AShield* InShield);
+
 
 	// ===== Debug =====
 	//UFUNCTION(Exec)

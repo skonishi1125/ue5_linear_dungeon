@@ -199,6 +199,11 @@ void ALinearPlayerCharacter::SetActiveDialogueComponent(ULinearDialogueComponent
 			{
 				// 優先度 1 で登録して、DefaultMappingContext の 0 より 優先度を上げておく
 				Subsystem->AddMappingContext(DialogueMappingContext, 1);
+				// 会話状態
+				ActionState = EActionState::EAS_InDialogue;
+				// 会話終了時のデリゲートの定義
+				ActiveDialogueComponent->OnDialogueFinished.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnDialogueEnd);
+
 			}
 			else
 			{
@@ -492,47 +497,23 @@ bool ALinearPlayerCharacter::CanDefense()
 
 void ALinearPlayerCharacter::Interact()
 {
-	// 1. 目の前に IInteractInterface を持った Actor があれば、会話開始
+	// 目の前に IInteractInterface を持った Actor があれば、処理開始
 	if (OverlappingInteractableActor)
 	{
 		if (OverlappingInteractableActor->Implements<UInteractInterface>()) 
 		{
+			// 会話 や 武器装備などが始まる
 			// 第一引数: 対象Actor 第二引数以降は定義した関数を渡す
 			// Interact 時の処理自体は、BP_Prisoner の場合、BP 側だけで設計している
 			// C++ で作ることもできるが、BP だけの設計にも慣れておこう
 			IInteractInterface::Execute_Interact(OverlappingInteractableActor, this);
 
-			// 会話状態
-			ActionState = EActionState::EAS_InDialogue;
-
-			// Dialogue の持つ、会話終了 Delegate に購読しておく
-			ULinearDialogueComponent* DialogueComp = OverlappingInteractableActor->FindComponentByClass<ULinearDialogueComponent>();
-			if (DialogueComp)
+			// InteractWidget 非表示
+			if (InteractMarkerWidget)
 			{
-				// 会話が終了したとき、EAS が 戻るような関数を紐づけておく
-				DialogueComp->OnDialogueFinished.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnDialogueEnd);
+				InteractMarkerWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
-		return;
-	}
-
-	// 2. 装備処理
-	// TODO: リファクタリングできる余地がある（Interface で Equipable など）
-	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	AShield* OverlappingShield = Cast<AShield>(OverlappingItem);
-
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// 暫定で全て片手武器
-		EquippedWeapon = OverlappingWeapon;
-		return;
-	}
-	else if (OverlappingShield)
-	{
-		OverlappingShield->Equip(GetMesh(), LeftHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作ってもよい
-		EquippedShield = OverlappingShield;
 		return;
 	}
 }
@@ -549,6 +530,31 @@ void ALinearPlayerCharacter::OnDialogueEnd()
 		{
 			Subsystem->RemoveMappingContext(DialogueMappingContext);
 		}
+	}
+}
+
+void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
+{
+	if (InWeapon)
+	{
+		InWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// 暫定で全て片手武器
+		EquippedWeapon = InWeapon;
+
+		// 装備が完了したため、インタラクト対象から除外・UIを非表示にする
+		SetOverlappingInteractableActor(nullptr);
+	}
+}
+
+void ALinearPlayerCharacter::EquipShield(AShield* InShield)
+{
+	if (InShield)
+	{
+		InShield->Equip(GetMesh(), LeftHandSocketName, this, this);
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作ってもよい
+		EquippedShield = InShield;
+
+		SetOverlappingInteractableActor(nullptr);
 	}
 }
 

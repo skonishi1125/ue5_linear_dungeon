@@ -1,14 +1,14 @@
-#include "Items/Weapon.h"
+ï»¿#include "Items/Weapon.h"
 #include "Logging/StructuredLog.h"
 #include "LinearDungeon/DebugMacros.h"
 
 #include "Characters/LinearPlayerCharacter.h"
 
-// ‰¹‚ÌÄ¶ŠÖ˜A
+// éŸ³ã®å†ç”Ÿé–¢é€£
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
-// ”»’èŠÖ˜A
+// åˆ¤å®šé–¢é€£
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h" // BoxTrace
@@ -22,9 +22,9 @@ AWeapon::AWeapon()
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box"));
 	WeaponBox->SetupAttachment(GetRootComponent());
 
-	// •Ší”»’èİ’è
-	// Pawn ‚É‚¾‚¯‚Í Overlap ŒŸ’m‚É”½‰‚µ‚È‚¢‚æ‚¤‚Éİ’è
-	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // ’Êí‚Í NoCollision
+	// æ­¦å™¨åˆ¤å®šè¨­å®š
+	// Pawn ã«ã ã‘ã¯ Overlap æ¤œçŸ¥ã«åå¿œã—ãªã„ã‚ˆã†ã«è¨­å®š
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // é€šå¸¸æ™‚ã¯ NoCollision
 	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
@@ -34,6 +34,22 @@ AWeapon::AWeapon()
 	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace End"));
 	BoxTraceEnd->SetupAttachment(GetRootComponent());
 
+}
+
+void AWeapon::Interact_Implementation(AActor* InstigatorActor)
+{
+	ALinearPlayerCharacter* PlayerCharacter = Cast<ALinearPlayerCharacter>(InstigatorActor);
+	if (PlayerCharacter)
+	{
+		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«è‡ªèº«ã‚’è£…å‚™ã•ã›ã‚‹
+		PlayerCharacter->EquipWeapon(this);
+	}
+}
+
+FText AWeapon::GetInteractPrompt_Implementation()
+{
+	FString InteractText = FString::Printf(TEXT("[E] è£…å‚™"));
+	return FText::FromString(InteractText);
 }
 
 void AWeapon::BeginPlay()
@@ -55,7 +71,12 @@ void AWeapon::OnItemBeginOverlap(
 	Super::OnItemBeginOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult
 	);
-	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemBeginOverlap");
+
+	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
+	if (LinearPlayerCharacter)
+	{
+		LinearPlayerCharacter->SetOverlappingInteractableActor(this);
+	}
 }
 
 
@@ -66,7 +87,12 @@ void AWeapon::OnItemEndOverlap(
 	Super::OnItemEndOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex
 	);
-	UE_LOGFMT(LogTemp, Warning, "AWeapon::OnItemEndOverlap");
+
+	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
+	if (LinearPlayerCharacter)
+	{
+		LinearPlayerCharacter->SetOverlappingInteractableActor(nullptr);
+	}
 
 }
 
@@ -75,11 +101,11 @@ void AWeapon::OnBoxOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	// BoxTrace n“_‚ÆI“_
+	// BoxTrace å§‹ç‚¹ã¨çµ‚ç‚¹
 	const FVector Start = BoxTraceStart->GetComponentLocation();
 	const FVector End = BoxTraceEnd->GetComponentLocation();
 
-	// –³‹‚·‚é‘ÎÛ
+	// ç„¡è¦–ã™ã‚‹å¯¾è±¡
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
 	for (AActor* Actor : BoxIgnoreActors)
@@ -93,14 +119,14 @@ void AWeapon::OnBoxOverlap(
 		this, Start, End, FVector(5.f, 5.f, 5.f),
 		BoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
 		ActorsToIgnore, 
-		EDrawDebugTrace::None, // Debug •\¦
-		BoxHit, // Hit ‚µ‚½î•ñ‚ğw’è‚Ì•Ï”‚ÉŠi”[ (& ‚ÅQÆ“n‚µ‚ÌŒ`‚É‚È‚Á‚Ä‚¢‚é)
+		EDrawDebugTrace::None, // Debug è¡¨ç¤º
+		BoxHit, // Hit ã—ãŸæƒ…å ±ã‚’æŒ‡å®šã®å¤‰æ•°ã«æ ¼ç´ (& ã§å‚ç…§æ¸¡ã—ã®å½¢ã«ãªã£ã¦ã„ã‚‹)
 		true
 	);
 
 	if (BoxHit.GetActor())
 	{
-		// 1. ƒ_ƒ[ƒWˆ—
+		// 1. ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†
 		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
 		UE_LOGFMT(
@@ -112,7 +138,7 @@ void AWeapon::OnBoxOverlap(
 			GetInstigator()->GetController(), this, UDamageType::StaticClass()
 		);
 
-		// 2.Interface ‚É‰‚¶‚½ŒÅ—Lˆ—
+		// 2.Interface ã«å¿œã˜ãŸå›ºæœ‰å‡¦ç†
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
@@ -121,11 +147,11 @@ void AWeapon::OnBoxOverlap(
 				BoxHit.GetActor(), BoxHit.ImpactPoint, FinalPoiseDamage
 			);
 		}
-		// •Ší‚ğU‚Á‚½A“¯‚¶“G‚É•¡”‰ñ“–‚½‚ç‚È‚¢‚æ‚¤‚É‚·‚é
-		// •Ší”»’è‚ğ Enabled / Disabled ‚Æ‚·‚é‚Æ‚«AƒŠƒZƒbƒg‚·‚é‚æ‚¤‚É‚·‚é (Character‘¤)
+		// æ­¦å™¨ã‚’æŒ¯ã£ãŸæ™‚ã€åŒã˜æ•µã«è¤‡æ•°å›å½“ãŸã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹
+		// æ­¦å™¨åˆ¤å®šã‚’ Enabled / Disabled ã¨ã™ã‚‹ã¨ãã€ãƒªã‚»ãƒƒãƒˆã™ã‚‹ã‚ˆã†ã«ã™ã‚‹ (Characterå´)
 		BoxIgnoreActors.AddUnique(BoxHit.GetActor());
 
-		// Geometry Collections “™‚ğ”j‰ó‚·‚é‚½‚ß‚Ì—Í Field ì¬
+		// Geometry Collections ç­‰ã‚’ç ´å£Šã™ã‚‹ãŸã‚ã®åŠ› Field ä½œæˆ
 		CreateFields(BoxHit.ImpactPoint);
 
 	}
@@ -137,33 +163,33 @@ void AWeapon::Equip(
 	AActor* NewOwner, APawn* NewInstigator
 )
 {
-	// Owner, Instigator İ’è
+	// Owner, Instigator è¨­å®š
 	SetOwner(NewOwner);
 	SetInstigator(NewInstigator);
 
-	// •Ší‚ÌƒAƒ^ƒbƒ`æw’è
+	// æ­¦å™¨ã®ã‚¢ã‚¿ãƒƒãƒå…ˆæŒ‡å®š
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	GetRootComponent()->AttachToComponent(InParent, TransformRules, InSocketName);
 	ItemState = EItemState::EIS_Equipped;
 
-	// ‘•”õŒã‚Ìİ’è
-	// Tick –³Œø‰»
-	// PrimaryActorTick.bCanEverTick ‚Í UE ‚É Tick ‚·‚éƒIƒuƒWƒFƒNƒg‚©‚Ç‚¤‚©‚ğ“`‚¦‚é‚à‚Ì‚È‚Ì‚ÅA‚±‚¿‚ç‚Å‘€ì‚Í‚Å‚«‚È‚¢
+	// è£…å‚™å¾Œã®è¨­å®š
+	// Tick ç„¡åŠ¹åŒ–
+	// PrimaryActorTick.bCanEverTick ã¯ UE ã« Tick ã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã©ã†ã‹ã‚’ä¼ãˆã‚‹ã‚‚ã®ãªã®ã§ã€ã“ã¡ã‚‰ã§æ“ä½œã¯ã§ããªã„
 	SetActorTickEnabled(false);
 
-	// Collision ‚ğ–³Œø‰»‚µ‚ÄACharacter ‚ÆC‚ê‚é“x‚É”­¶‚·‚é Overlap ƒCƒxƒ“ƒg‚ğ–h‚®
+	// Collision ã‚’ç„¡åŠ¹åŒ–ã—ã¦ã€Character ã¨æ“¦ã‚Œã‚‹åº¦ã«ç™ºç”Ÿã™ã‚‹ Overlap ã‚¤ãƒ™ãƒ³ãƒˆã‚’é˜²ã
 	if (OverlapSphere)
 	{
 		OverlapSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	// ‰¹Ä¶
+	// éŸ³å†ç”Ÿ
 	if (EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
 	}
 
-	// ƒGƒtƒFƒNƒg‚ğØ‚é
+	// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’åˆ‡ã‚‹
 	if (NSEffect)
 	{
 		NSEffect->Deactivate();

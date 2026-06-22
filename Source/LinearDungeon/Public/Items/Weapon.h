@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Items/ItemBase.h"
+#include "Interfaces/InteractInterface.h"
+
 #include "Weapon.generated.h"
 
 class USceneComponent;
@@ -9,11 +11,16 @@ class USoundBase; // UMetaSound ÇÕÇ±ÇÍÇåpè≥Ç∑ÇÈÇÃÇ≈ÅAÇ±ÇÃÉNÉâÉXÇ∆ÇµÇƒäiî[Ç≈Ç´ÇÈ
 class UBoxComponent;
 
 UCLASS()
-class LINEARDUNGEON_API AWeapon : public AItemBase
+class LINEARDUNGEON_API AWeapon : public AItemBase, public IInteractInterface
 {
 	GENERATED_BODY()
 public:
 	AWeapon();
+
+	// InteractInterface ä÷òA
+	virtual void Interact_Implementation(AActor* InstigatorActor) override;
+	virtual FText GetInteractPrompt_Implementation() override;
+
 	void Equip(
 		USceneComponent* InParent, FName InSocketName,
 		AActor* NewOwner, APawn* NewInstigator
