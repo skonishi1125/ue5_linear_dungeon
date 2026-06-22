@@ -8,6 +8,7 @@ class UWidgetSwitcher;
 class ULinearMainMenuUserWidget;
 class USaveLoadMenuWidget;
 class USettingsMenuWidget;
+class UQuitGameWidget;
 
 UCLASS()
 class LINEARDUNGEON_API UMenuContainerWidget : public UUserWidget
@@ -26,15 +27,14 @@ protected:
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> MenuSwitcher;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<ULinearMainMenuUserWidget> WBP_LinearMainMenu;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USaveLoadMenuWidget> WBP_SaveLoadMenu;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USettingsMenuWidget> WBP_SettingsMenu;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UQuitGameWidget> WBP_QuitGameMenu;
 
 	// ===== MainMenu ‚©‚ç‚Ì Delegate ‚ğó‚¯æ‚èˆ—‚·‚éŠÖ” =====
 	UFUNCTION()
@@ -43,5 +43,10 @@ private:
 	void HandleLoadMenuRequested();
 	UFUNCTION()
 	void HandleSettingsMenuRequested();
+	UFUNCTION()
+	void HandleQuitMenuRequested();
 
+	// ===== QuitGameMenu ‚©‚ç‚Ì Delegate ‚ğó‚¯æ‚èˆ—‚·‚éŠÖ” =====
+	UFUNCTION()
+	void HandleReturnMainMenuRequested();
 };

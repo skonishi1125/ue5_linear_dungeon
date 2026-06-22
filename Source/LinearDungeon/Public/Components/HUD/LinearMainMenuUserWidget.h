@@ -10,6 +10,8 @@ class UButton;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSaveMenuRequestedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoadMenuRequestedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSettingsMenuRequestedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuitGameMenuRequestedDelegate);
+
 
 UCLASS()
 class LINEARDUNGEON_API ULinearMainMenuUserWidget : public UUserWidget
@@ -18,15 +20,15 @@ class LINEARDUNGEON_API ULinearMainMenuUserWidget : public UUserWidget
 public:
 	void FocusFirstButton();
 
-	// 親が購読する、各ボタン押下時のデリゲート
+	// 親(MenuContainer)が購読する、各ボタン押下時, WidgetSwitcher で切り替えるためのデリゲート
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSaveMenuRequestedDelegate OnSaveMenuRequestedDelegate;
-
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnLoadMenuRequestedDelegate OnLoadMenuRequestedDelegate;
-
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSettingsMenuRequestedDelegate OnSettingsMenuRequestedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnQuitGameMenuRequestedDelegate OnQuitGameMenuRequestedDelegate;
 
 protected:
 	// ボタンの OnClick と、押された時の関数を紐づける用途の初期化処理
@@ -51,5 +53,9 @@ private:
 	UFUNCTION()
 	void OnSettingsButtonClicked();
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> QuitGameButton;
+	UFUNCTION()
+	void OnQuitGameButtonClicked();
 	
 };

@@ -26,6 +26,11 @@ bool ULinearMainMenuUserWidget::Initialize()
 		SettingsButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnSettingsButtonClicked);
 	}
 
+	if (QuitGameButton)
+	{
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ULinearMainMenuUserWidget::OnQuitGameButtonClicked);
+	}
+
 	return true;
 }
 
@@ -46,7 +51,6 @@ void ULinearMainMenuUserWidget::NativeConstruct()
 
 void ULinearMainMenuUserWidget::OnSaveButtonClicked()
 {
-	//UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSaveButtonClicked()");
 	OnSaveMenuRequestedDelegate.Broadcast();
 }
 
@@ -57,6 +61,10 @@ void ULinearMainMenuUserWidget::OnLoadButtonClicked()
 
 void ULinearMainMenuUserWidget::OnSettingsButtonClicked()
 {
-	UE_LOGFMT(LogTemp, Warning, "ULinearMainMenuUserWidget::OnSettingsButtonClicked()");
 	OnSettingsMenuRequestedDelegate.Broadcast();
+}
+
+void ULinearMainMenuUserWidget::OnQuitGameButtonClicked()
+{
+	OnQuitGameMenuRequestedDelegate.Broadcast();
 }

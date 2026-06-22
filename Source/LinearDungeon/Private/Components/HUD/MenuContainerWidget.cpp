@@ -5,6 +5,7 @@
 #include "Components/HUD/LinearMainMenuUserWidget.h"
 #include "Components/HUD/SaveLoadMenuWidget.h"
 #include "Components/HUD/SettingsMenuWidget.h"
+#include "Components/HUD/QuitGameWidget.h"
 
 void UMenuContainerWidget::NativeConstruct()
 {
@@ -15,6 +16,12 @@ void UMenuContainerWidget::NativeConstruct()
 		WBP_LinearMainMenu->OnSaveMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleSaveMenuRequested);
 		WBP_LinearMainMenu->OnLoadMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleLoadMenuRequested);
 		WBP_LinearMainMenu->OnSettingsMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleSettingsMenuRequested);
+		WBP_LinearMainMenu->OnQuitGameMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleQuitMenuRequested);
+	}
+
+	if (WBP_QuitGameMenu)
+	{
+		WBP_QuitGameMenu->OnReturnMainMenuRequestedDelegate.AddUniqueDynamic(this, &UMenuContainerWidget::HandleReturnMainMenuRequested);
 	}
 
 }
@@ -52,6 +59,18 @@ void UMenuContainerWidget::HandleSettingsMenuRequested()
 	if (MenuSwitcher && WBP_SettingsMenu)
 	{
 		MenuSwitcher->SetActiveWidget(WBP_SettingsMenu);
-		UE_LOGFMT(LogTemp, Warning, "UMenuContainerWidget::HandleSettingsMenuRequested()");
 	}
+}
+
+void UMenuContainerWidget::HandleQuitMenuRequested()
+{
+	if (MenuSwitcher && WBP_QuitGameMenu)
+	{
+		MenuSwitcher->SetActiveWidget(WBP_QuitGameMenu);
+	}
+}
+
+void UMenuContainerWidget::HandleReturnMainMenuRequested()
+{
+	ResetToMainMenu();
 }
