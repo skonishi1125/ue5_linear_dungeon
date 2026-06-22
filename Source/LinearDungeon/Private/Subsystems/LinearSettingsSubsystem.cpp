@@ -2,6 +2,62 @@
 #include "Logging/StructuredLog.h"
 
 #include "GameFramework/GameUserSettings.h"
+#include "SaveGames/LinearSettingsSaveGame.h"
+#include "Subsystems/LinearAudioSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+
+// ゲーム起動時に設定ファイルがあれば、それをキャストして保存されている値を適用
+void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	if (UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0))
+	{
+		if (ULinearSettingsSaveGame* LoadedSettings = Cast<ULinearSettingsSaveGame>(UGameplayStatics::LoadGameFromSlot(SettingsSlotName, 0)))
+		{
+			ThisMouseSensitivity = LoadedSettings->MouseSensitivity;
+			ThisBGMVolume = LoadedSettings->BGMVolume;
+
+			// 補足: Subsystem は GameInstance -> Subsystem という流れで呼べるが、
+			// GI という変数に格納しなくてもこんな感じで呼べる
+			if (ULinearAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<ULinearAudioSubsystem>())
+			{
+				AudioSubsystem->SetBGMVolume(ThisBGMVolume);
+			}
+		}
+	}
+}
+
+// 設定ファイルの保存処理
+void ULinearSettingsSubsystem::SaveSettings()
+{
+	ULinearSettingsSaveGame* SaveObj = Cast<ULinearSettingsSaveGame>(UGameplayStatics::CreateSaveGameObject(ULinearSettingsSaveGame::StaticClass()));
+	if (SaveObj)
+	{
+		// データ保管
+		SaveObj->MouseSensitivity = ThisMouseSensitivity;
+		SaveObj->BGMVolume = ThisBGMVolume;
+
+		UGameplayStatics::SaveGameToSlot(SaveObj, SettingsSlotName, 0); // 非同期ではないが、ファイル自体が軽いのでそこまで重くならない
+	}
+}
+
+// UI から値を受け取り、自身のスロットに書き込み、AudioSubsystem を呼ぶ
+void ULinearSettingsSubsystem::SetBGMVolume(float ClampedVolume)
+{
+	ThisBGMVolume = ClampedVolume;
+	SaveSettings();
+	UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetBGMVolume()");
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
+		{
+			AudioSubsystem->SetBGMVolume(ClampedVolume);
+		}
+	}
+}
+
 
 void ULinearSettingsSubsystem::SetGraphicsQuality(int32 QualityLevel)
 {
@@ -43,7 +99,8 @@ int32 ULinearSettingsSubsystem::GetGraphicsQuality() const
 
 void ULinearSettingsSubsystem::SetMouseSensitivity(float ClampedInSensitivity)
 {
-	MouseSensitivity = ClampedInSensitivity;
+	ThisMouseSensitivity = ClampedInSensitivity;
+	SaveSettings();
 	UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetMouseSensitivity(), {0}", ClampedInSensitivity);
 }
 
