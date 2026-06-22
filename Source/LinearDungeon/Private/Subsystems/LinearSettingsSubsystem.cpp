@@ -18,6 +18,10 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			ThisMouseSensitivity = LoadedSettings->MouseSensitivity;
 			ThisBGMVolume = LoadedSettings->BGMVolume;
 
+			// マウス感度の反映は必要ない
+			// (ThisMouseSensitivity を Player が直接参照する形になっているので、↑だけでOK)
+
+			// ボリューム設定
 			// 補足: Subsystem は GameInstance -> Subsystem という流れで呼べるが、
 			// GI という変数に格納しなくてもこんな感じで呼べる
 			if (ULinearAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<ULinearAudioSubsystem>())

@@ -1,4 +1,6 @@
 #include "Subsystems/LinearAudioSubsystem.h"
+#include "Logging/StructuredLog.h"
+
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -44,6 +46,7 @@ void ULinearAudioSubsystem::SetBGMVolume(float ClampedVolume)
 	{
 		BGMAudioComponent->SetVolumeMultiplier(ClampedVolume);
 		CurrentBGMVolume = ClampedVolume;
+		UE_LOGFMT(LogTemp, Warning, "ULinearAudioSubsystem::SetBGMVolume() Settings ClampedVolume!");
 	}
 
 }
