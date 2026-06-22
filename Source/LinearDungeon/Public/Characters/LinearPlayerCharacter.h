@@ -40,8 +40,11 @@ class ULinearDungeonOverlay;
 // ターゲットカメラ
 class UPlayerTargetingComponent;
 
-// テキスト関連
+// 会話関連
 class ULinearDialogueComponent;
+class UInteractMarker;
+
+
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface, public ISaveInterface
@@ -63,8 +66,6 @@ public:
 	) override;
 	virtual void OnSaveGame(ULinearSaveGame* SaveGameObj) override;
 	virtual void OnLoadGame(ULinearSaveGame* SaveGameObj) override;
-
-
 
 	// インタラクト DialogueComponent 関連
 	// ↑の ItemBase と同じ処理だが、 BP に慣れるためにActor を格納処理は BP で 作ってみる
@@ -185,6 +186,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive; // 死亡時のポーズ
 
+	// ===== Interact 関連 =====
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UInteractMarker> InteractMarkerClass;
+
 private:
 	// ===== Character 設定 =====
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
@@ -270,6 +275,9 @@ private:
 	UFUNCTION()
 	void OnPoisePercentChanged(float NewPercent);
 
+	// ===== Interact 関連 =====
+	UPROPERTY()
+	TObjectPtr<class UInteractMarker> InteractMarkerWidget; // 生成した Widget 保持用
 	// Dialogue Text 関連
 	// 現在アクティブなダイアログ表示の情報
 	// Overlap されたものを Interact() する以外でも、ムービーシーン等でもダイアログは発生する

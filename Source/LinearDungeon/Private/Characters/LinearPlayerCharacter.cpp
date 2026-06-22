@@ -21,6 +21,7 @@
 // 会話関連
 #include "Interfaces/InteractInterface.h"
 #include "Components/LinearDialogueComponent.h"
+#include "Components/HUD/InteractMarker.h"
 
 // 音関連
 #include "Sound/SoundBase.h"
@@ -150,6 +151,39 @@ void ALinearPlayerCharacter::Tick(float DeltaTime)
 void ALinearPlayerCharacter::SetOverlappingInteractableActor(AActor* Actor)
 {
 	OverlappingInteractableActor = Actor;
+
+	// Overlap したとき, 対象を入れつつインタラクトを出す
+	if (OverlappingInteractableActor && OverlappingInteractableActor->Implements<UInteractInterface>())
+	{
+		if (!InteractMarkerWidget && InteractMarkerClass)
+		{
+			InteractMarkerWidget = CreateWidget<UInteractMarker>(GetWorld(), InteractMarkerClass);
+			if (InteractMarkerWidget)
+			{
+				InteractMarkerWidget->AddToViewport();
+			}
+		}
+
+		if (InteractMarkerWidget)
+		{
+			// Pull 型という設計で考える
+			// Interface 経由で対象からテキストを取得し、テキスト設定。表示設定にする。
+			FText PromptText = IInteractInterface::Execute_GetInteractPrompt(OverlappingInteractableActor);
+			InteractMarkerWidget->SetInteractText(PromptText);
+			InteractMarkerWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
+
+	}
+	// Overlap 解除時(Actor がヌルポインタのとき）, インタラクト非表示
+	else
+	{
+		if (InteractMarkerWidget)
+		{
+			InteractMarkerWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+
+
 }
 
 void ALinearPlayerCharacter::SetActiveDialogueComponent(ULinearDialogueComponent* DialogueComponent)
