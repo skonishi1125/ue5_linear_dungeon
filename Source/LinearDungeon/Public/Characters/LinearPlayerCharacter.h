@@ -31,6 +31,9 @@ class FName;
 class UAnimMontage;
 class USoundBase;
 
+// Particle
+class UParticleSystem;
+
 // Die 死亡通知
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeathDelegate);
 
@@ -275,6 +278,8 @@ private:
 	TArray<FName> HitReactionSectionNames{ FName("Impact"), FName("BlockImpact") };
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<USoundBase> HitSound;
+	UPROPERTY(EditAnywhere, Category = Particles)
+	TObjectPtr<UParticleSystem> HitParticle;
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<USoundBase> BlockSound;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

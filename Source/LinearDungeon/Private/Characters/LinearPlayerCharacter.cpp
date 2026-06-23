@@ -776,6 +776,15 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 	}
+
+	// パーティクル
+	if (HitParticle && GetWorld())
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(), HitParticle, ImpactPoint
+		);
+	}
+
 }
 
 void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)

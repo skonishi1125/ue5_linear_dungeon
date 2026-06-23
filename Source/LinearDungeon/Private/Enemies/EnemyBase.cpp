@@ -65,6 +65,17 @@ AEnemyBase::AEnemyBase()
 	LeftHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	LeftHandCollision->SetGenerateOverlapEvents(true);
 
+	// 左右の手の攻撃始点を決める
+	RightBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Right Box Trace Start"));
+	RightBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_r"));
+	RightBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Right Box Trace End"));
+	RightBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_r"));
+
+	LeftBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Left Box Trace Start"));
+	LeftBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_l"));
+	LeftBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Left Box Trace End"));
+	LeftBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_l"));
+
 }
 
 void AEnemyBase::BeginPlay()
@@ -176,54 +187,126 @@ void AEnemyBase::OnRightHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (OtherActor && OtherActor != this && OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	const FVector Start = RightBoxTraceStart->GetComponentLocation();
+	const FVector End = RightBoxTraceEnd->GetComponentLocation();
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	for (AActor* Actor : BoxIgnoreActors)
 	{
-		//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnRightHandOverlap");
-	
+		ActorsToIgnore.AddUnique(Actor);
+	}
+
+	FHitResult BoxHit;
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this, Start, End, FVector(5.f, 5.f, 5.f),
+		RightBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
+		ActorsToIgnore,
+		EDrawDebugTrace::None, // Debug 表示
+		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
+		true
+	);
+
+	AActor* HitActor = BoxHit.GetActor();
+
+	if (HitActor) 
+		UE_LOGFMT(LogTemp, Warning, "RightHand::Overlap! {0}", HitActor->GetName());
+	else 
+		UE_LOGFMT(LogTemp, Warning, "RightHand::No Hit");
+
+
+	if (HitActor && HitActor != this && HitActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		// 1. Damage / Poise 処理
 		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
-
-		UGameplayStatics::ApplyDamage(
-			OtherActor, FinalDamage, GetController(), this, UDamageType::StaticClass()
+		UE_LOGFMT(
+			LogTemp, Warning,
+			"AEnemyBase::OnRightHandOverlap() finalDmg: {0} finalPoise: {1}", FinalDamage, FinalPoiseDamage
 		);
 
-		// Interface に応じた固有処理
-		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
+		UGameplayStatics::ApplyDamage(HitActor, FinalDamage,
+			GetInstigator()->GetController(), this, UDamageType::StaticClass()
+		);
+
+		// 2. Interface に応じた固有処理
+		IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
 		if (HitInterface)
 		{
+			//HitInterface->GetHit(BoxHit.ImpactPoint);
 			HitInterface->Execute_GetHit(
-				OtherActor, OtherActor->GetActorLocation(), FinalPoiseDamage
+				HitActor, BoxHit.ImpactPoint, FinalPoiseDamage
 			);
 		}
+
+		// 1回の振りかぶりで、Playerに複数回当たらないようにする
+		BoxIgnoreActors.AddUnique(HitActor);
 	}
 }
 
-// TODO: 両手攻撃でどちらも処理が走ってしまうので、調整対応する
 void AEnemyBase::OnLeftHandOverlap(
 	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	if (OtherActor && OtherActor != this &&	OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
-	{
-		//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnLeftHandOverlap");
+	const FVector Start = LeftBoxTraceStart->GetComponentLocation();
+	const FVector End = LeftBoxTraceEnd->GetComponentLocation();
 
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	for (AActor* Actor : BoxIgnoreActors)
+	{
+		ActorsToIgnore.AddUnique(Actor);
+	}
+
+	FHitResult BoxHit;
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this, Start, End, FVector(5.f, 5.f, 5.f),
+		LeftBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
+		ActorsToIgnore,
+		EDrawDebugTrace::None, // Debug 表示
+		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
+		true
+	);
+
+	// TraceTypeQuery 1 に Player を感知させるには、
+	// Player の SkeletonMesh の Collision で、Visibility を Ignore 以外にしておこう
+	AActor* HitActor = BoxHit.GetActor();
+
+	if (HitActor)
+		UE_LOGFMT(LogTemp, Warning, "LeftHand::Overlap! {0}", HitActor->GetName());
+	else
+		UE_LOGFMT(LogTemp, Warning, "LeftHand::No Hit");
+
+	if (HitActor && HitActor != this && HitActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		// 1. Damage / Poise 処理
 		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
-
-		UGameplayStatics::ApplyDamage(
-			OtherActor, FinalDamage, GetController(), this, UDamageType::StaticClass()
+		UE_LOGFMT(
+			LogTemp, Warning,
+			"AEnemyBase::OnLeftHandOverlap() finalDmg: {0} finalPoise: {1}", FinalDamage, FinalPoiseDamage
 		);
 
-		// Interface に応じた固有処理
-		IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor);
+		UGameplayStatics::ApplyDamage(HitActor, FinalDamage,
+			GetInstigator()->GetController(), this, UDamageType::StaticClass()
+		);
+
+		// 2. Interface に応じた固有処理
+		IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
 		if (HitInterface)
 		{
+			//HitInterface->GetHit(BoxHit.ImpactPoint);
 			HitInterface->Execute_GetHit(
-				OtherActor, OtherActor->GetActorLocation(), FinalPoiseDamage
+				HitActor, BoxHit.ImpactPoint, FinalPoiseDamage
 			);
 		}
+
+		// 1回の振りかぶりで、Playerに複数回当たらないようにする
+		BoxIgnoreActors.AddUnique(HitActor);
 	}
 }
 
@@ -238,9 +321,9 @@ void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
 			}
 			break;
 		case EAttackCollisionType::EAC_LeftHand:
-			if (RightHandCollision)
+			if (LeftHandCollision)
 			{
-				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
 			break;
 		case EAttackCollisionType::EAC_BothHands:
@@ -248,9 +331,9 @@ void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
 			{
 				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
-			if (RightHandCollision)
+			if (LeftHandCollision)
 			{
-				RightHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
 			break;
 	}
@@ -280,11 +363,14 @@ void AEnemyBase::DeactivateAttackCollision()
 	}
 }
 
+// Romero AN_AttackCollision の Notify 終了時に呼ばれる処理
 void AEnemyBase::OnAttackCollisionNotifyEnd()
 {
 	DeactivateAttackCollision();
 	CurrentDamageMultiplier = 1.0f;
 	CurrentPoiseMultiplier = 1.0f;
+	BoxIgnoreActors.Empty(); // 重複して攻撃しない為に作った配列のリセット
+	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnAttackCollisionNotifyEnd()");
 }
 
 void AEnemyBase::OnAttackEnd()

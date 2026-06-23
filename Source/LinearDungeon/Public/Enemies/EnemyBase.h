@@ -96,6 +96,9 @@ protected:
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
 
+	// BoxTrace 判定で考慮しない Actor の配列
+	TArray<AActor*> BoxIgnoreActors;
+
 private:
 	// 被弾時のベクトル計算
 	void DirectionalHitReact(const FVector& ImpactPoint);
@@ -156,5 +159,15 @@ private:
 	UFUNCTION()
 	void ResetCharacterDie();
 
+	// BoxTrace用
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightBoxTraceEnd;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftBoxTraceEnd;
 
 };
