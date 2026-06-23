@@ -266,9 +266,17 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Interact);
 		}
 
-		if (RollingAction)
+		// 1 つのキーに複数の機能を持たせる例(Rolling / Sprint)
+		if (EvadeSprintAction)
 		{
-			EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::Rolling);
+			// 押した瞬間
+			EnhancedInputComponent->BindAction(EvadeSprintAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::EvadeSprintStarted);
+			// Hold 時間に達した瞬間
+			EnhancedInputComponent->BindAction(EvadeSprintAction, ETriggerEvent::Triggered, this, &ALinearPlayerCharacter::EvadeSprintTriggered);
+			// キーを離した瞬間
+			EnhancedInputComponent->BindAction(EvadeSprintAction, ETriggerEvent::Completed, this, &ALinearPlayerCharacter::EvadeSprintCompleted);
+			// キャンセルされた時（念のため Completed と同じ処理をさせる）
+			EnhancedInputComponent->BindAction(EvadeSprintAction, ETriggerEvent::Canceled, this, &ALinearPlayerCharacter::EvadeSprintCompleted);
 		}
 
 		if (TargetAction)
@@ -579,6 +587,61 @@ void ALinearPlayerCharacter::OnWeaponCollisionDisabled(ECollisionEnabled::Type C
 	}
 }
 
+void ALinearPlayerCharacter::EvadeSprintStarted()
+{
+	// 押した瞬間はまだダッシュしない
+	bHasSprintStarted = false;
+
+}
+
+void ALinearPlayerCharacter::EvadeSprintTriggered()
+{
+	// 指定時間が経過してTrigger が呼ばれた(長押しされた)とき、走れるかチェックして走る
+	if (CanSprint() && !bHasSprintStarted)
+	{
+		bHasSprintStarted = true;
+		StartSprint();
+	}
+}
+
+void ALinearPlayerCharacter::EvadeSprintCompleted()
+{
+
+	// キーを離したとき、ダッシュしていたら停止する
+	if (bHasSprintStarted)
+	{
+		StopSprint();
+	}
+	// キーを離したとき、ダッシュしていなかったらローリングする(ダッシュ移行前に離したということ)
+	else
+	{
+		Rolling();
+	}
+}
+
+void ALinearPlayerCharacter::StartSprint()
+{
+	// 攻撃とかその辺りの処理ができなくなるのでいらないかも
+	//ActionState = EActionState::EAS_Sprinting;
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = DashSpeed; // 通常歩行より速い値
+	}
+
+}
+
+void ALinearPlayerCharacter::StopSprint()
+{
+	if (GetCharacterMovement())
+	{
+		// 通常値
+		// TODO: 走ってる途中に攻撃を受けると戻らないかも
+		GetCharacterMovement()->MaxWalkSpeed = DefaultSpeed;
+	}
+}
+
+
 
 void ALinearPlayerCharacter::Rolling()
 {
@@ -590,11 +653,6 @@ void ALinearPlayerCharacter::Rolling()
 		AnimRootMotionTranslationScale = 1.5f;
 		PlayRollingMontage();
 	}
-	else
-	{
-		//UE_LOGFMT(LogTemp, Warning, "Cannot exec PlayRollingMontage(). Now Actioning.");
-	}
-
 }
 
 void ALinearPlayerCharacter::PlayRollingMontage()
@@ -654,6 +712,12 @@ bool ALinearPlayerCharacter::CanRolling()
 		ActionState == EActionState::EAS_Unoccupied &&
 		! GetCharacterMovement()->IsFalling()
 	;
+}
+
+
+bool ALinearPlayerCharacter::CanSprint()
+{
+	return ActionState == EActionState::EAS_Unoccupied;
 }
 
 // ダメージ処理(Interface より手前で呼ばれる)

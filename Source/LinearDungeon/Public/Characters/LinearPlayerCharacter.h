@@ -156,9 +156,20 @@ protected:
 	void Interact();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> RollingAction;
+	TObjectPtr<UInputAction> EvadeSprintAction;
+	void EvadeSprintStarted();
+	void EvadeSprintTriggered();
+	void EvadeSprintCompleted();
+	void StartSprint();
+	void StopSprint();
+	bool CanSprint();
 	void Rolling();
 	bool CanRolling();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DefaultSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashSpeed = 850.f;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> TargetAction;
@@ -254,6 +265,8 @@ private:
 	TObjectPtr<AActor> FieldSystemActor; // BP 側で割り当てる
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "RollingField")
 	TSubclassOf<AActor> FieldActorClass;
+
+	bool bHasSprintStarted = false;
 
 	// HitReaction
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
