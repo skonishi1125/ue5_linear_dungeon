@@ -108,6 +108,10 @@ void AWeapon::OnBoxOverlap(
 	// 無視する対象
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
+	if (GetOwner())
+	{
+		ActorsToIgnore.Add(GetOwner());// 武器の所有者（プレイヤー）を無視
+	}
 	for (AActor* Actor : BoxIgnoreActors)
 	{
 		ActorsToIgnore.AddUnique(Actor);
