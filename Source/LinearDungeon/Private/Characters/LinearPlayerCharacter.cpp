@@ -472,25 +472,16 @@ void ALinearPlayerCharacter::StartDefense()
 {
 	if (CanDefense())
 	{
-		//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
 		ActionState = EActionState::EAS_Defensing;
 	}
-	else
-	{
-		//UE_LOGFMT(LogTemp, Warning, "Cannot exec StartDefense()");
-	}
+
 }
 
 void ALinearPlayerCharacter::StopDefense()
 {
 	if (ActionState == EActionState::EAS_Defensing)
 	{
-		//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::StopDefense()");
 		ActionState = EActionState::EAS_Unoccupied;
-	}
-	else
-	{
-		//UE_LOGFMT(LogTemp, Warning, "Cannot exec StopDefense()");
 	}
 }
 
@@ -723,16 +714,35 @@ bool ALinearPlayerCharacter::CanSprint()
 // ダメージ処理(Interface より手前で呼ばれる)
 float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// TODO: 防御中かどうかで処理を分ける（ダメージを抑えるかとか）
+	// ローリング中は無敵
+	if (ActionState == EActionState::EAS_Rolling)
+	{
+		return 0.0f;
+	}
+
+	// 防御出来ている場合、ダメージを減らす
+	if (ActionState == EActionState::EAS_Defensing && DamageCauser != nullptr)
+	{
+		// ImpactPoint の代わりに DamageCauser の位置を使用して、ガードできているか計算
+		const FVector Forward = GetActorForwardVector();
+		const FVector CauserLocationLowered(DamageCauser->GetActorLocation().X, DamageCauser->GetActorLocation().Y, GetActorLocation().Z);
+		const FVector ToHit = (CauserLocationLowered - GetActorLocation()).GetSafeNormal();
+
+		const double DotResult = FVector::DotProduct(Forward, ToHit);
+		const bool bIsFrontalAttack = (DotResult > 0.5f); // 前方120°
+
+		if (bIsFrontalAttack)
+		{
+			// ガード成功時、HPへのダメージを減らす
+			DamageAmount *= DefenseMultiply;
+		}
+	}
 
 	if (Attributes)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
-		//UE_LOGFMT(
-		//	LogTemp, Warning, 
-		//	"ALinearPlayerCharacter::TakeDamage() CurrentHealthPercent: {0}", Attributes->GetHealthPercent()
-		//);
 	}
+
 	return DamageAmount;
 }
 
@@ -741,8 +751,61 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	const FVector& ImpactPoint, const float FinalPoiseDamage
 )
 {
-	// TODO: 防御中かどうかで Anime を調整。外積などで前方180°なら... というようにしたい
+	// 防御に成功したときでも死亡しているケースがあるので、その場合は即座に死亡処理に移る
+	if (Attributes && !Attributes->IsAlive())
+	{
+		// ヒット音
+		if (HitSound) UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 
+		// パーティクル
+		if (HitParticle && GetWorld())
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, ImpactPoint);
+
+		Die();
+		return;
+	}
+
+	// ローリング中なら無敵のため無視
+	if (ActionState == EActionState::EAS_Rolling)
+	{
+		return;
+	}
+
+	// 防御処理
+	// 攻撃の方向を計算
+	const FVector Forward = GetActorForwardVector();
+	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+
+	const double DotResult = FVector::DotProduct(Forward, ToHit);
+	const bool bIsFrontalAttack = (DotResult > 0.5f); // 前方 120°
+
+	if (ActionState == EActionState::EAS_Defensing && bIsFrontalAttack)
+	{
+		// ガード成立時のPoise計算
+		float ExcessPoiseDamage = 0.f;
+		const float GuardPoiseDamage = FinalPoiseDamage * DefenseMultiply;
+
+		const bool bIsGuardBroken = Attributes->IsStaggeredWithPoise(GuardPoiseDamage, ExcessPoiseDamage);
+
+		if (bIsGuardBroken)
+		{
+			// ガードブレイク発生
+			PlayHardHitReactionMontage();
+			ActionState = EActionState::EAS_Hitting;
+			if (HitSound) UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+		}
+		else
+		{
+			// 通常ガード成功
+			PlayDefenseReactionMontage();
+		}
+
+		// ガード成功 / 失敗にかかわらず以降はスキップ
+		return;
+	}
+
+	// 通常被弾
 	// アニメ再生 （やられ or 死亡）
 	if (Attributes && Attributes->IsAlive())
 	{
@@ -761,9 +824,6 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 			{
 				PlayHitReactionMontage();
 			}
-
-			// Player 側は、Poise が リセットしないような設計にする
-			//Attributes->ResetPoise(); // 怯んだときは、Poise を最大にリセット
 		}
 	}
 	else
@@ -806,6 +866,15 @@ void ALinearPlayerCharacter::PlayHardHitReactionMontage()
 	if (AnimInstance && HardHitReactionMontage)
 	{
 		AnimInstance->Montage_Play(HardHitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+	}
+}
+
+void ALinearPlayerCharacter::PlayDefenseReactionMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DefenseReactionMontage)
+	{
+		AnimInstance->Montage_Play(DefenseReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 	}
 }
 

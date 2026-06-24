@@ -100,12 +100,16 @@ bool UAttributeComponent::IsStaggeredWithPoise(float PoiseDamage, float& OutExce
 	//UE_LOGFMT(LogTemp, Warning, "UAttributeComponent::ReceivePoiseDamage() CurrentPoise: {0}", CurrentPoise);
 
 	const bool bIsStaggered = CurrentPoise <= 0.f;
+
+	// 怯まない被弾をしたとき、回復待ちタイマーをリセット（回復中の再被弾もここ）
 	//if (!bIsStaggered)
 	//{
-	//	// 怯まない被弾をしたとき、回復待ちタイマーをリセット（回復中の再被弾もここ）
 	//	MarkPoiseDamaged();
 	//	BroadcastPoisePercent();
 	//}
+
+	// ↑という仕様だったが、ダメージを受けたときは都度回復タイマーをリセットするようにしてしまう
+	// 触りながら調整していく
 	MarkPoiseDamaged();
 	BroadcastPoisePercent();
 

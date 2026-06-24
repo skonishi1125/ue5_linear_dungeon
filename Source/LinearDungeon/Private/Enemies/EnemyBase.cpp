@@ -272,7 +272,7 @@ void AEnemyBase::PerformAttackTrace(USceneComponent* TraceStart, USceneComponent
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore, 
-		EDrawDebugTrace::ForDuration, 
+		EDrawDebugTrace::None, 
 		BoxHit, 
 		true
 	);

@@ -198,6 +198,7 @@ protected:
 	// HitReaction
 	void PlayHitReactionMontage();
 	void PlayHardHitReactionMontage();
+	void PlayDefenseReactionMontage();
 	// Hard Staggerに移行するための超過ダメージの閾値
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float HardStaggerThreshold = 20.f;
@@ -278,9 +279,12 @@ private:
 	// HitReaction
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;
-
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HardHitReactionMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> DefenseReactionMontage;
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = "Defense")
+	float DefenseMultiply = .3f; // 防御時、HP / Poise にかける補正値
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<USoundBase> HitSound;
