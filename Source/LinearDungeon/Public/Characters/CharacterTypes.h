@@ -29,7 +29,6 @@ enum class EDeathPose : uint8
 	EDP_Alive UMETA(DisplayName = "Alive"),
 	EDP_Death1 UMETA(DisplayName = "Death1"),
 	EDP_Death2 UMETA(DisplayName = "Death2"),
-	EDP_Death3 UMETA(DisplayName = "Death3")
 };
 
 UENUM(BlueprintType)
@@ -37,5 +36,8 @@ enum class EAttackCollisionType : uint8
 {
 	EAC_RightHand UMETA(DisplayName = "Right Hand"),
 	EAC_LeftHand UMETA(DisplayName = "Left Hand"),
-	EAC_BothHands UMETA(DisplayName = "Both Hands")
+	EAC_RightLeg UMETA(DisplayName = "Right Leg"),
+	EAC_LeftLeg UMETA(DisplayName = "Left Leg"),
+	EAC_BothHands UMETA(DisplayName = "Both Hands"),
+	EAC_BothLegs UMETA(DisplayName = "Both Legs")
 };

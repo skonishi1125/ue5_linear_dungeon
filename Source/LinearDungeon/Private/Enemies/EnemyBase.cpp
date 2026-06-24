@@ -52,10 +52,18 @@ AEnemyBase::AEnemyBase()
 	RightHandCollision->SetupAttachment(GetMesh(), FName("hand_r")); // Bone に割り当てる
 	RightHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RightHandCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	// Player(Pawn) に対してのみ動作させる
+	// Player(Pawn) に対してのみ動作させるような形で設計
 	RightHandCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	RightHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	RightHandCollision->SetGenerateOverlapEvents(true);
+
+	RightLegCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightLegBox"));
+	RightLegCollision->SetupAttachment(GetMesh(), FName("calf_r"));
+	RightLegCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RightLegCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	RightLegCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	RightLegCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	RightLegCollision->SetGenerateOverlapEvents(true);
 
 	LeftHandCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandBox"));
 	LeftHandCollision->SetupAttachment(GetMesh(), FName("hand_l"));
@@ -65,16 +73,34 @@ AEnemyBase::AEnemyBase()
 	LeftHandCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	LeftHandCollision->SetGenerateOverlapEvents(true);
 
-	// 左右の手の攻撃始点を決める
-	RightBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Right Box Trace Start"));
-	RightBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_r"));
-	RightBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Right Box Trace End"));
-	RightBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_r"));
+	LeftLegCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftLegBox"));
+	LeftLegCollision->SetupAttachment(GetMesh(), FName("calf_l"));
+	LeftLegCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	LeftLegCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	LeftLegCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	LeftLegCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	LeftLegCollision->SetGenerateOverlapEvents(true);
 
-	LeftBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Left Box Trace Start"));
-	LeftBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_l"));
-	LeftBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Left Box Trace End"));
-	LeftBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_l"));
+	// 左右手足の攻撃始点を決める
+	RightHandBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Right Hand Box Trace Start"));
+	RightHandBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_r"));
+	RightHandBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Right Hand Box Trace End"));
+	RightHandBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_r"));
+
+	RightLegBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Right Leg Box Trace Start"));
+	RightLegBoxTraceStart->SetupAttachment(GetMesh(), FName("calf_r"));
+	RightLegBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Right Leg Box Trace End"));
+	RightLegBoxTraceEnd->SetupAttachment(GetMesh(), FName("calf_r"));
+
+	LeftHandBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Left Hand Box Trace Start"));
+	LeftHandBoxTraceStart->SetupAttachment(GetMesh(), FName("hand_l"));
+	LeftHandBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Left Hand Box Trace End"));
+	LeftHandBoxTraceEnd->SetupAttachment(GetMesh(), FName("hand_l"));
+
+	LeftLegBoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Left Leg Box Trace Start"));
+	LeftLegBoxTraceStart->SetupAttachment(GetMesh(), FName("calf_l"));
+	LeftLegBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Left Leg Box Trace End"));
+	LeftLegBoxTraceEnd->SetupAttachment(GetMesh(), FName("calf_l"));
 
 }
 
@@ -154,7 +180,7 @@ void AEnemyBase::Die()
 	{
 		AnimInstance->Montage_Play(DeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 
-		const int32 Selection = FMath::RandRange(0, 2);
+		const int32 Selection = FMath::RandRange(0, 1);
 		FName SectionName = FName();
 		switch (Selection)
 		{
@@ -166,16 +192,12 @@ void AEnemyBase::Die()
 			SectionName = FName("Death2");
 			DeathPose = EDeathPose::EDP_Death2;
 			break;
-		case 2:
-			SectionName = FName("Death3");
-			DeathPose = EDeathPose::EDP_Death3;
-			break;
 		default:
 			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
 
-		UE_LOGFMT(LogTemp, Warning, "Playing DeathMontage {Name}", SectionName);
+		//UE_LOGFMT(LogTemp, Warning, "Playing DeathMontage {Name}", SectionName);
 
 	}
 
@@ -187,8 +209,8 @@ void AEnemyBase::OnRightHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	const FVector Start = RightBoxTraceStart->GetComponentLocation();
-	const FVector End = RightBoxTraceEnd->GetComponentLocation();
+	const FVector Start = RightHandBoxTraceStart->GetComponentLocation();
+	const FVector End = RightHandBoxTraceEnd->GetComponentLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
@@ -201,7 +223,7 @@ void AEnemyBase::OnRightHandOverlap(
 
 	UKismetSystemLibrary::BoxTraceSingle(
 		this, Start, End, FVector(5.f, 5.f, 5.f),
-		RightBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
+		RightHandBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
 		ActorsToIgnore,
 		EDrawDebugTrace::None, // Debug 表示
 		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
@@ -251,8 +273,8 @@ void AEnemyBase::OnLeftHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	const FVector Start = LeftBoxTraceStart->GetComponentLocation();
-	const FVector End = LeftBoxTraceEnd->GetComponentLocation();
+	const FVector Start = LeftHandBoxTraceStart->GetComponentLocation();
+	const FVector End = LeftHandBoxTraceEnd->GetComponentLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
@@ -265,7 +287,7 @@ void AEnemyBase::OnLeftHandOverlap(
 
 	UKismetSystemLibrary::BoxTraceSingle(
 		this, Start, End, FVector(5.f, 5.f, 5.f),
-		LeftBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
+		LeftHandBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
 		ActorsToIgnore,
 		EDrawDebugTrace::None, // Debug 表示
 		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
@@ -326,6 +348,18 @@ void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
 				LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
 			break;
+		case EAttackCollisionType::EAC_RightLeg:
+			if (RightLegCollision)
+			{
+				RightLegCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
+		case EAttackCollisionType::EAC_LeftLeg:
+			if (LeftLegCollision)
+			{
+				LeftLegCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
 		case EAttackCollisionType::EAC_BothHands:
 			if (RightHandCollision)
 			{
@@ -334,6 +368,16 @@ void AEnemyBase::ActivateAttackCollision(EAttackCollisionType CollisionType)
 			if (LeftHandCollision)
 			{
 				LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			break;
+		case EAttackCollisionType::EAC_BothLegs:
+			if (RightLegCollision)
+			{
+				RightLegCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			if (LeftLegCollision)
+			{
+				LeftLegCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			}
 			break;
 	}
@@ -357,9 +401,19 @@ void AEnemyBase::DeactivateAttackCollision()
 		RightHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	if (RightLegCollision)
+	{
+		RightLegCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
 	if (LeftHandCollision)
 	{
 		LeftHandCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (LeftLegCollision)
+	{
+		LeftLegCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -373,9 +427,10 @@ void AEnemyBase::OnAttackCollisionNotifyEnd()
 	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnAttackCollisionNotifyEnd()");
 }
 
+// Delegate に登録されたタスクを実行
+// 例えば、BT に Attack の挙動が正常に終了したことなどを伝えて、攻撃終了後どうするか、みたいな処理を決める
 void AEnemyBase::OnAttackEnd()
 {
-	// Delegate に登録したタスクの実行
 	OnAttackEndDelegate.Broadcast();
 }
 
@@ -413,30 +468,17 @@ AActor* AEnemyBase::OnGetNextPatrolTarget()
 
 void AEnemyBase::OnPerformAttack()
 {
-	//UE_LOGFMT(LogTemp, Log, "AEnemyBase::PerformAttack() Attack!");
-
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage)
+
+	if (AnimInstance && AttackMontages.Num() > 0)
 	{
-		AnimInstance->Montage_Play(AttackMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		int32 MaxRange = AttackMontages.Num() - 1;
+		const int32 AttackIndex = FMath::RandRange(0, MaxRange);
 
-		const int32 Selection = FMath::RandRange(0, 1);
-		FName SectionName = FName();
-		switch (Selection)
+		if (AttackMontages[AttackIndex] != nullptr)
 		{
-		case 0:
-			SectionName = FName("Attack1");
-			break;
-		case 1:
-			SectionName = FName("Attack2");
-			break;
-		default:
-			break;
+			AnimInstance->Montage_Play(AttackMontages[AttackIndex], 1.0f);
 		}
-		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
-
-		//UE_LOGFMT(LogTemp, Warning, "Playing AttackMontage {Name}", SectionName);
-
 	}
 }
 

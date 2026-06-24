@@ -127,8 +127,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> DeathMontage;
 
+	// TArray として 攻撃パターンを持たせることで、敵に応じて色々な攻撃パターンを持たせられるようにする
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TObjectPtr<UAnimMontage> AttackMontage;
+	TArray<UAnimMontage*> AttackMontages;
 
 	// BT 用
 	TObjectPtr<ALinearEnemyAIController> CachedAIController;
@@ -140,14 +141,41 @@ private:
 	TArray<AActor*> PatrolTargets;
 
 	// ===== 攻撃処理 =====
+	// Collision
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> RightHandCollision;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> RightLegCollision;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> LeftHandCollision;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> LeftLegCollision;
+
+	// BoxTrace 始点 / 終点
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightHandBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightHandBoxTraceEnd;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightLegBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> RightLegBoxTraceEnd;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftHandBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftHandBoxTraceEnd;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftLegBoxTraceStart;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> LeftLegBoxTraceEnd;
+
+	// Player 追跡
 	bool bIsTrackingTarget = false;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double TrackingInterpSpeed = 5.0;
 	void UpdateTrackingRotation(float DeltaTime);
+
+	// 攻撃パラメータ
 	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float BaseDamage = 20.f; // 基礎攻撃力
 	float CurrentDamageMultiplier = 1.0f; // 攻撃倍率
@@ -159,15 +187,6 @@ private:
 	UFUNCTION()
 	void ResetCharacterDie();
 
-	// BoxTrace用
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> RightBoxTraceStart;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> RightBoxTraceEnd;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> LeftBoxTraceStart;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> LeftBoxTraceEnd;
 
 };
