@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 
 	// UŒ‚ˆ—
 	CachedOwnerComp = &OwnerComp; // AttackEnd ‚Å OwnerComp ‚ðŽg‚¤‚½‚ß‚ÉŠi”[‚µ‚Ä‚¨‚­
-	EnemyPawn->OnAttackEndDelegate.AddDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
+	EnemyPawn->OnAttackEndDelegate.AddUniqueDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
 	EnemyPawn->OnPerformAttack();
 
 	return EBTNodeResult::InProgress;

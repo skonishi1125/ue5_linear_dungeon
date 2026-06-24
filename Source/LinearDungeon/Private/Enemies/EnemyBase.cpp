@@ -264,9 +264,17 @@ void AEnemyBase::PerformAttackTrace(USceneComponent* TraceStart, USceneComponent
 
 	FHitResult BoxHit;
 	UKismetSystemLibrary::BoxTraceSingle(
-		this, Start, End, FVector(10.f, 10.f, 10.f),
-		TraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
-		ActorsToIgnore, EDrawDebugTrace::None, BoxHit, true
+		this, 
+		Start, 
+		End, 
+		FVector(5.f, 5.f, 5.f),
+		TraceStart->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		ActorsToIgnore, 
+		EDrawDebugTrace::ForDuration, 
+		BoxHit, 
+		true
 	);
 
 	AActor* HitActor = BoxHit.GetActor();
