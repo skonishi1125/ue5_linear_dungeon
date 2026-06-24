@@ -84,12 +84,28 @@ protected:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult
 	);
+
+	UFUNCTION()
+	void OnRightLegOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult
+	);
+
 	UFUNCTION()
 	void OnLeftHandOverlap(
 		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 		bool bFromSweep, const FHitResult& SweepResult
 	);
+
+	UFUNCTION()
+	void OnLeftLegOverlap(
+		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult
+	);
+
 	void ActivateAttackCollision(EAttackCollisionType CollisionType);
 	void DeactivateAttackCollision();
 
@@ -141,6 +157,9 @@ private:
 	TArray<AActor*> PatrolTargets;
 
 	// ===== çUåÇèàóù =====
+	// BoxTrace ã§í èàóù
+	void PerformAttackTrace(USceneComponent* TraceStart, USceneComponent* TraceEnd, const FString& DebugSocketName);
+
 	// Collision
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> RightHandCollision;
