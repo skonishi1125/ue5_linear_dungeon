@@ -24,6 +24,10 @@ public:
 		AActor* NewOwner, APawn* NewInstigator
 	);
 
+	// ‚‚ğÌ‚Ä‚éˆ—
+	UFUNCTION()
+	void Drop(const FVector& DropLocation);
+
 protected:
 	virtual void OnItemBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

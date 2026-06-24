@@ -534,10 +534,24 @@ void ALinearPlayerCharacter::OnDialogueEnd()
 
 void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
 {
+	// 武器を装備している場合は、それを外して地面に置いて配置する
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Drop(GetEquipmentDropLocation());
+		EquippedWeapon = nullptr;
+	}
+
 	if (InWeapon)
 	{
-		InWeapon->Equip(GetMesh(), RightHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// 暫定で全て片手武器
+		// 両手武器で盾を装備している場合、盾を外す
+		if (InWeapon->GetEquippedCharacterState() == ECharacterState::ECS_EquippedTwoHandedWeapon && EquippedShield)
+		{
+			EquippedShield->Drop(GetEquipmentDropLocation());
+			EquippedShield = nullptr;
+		}
+
+		InWeapon->Equip(GetMesh(), InWeapon->GetEquipSocketName(), this, this);
+		CharacterState = InWeapon->GetEquippedCharacterState();
 		EquippedWeapon = InWeapon;
 
 		// 装備が完了したため、インタラクト対象から除外・UIを非表示にする
@@ -547,6 +561,13 @@ void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
 
 void ALinearPlayerCharacter::EquipShield(AShield* InShield)
 {
+	// 装備武器が両手武器だった場合、外す
+	if (EquippedWeapon && EquippedWeapon->GetEquippedCharacterState() == ECharacterState::ECS_EquippedTwoHandedWeapon)
+	{
+		EquippedWeapon->Drop(GetEquipmentDropLocation());
+		EquippedWeapon = nullptr;
+	}
+
 	if (InShield)
 	{
 		InShield->Equip(GetMesh(), LeftHandSocketName, this, this);
@@ -555,6 +576,19 @@ void ALinearPlayerCharacter::EquipShield(AShield* InShield)
 
 		SetOverlappingInteractableActor(nullptr);
 	}
+}
+
+FVector ALinearPlayerCharacter::GetEquipmentDropLocation() const
+{
+	// Player の周囲, 360° ランダムな位置に装備を捨てる
+	constexpr float DropDistance = 100.f;
+	const float AngleRadians = FMath::DegreesToRadians(FMath::FRandRange(0.f, 360.f));
+	const FVector DropDirection(
+		FMath::Cos(AngleRadians),
+		FMath::Sin(AngleRadians),
+		0.f
+	);
+	return GetActorLocation() + DropDirection * DropDistance;
 }
 
 void ALinearPlayerCharacter::OnWeaponCollisionEnabled(

@@ -108,6 +108,8 @@ public:
 	void EquipWeapon(AWeapon* InWeapon);
 	void EquipShield(AShield* InShield);
 
+	FVector GetEquipmentDropLocation() const;
+
 
 	// ===== Debug =====
 	//UFUNCTION(Exec)
@@ -248,7 +250,9 @@ private:
 	TObjectPtr<AWeapon> EquippedWeapon;
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AShield> EquippedShield;
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	FName RightHandSocketName = "RightHandSocket";
+	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	FName LeftHandSocketName = "LeftHandSocket";
 
 	// ===== Overlap している Interactable な Actor 情報を格納する変数

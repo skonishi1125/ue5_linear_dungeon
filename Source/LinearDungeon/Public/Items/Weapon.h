@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Items/ItemBase.h"
 #include "Interfaces/InteractInterface.h"
+#include "Characters/CharacterTypes.h"
 
 #include "Weapon.generated.h"
 
@@ -31,6 +32,14 @@ public:
 
 	// 武器判定で考慮しない Actor の配列
 	TArray<AActor*> BoxIgnoreActors; // 攻撃モーション中の一時的なリストなので、生ポインタで良い
+
+	// ゲッタ
+	FORCEINLINE FName GetEquipSocketName() { return EquipSocketName; }
+	FORCEINLINE ECharacterState GetEquippedCharacterState() { return EquippedCharacterState; }
+
+	// 武器を捨てる処理
+	UFUNCTION()
+	void Drop(const FVector& DropLocation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,6 +70,12 @@ protected:
 	void CreateFields(const FVector& FieldLocation);
 
 private:
+	// アタッチするソケットの名前と、武器タイプを BP 側で設定できるようにする
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
+	FName EquipSocketName;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
+	ECharacterState EquippedCharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	TObjectPtr<USoundBase> EquipSound;
 

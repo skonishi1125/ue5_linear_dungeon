@@ -101,3 +101,21 @@ void AShield::OnItemEndOverlap(
 	}
 
 }
+
+void AShield::Drop(const FVector& DropLocation)
+{
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	SetOwner(nullptr);
+	SetInstigator(nullptr);
+	SetActorLocation(DropLocation);
+	ItemState = EItemState::EIS_Dropped;
+	SetActorTickEnabled(true);
+	if (OverlapSphere)
+	{
+		OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	if (NSEffect)
+	{
+		NSEffect->Activate();
+	}
+}

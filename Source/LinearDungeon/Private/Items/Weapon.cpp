@@ -213,3 +213,25 @@ void AWeapon::ResetMultipliers()
 	CurrentPoiseMultiplier = 1.f;
 }
 
+void AWeapon::Drop(const FVector& DropLocation)
+{
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	SetOwner(nullptr);
+	SetInstigator(nullptr);
+	SetActorLocation(DropLocation);
+	ItemState = EItemState::EIS_Dropped;
+	SetActorTickEnabled(true);
+	if (OverlapSphere)
+	{
+		OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	if (WeaponBox)
+	{
+		WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (NSEffect)
+	{
+		NSEffect->Activate();
+	}
+}
+
