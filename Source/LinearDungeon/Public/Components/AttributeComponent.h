@@ -26,7 +26,7 @@ public:
 
 	// Poise ŠÖ˜A
 	float GetPoisePercent() const;
-	bool IsStaggeredWithPoise(float PoiseDamage);
+	bool IsStaggeredWithPoise(float PoiseDamage, float& OutExcessDamage);
 	void ResetPoise();
 
 	FOnHealthPercentChangedDelegate OnHealthPercentChanged;

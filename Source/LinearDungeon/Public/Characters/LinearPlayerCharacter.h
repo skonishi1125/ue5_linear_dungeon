@@ -197,6 +197,10 @@ protected:
 
 	// HitReaction
 	void PlayHitReactionMontage();
+	void PlayHardHitReactionMontage();
+	// Hard Staggerに移行するための超過ダメージの閾値
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float HardStaggerThreshold = 20.f;
 	UFUNCTION(BlueprintCallable)
 	void OnHitReactionAnimEnded();
 	void Die();
@@ -274,8 +278,10 @@ private:
 	// HitReaction
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> HitReactionMontage;
+
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	TArray<FName> HitReactionSectionNames{ FName("Impact"), FName("BlockImpact") };
+	TObjectPtr<UAnimMontage> HardHitReactionMontage;
+
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<USoundBase> HitSound;
 	UPROPERTY(EditAnywhere, Category = Particles)

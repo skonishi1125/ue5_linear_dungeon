@@ -741,25 +741,29 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 	const FVector& ImpactPoint, const float FinalPoiseDamage
 )
 {
-	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::GetHit_Implementation()");
-
 	// TODO: 防御中かどうかで Anime を調整。外積などで前方180°なら... というようにしたい
 
 	// アニメ再生 （やられ or 死亡）
 	if (Attributes && Attributes->IsAlive())
 	{
 		// 生存 Poise に応じて 怯みアニメ再生
-		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
+		float ExcessPoiseDamage = 0.f;
+
+		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage, ExcessPoiseDamage);
 		if (bIsStaggered)
 		{
-			//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Broken!");
-			PlayHitReactionMontage(); // 怯みアニメの再生
 			ActionState = EActionState::EAS_Hitting;
-			Attributes->ResetPoise(); // 怯んだときは、Poise を最大にリセット
-		}
-		else
-		{
-			//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter Poise Intaract: No reaction.");
+			if (ExcessPoiseDamage >= HardStaggerThreshold)
+			{
+				PlayHardHitReactionMontage();
+			}
+			else
+			{
+				PlayHitReactionMontage();
+			}
+
+			// Player 側は、Poise が リセットしないような設計にする
+			//Attributes->ResetPoise(); // 怯んだときは、Poise を最大にリセット
 		}
 	}
 	else
@@ -787,41 +791,21 @@ void ALinearPlayerCharacter::GetHit_Implementation(
 
 }
 
-void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
-{
-	if (!SaveGameObj) return;
-
-	// 自身のデータをSaveGameObj に格納する
-	// (Player の情報は、Player が書き込むというような責務を持たせる）
-	SaveGameObj->PlayerTransform = GetActorTransform();
-	if (Attributes)
-	{
-		SaveGameObj->PlayerHealth = Attributes->GetCurrentHealth();
-	}
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnSaveGame() Data extracted successfully.");
-}
-
-void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
-{
-	if (!SaveGameObj) return;
-
-	// SaveGameObj の情報を自身に反映
-	// (Player に関する情報は自分が取り出して、自分で設定）
-	SetActorTransform(SaveGameObj->PlayerTransform);
-	if (Attributes)
-	{
-		Attributes->SetCurrentHealth(SaveGameObj->PlayerHealth);
-	}
-
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnLoadGame() Data applied successfully.");
-}
-
 void ALinearPlayerCharacter::PlayHitReactionMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HitReactionMontage)
 	{
 		AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+	}
+}
+
+void ALinearPlayerCharacter::PlayHardHitReactionMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HardHitReactionMontage)
+	{
+		AnimInstance->Montage_Play(HardHitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 	}
 }
 
@@ -892,6 +876,35 @@ void ALinearPlayerCharacter::AdvanceDialogue()
 	{
 		ActiveDialogueComponent->AdvanceDialogue();
 	}
+}
+
+void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
+{
+	if (!SaveGameObj) return;
+
+	// 自身のデータをSaveGameObj に格納する
+	// (Player の情報は、Player が書き込むというような責務を持たせる）
+	SaveGameObj->PlayerTransform = GetActorTransform();
+	if (Attributes)
+	{
+		SaveGameObj->PlayerHealth = Attributes->GetCurrentHealth();
+	}
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnSaveGame() Data extracted successfully.");
+}
+
+void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
+{
+	if (!SaveGameObj) return;
+
+	// SaveGameObj の情報を自身に反映
+	// (Player に関する情報は自分が取り出して、自分で設定）
+	SetActorTransform(SaveGameObj->PlayerTransform);
+	if (Attributes)
+	{
+		Attributes->SetCurrentHealth(SaveGameObj->PlayerHealth);
+	}
+
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnLoadGame() Data applied successfully.");
 }
 
 

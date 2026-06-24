@@ -87,18 +87,27 @@ void UAttributeComponent::ResetPoise()
 }
 
 // Poise ダメージを受けたとき、Poise 回復用タイマーをセットして怯み判定の t/f を返す
-bool UAttributeComponent::IsStaggeredWithPoise(float PoiseDamage)
+// また、併せてどの程度超過したのかも、OutExcessDamage として返す
+bool UAttributeComponent::IsStaggeredWithPoise(float PoiseDamage, float& OutExcessDamage)
 {
+	OutExcessDamage = 0.f;
+	if (CurrentPoise < PoiseDamage)
+	{
+		OutExcessDamage = PoiseDamage - CurrentPoise;
+	}
+
 	ApplyPoiseDamage(PoiseDamage);
-	UE_LOGFMT(LogTemp, Warning, "UAttributeComponent::ReceivePoiseDamage() CurrentPoise: {0}", CurrentPoise);
+	//UE_LOGFMT(LogTemp, Warning, "UAttributeComponent::ReceivePoiseDamage() CurrentPoise: {0}", CurrentPoise);
 
 	const bool bIsStaggered = CurrentPoise <= 0.f;
-	if (!bIsStaggered)
-	{
-		// 怯まない被弾をしたとき、回復待ちタイマーをリセット（回復中の再被弾もここ）
-		MarkPoiseDamaged();
-		BroadcastPoisePercent();
-	}
+	//if (!bIsStaggered)
+	//{
+	//	// 怯まない被弾をしたとき、回復待ちタイマーをリセット（回復中の再被弾もここ）
+	//	MarkPoiseDamaged();
+	//	BroadcastPoisePercent();
+	//}
+	MarkPoiseDamaged();
+	BroadcastPoisePercent();
 
 	return bIsStaggered;
 }
@@ -133,9 +142,10 @@ void UAttributeComponent::UpdatePoiseRecoveryTickEnabled()
 	SetComponentTickEnabled(bShouldTick);
 }
 
+// 敵なら上部の Widget, Player なら 自身の HUD に反映するための通知
 void UAttributeComponent::BroadcastPoisePercent() const
 {
 	// const 関数の中からは、同じく const 指定された関数しか呼べない
-	// ゲッタ関数にも const をつけておこう
+	// ゲッタ関数 GetPoisePercent にも const をつけておく必要があるので注意
 	OnPoisePercentChanged.Broadcast(GetPoisePercent());
 }

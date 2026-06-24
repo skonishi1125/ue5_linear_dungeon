@@ -503,7 +503,8 @@ void AEnemyBase::GetHit_Implementation(
 	if (Attributes && Attributes->IsAlive())
 	{
 		// ポイズ値を差し引きして、怯みチェック
-		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage);
+		float ExcessPoiseDamage = 0.f; // 現状 EnemyBase では HardHit のケースを未実装のため、使っていない
+		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage, ExcessPoiseDamage);
 		if (bIsStaggered)
 		{
 			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
