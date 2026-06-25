@@ -398,6 +398,8 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	TArray<UAnimMontage*> ExecMontages;
+
+	// 参照で受け取ったほうがいいだろうか？
 	// Halberd のケース
 	if (CharacterState == ECharacterState::ECS_EquippedTwoHandedWeapon)
 	{
