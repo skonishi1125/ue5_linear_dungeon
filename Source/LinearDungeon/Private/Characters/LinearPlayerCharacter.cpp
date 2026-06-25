@@ -397,6 +397,18 @@ void ALinearPlayerCharacter::Attack()
 void ALinearPlayerCharacter::PlayAttackMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	TArray<UAnimMontage*> ExecMontages;
+	// Halberd のケース
+	if (CharacterState == ECharacterState::ECS_EquippedTwoHandedWeapon)
+	{
+		ExecMontages = ComboHalberdMontages;
+	}
+	// 片手武器のケース
+	else if (CharacterState == ECharacterState::ECS_EquippedOneHandedWeapon)
+	{
+		ExecMontages = ComboMontages;
+	}
+
 	if (AnimInstance)
 	{
 
@@ -406,11 +418,11 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 			AnimInstance->Montage_Play(JumpAttackMontage, 1.0f);
 		}
 
-		else if (ComboMontages.Num() > 0 && ComboMontages[0] != nullptr)
+		else if (ExecMontages.Num() > 0 && ExecMontages[0] != nullptr)
 		{
 			// インデックスを0にリセットして1段目を再生
 			ComboCountIndex = 0;
-			AnimInstance->Montage_Play(ComboMontages[ComboCountIndex], 1.0f);
+			AnimInstance->Montage_Play(ExecMontages[ComboCountIndex], 1.0f);
 			ComboCountIndex++;
 		}
 	}
@@ -429,13 +441,25 @@ void ALinearPlayerCharacter::OnCheckCombo()
 		bSaveAttack = false;
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance && ComboMontages.Num() > 0)
+		TArray<UAnimMontage*> ExecMontages;
+		// Halberd のケース
+		if (CharacterState == ECharacterState::ECS_EquippedTwoHandedWeapon)
+		{
+			ExecMontages = ComboHalberdMontages;
+		}
+		// 片手武器のケース
+		else if (CharacterState == ECharacterState::ECS_EquippedOneHandedWeapon)
+		{
+			ExecMontages = ComboMontages;
+		}
+
+		if (AnimInstance && ExecMontages.Num() > 0)
 		{
 			// コンボ上限に達していない場合のみ遷移
-			if (ComboCountIndex < ComboMontages.Num())
+			if (ComboCountIndex < ExecMontages.Num())
 			{
 				// 次のMontageを再生（自動的に前のMontageからブレンドされる）
-				AnimInstance->Montage_Play(ComboMontages[ComboCountIndex], 1.0f);
+				AnimInstance->Montage_Play(ExecMontages[ComboCountIndex], 1.0f);
 				ComboCountIndex++;
 			}
 		}

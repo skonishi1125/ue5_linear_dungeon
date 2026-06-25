@@ -265,6 +265,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<UAnimMontage*> ComboMontages;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TArray<UAnimMontage*> ComboHalberdMontages;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> JumpAttackMontage;
 	int32 ComboCountIndex = 0;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Attack")
