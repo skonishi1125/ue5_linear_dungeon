@@ -62,6 +62,7 @@ public:
 	FORCEINLINE void SetCharacterActionState(EActionState NewActionState) { ActionState = NewActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; }
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 
 	// ===== Interface Override ===== 
 	virtual void GetHit_Implementation(

@@ -41,6 +41,9 @@ public:
 	UFUNCTION()
 	void Drop(const FVector& DropLocation);
 
+	// 左手の沿える位置 ゲッタとしておき、PlayerAnimInstance 等から読ませる
+	FORCEINLINE USceneComponent* GetLeftHandGrip() const { return LeftHandGrip; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -75,6 +78,8 @@ private:
 	FName EquipSocketName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
 	ECharacterState EquippedCharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USceneComponent> LeftHandGrip; // 長物用の、左手をどこに沿えるかという起点の Component
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	TObjectPtr<USoundBase> EquipSound;

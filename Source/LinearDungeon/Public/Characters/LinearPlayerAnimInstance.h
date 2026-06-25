@@ -35,4 +35,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | Character State")
 	ECharacterState CharacterState;
 
+	UPROPERTY(BlueprintReadOnly, Category = "IK")
+	FVector LeftHandIKLocation;
+	UPROPERTY(BlueprintReadOnly, Category = "IK")
+	float LeftHandIKAlpha = 0.f;
+
 };
