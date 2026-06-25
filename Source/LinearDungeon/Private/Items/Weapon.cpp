@@ -24,9 +24,18 @@ AWeapon::AWeapon()
 
 	// 武器判定設定
 	// Pawn にだけは Overlap 検知に反応しないように設定
+	//WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 通常時は NoCollision
+	//WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	//WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+	// ↑を変えた
+	// 通常時は NoCollsion (同じ), Overlap イベントのチャンネルをセット(同じ)
+	// Pawn (Capsule) に対しても Overlap イベントを拾えるようにして、相手のメッシュ依存でなくする
+	// 設定の適用
 	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 通常時は NoCollision
 	WeaponBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	WeaponBox->SetGenerateOverlapEvents(true);
 
 	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace Start"));
 	BoxTraceStart->SetupAttachment(GetRootComponent());
@@ -103,64 +112,85 @@ void AWeapon::OnBoxOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	// BoxTrace 始点と終点
-	const FVector Start = BoxTraceStart->GetComponentLocation();
-	const FVector End = BoxTraceEnd->GetComponentLocation();
-
-	// 無視する対象
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-	if (GetOwner())
+	// 無効ケースを除外
+	if (OtherActor == nullptr || OtherActor == this || OtherActor == GetOwner())
 	{
-		ActorsToIgnore.Add(GetOwner());// 武器の所有者（プレイヤー）を無視
+		return;
 	}
-	for (AActor* Actor : BoxIgnoreActors)
+	// ヒット対象を明確化（HitInterface実装Actorのみ）
+	if (!OtherActor->GetClass()->ImplementsInterface(UHitInterface::StaticClass()))
 	{
-		ActorsToIgnore.AddUnique(Actor);
+		return;
 	}
-
-	FHitResult BoxHit;
-
-	UKismetSystemLibrary::BoxTraceSingle(
-		this, Start, End, FVector(5.f, 5.f, 5.f),
-		BoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, false,
-		ActorsToIgnore, 
-		EDrawDebugTrace::None, // Debug 表示
-		BoxHit, // Hit した情報を指定の変数に格納 (& で参照渡しの形になっている)
-		true
+	// 多段ヒット防止
+	if (BoxIgnoreActors.Contains(OtherActor))
+	{
+		return;
+	}
+	// ダメージ計算
+	const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
+	const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
+	UE_LOGFMT(
+		LogTemp, Warning,
+		"AWeapon::OnBoxOverlap() finalDmg: {0} finalPoise: {1}",
+		FinalDamage, FinalPoiseDamage
 	);
-
-	if (BoxHit.GetActor())
+	// Overlap相手に直接ダメージ
+	AController* InstigatorController = nullptr;
+	if (APawn* InstigatorPawn = GetInstigator())
 	{
-		// 1. ダメージ処理
-		const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
-		const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
-		UE_LOGFMT(
-			LogTemp, Warning,
-			"AWeapon::OnBoxOverlap() finalDmg: {0} finalPoise: {1}", FinalDamage, FinalPoiseDamage
-		);
-
-		UGameplayStatics::ApplyDamage(BoxHit.GetActor(), FinalDamage,
-			GetInstigator()->GetController(), this, UDamageType::StaticClass()
-		);
-
-		// 2.Interface に応じた固有処理
-		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
-		if (HitInterface)
-		{
-			//HitInterface->GetHit(BoxHit.ImpactPoint);
-			HitInterface->Execute_GetHit(
-				BoxHit.GetActor(), BoxHit.ImpactPoint, FinalPoiseDamage
-			);
-		}
-		// 武器を振った時、同じ敵に複数回当たらないようにする
-		// 武器判定を Enabled / Disabled とするとき、リセットするようにする (Character側)
-		BoxIgnoreActors.AddUnique(BoxHit.GetActor());
-
-		// Geometry Collections 等を破壊するための力 Field 作成
-		CreateFields(BoxHit.ImpactPoint);
-
+		InstigatorController = InstigatorPawn->GetController();
 	}
+	UGameplayStatics::ApplyDamage(
+		OtherActor,
+		FinalDamage,
+		InstigatorController,
+		this,
+		UDamageType::StaticClass()
+	);
+	// ImpactPoint はSweepResult -> 補助Trace -> フォールバックの順で決定
+	FVector ImpactPoint = SweepResult.ImpactPoint;
+	if (ImpactPoint.IsNearlyZero())
+	{
+		const FVector Start = BoxTraceStart->GetComponentLocation();
+		const FVector End = BoxTraceEnd->GetComponentLocation();
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
+		if (AActor* OwnerActor = GetOwner())
+		{
+			ActorsToIgnore.Add(OwnerActor);
+		}
+		FHitResult BoxHit;
+		const bool bTraceHit = UKismetSystemLibrary::BoxTraceSingle(
+			this, Start,	End,
+			FVector(8.f, 8.f, 8.f), // 位置補正用なので広めに取る
+			BoxTraceStart->GetComponentRotation(),
+			ETraceTypeQuery::TraceTypeQuery1,
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::None,
+			BoxHit,
+			true
+		);
+
+		// 補助 Trace は座標取得のみで、失敗してもダメージ判定には影響させない
+		if (bTraceHit && BoxHit.GetActor() == OtherActor && !BoxHit.ImpactPoint.IsNearlyZero())
+		{
+			ImpactPoint = BoxHit.ImpactPoint;
+		}
+		else
+		{
+			ImpactPoint = (OtherComp != nullptr)
+				? OtherComp->GetComponentLocation()
+				: OtherActor->GetActorLocation();
+		}
+	}
+	// 固有ヒット処理
+	IHitInterface::Execute_GetHit(OtherActor, ImpactPoint, FinalPoiseDamage);
+	// 同一攻撃中の多段防止
+	BoxIgnoreActors.AddUnique(OtherActor);
+	// 破壊フィールド生成
+	CreateFields(ImpactPoint);
 	
 }
 
