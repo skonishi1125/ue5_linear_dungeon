@@ -22,6 +22,13 @@ void ULinearPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
+	LeftHandIKAlphaMultiplier = FMath::FInterpTo(
+		LeftHandIKAlphaMultiplier,
+		LeftHandIKAlphaMultiplierTarget,
+		DeltaTime,
+		LeftHandIKInterpSpeed
+	);
+
 	if (LinearPlayerCharacterMovement)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(LinearPlayerCharacterMovement->Velocity);
@@ -62,9 +69,13 @@ void ULinearPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			LeftHandIKLocation = LinearPlayerCharacter->GetMesh()->GetComponentTransform().InverseTransformPosition(GripWorldLocation);
 
 			// Alpha: 適用値 1 が最大, 0 が無し。両手武器の時だけ適用するという意味になる
-			LeftHandIKAlpha = 1.f;
+			LeftHandIKAlpha = LeftHandIKAlphaMultiplier;
 		}
 	}
 
 
+}
+void ULinearPlayerAnimInstance::SetLeftHandIKAlphaMultiplierTarget(float NewAlphaMultiplier)
+{
+	LeftHandIKAlphaMultiplierTarget = FMath::Clamp(NewAlphaMultiplier, 0.f, 1.f);
 }
