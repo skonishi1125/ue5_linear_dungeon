@@ -20,6 +20,7 @@ public:
 	// Health ŠÖ˜A
 	FORCEINLINE float GetCurrentHealth() { return CurrentHealth; }
 	FORCEINLINE void SetCurrentHealth(float SavedHealth) { CurrentHealth = SavedHealth; }
+	void ReceiveHealthHeal(float HealPoint);
 	void ReceiveHealthDamage(float Damage);
 	float GetHealthPercent() const;
 	bool IsAlive() const;

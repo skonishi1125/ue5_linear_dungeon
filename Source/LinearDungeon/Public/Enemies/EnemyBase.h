@@ -36,6 +36,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PossessedBy(AController* NewController) override;
 
+	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; }
+
 	// Interface ‚Ì Override
 	virtual void GetHit_Implementation(
 		const FVector& ImpactPoint, const float FinalPoiseDamage

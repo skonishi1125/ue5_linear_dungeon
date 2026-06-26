@@ -54,6 +54,14 @@ void UAttributeComponent::TickComponent(
 	UpdatePoiseRecoveryTickEnabled(); // CurrentPoise が Max になったら Tick() を切る
 }
 
+// 渡された値だけ、HP を回復
+void UAttributeComponent::ReceiveHealthHeal(float HealPoint)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth + HealPoint, 0.f, MaxHealth);
+	OnHealthPercentChanged.Broadcast(GetHealthPercent());
+}
+
+// 渡された値だけ、HP を減らす
 void UAttributeComponent::ReceiveHealthDamage(float Damage)
 {
 	// 0 - MaxHealth の間の数値で返す（ - になっても、Clamp して 0 を返すようにしている）
