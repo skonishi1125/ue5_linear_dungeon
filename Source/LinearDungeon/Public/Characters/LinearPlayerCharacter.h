@@ -185,6 +185,11 @@ protected:
 	TObjectPtr<UInputAction> AdvanceDialogueAction;
 	void AdvanceDialogue();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> UsePotionAction;
+	void UsePotion();
+	bool CanUsePotion();
+
 	// ===== Montages 関連 =====
 	// Attack
 	void PlayAttackMontage();
@@ -304,7 +309,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
 
-	// HUD, Overlay 関連
+	// UsePotion
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> UsePotionReactionMontage;
+
+	// ===== HUD, Overlay 関連 =====
 	void CacheLinearDungeonOverlay();
 	UPROPERTY()
 	TObjectPtr<ULinearDungeonOverlay> LinearDungeonOverlay;

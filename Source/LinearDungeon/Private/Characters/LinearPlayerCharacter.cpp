@@ -288,6 +288,12 @@ void ALinearPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		{
 			EnhancedInputComponent->BindAction(AdvanceDialogueAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::AdvanceDialogue);
 		}
+
+		if (UsePotionAction)
+		{
+			EnhancedInputComponent->BindAction(UsePotionAction, ETriggerEvent::Started, this, &ALinearPlayerCharacter::UsePotion);
+		}
+
 	}
 }
 
@@ -991,7 +997,6 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 
 void ALinearPlayerCharacter::Target()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Target()");
 	if (PlayerTargeting)
 	{
 		PlayerTargeting->OnLockOnPressed();
@@ -1000,11 +1005,31 @@ void ALinearPlayerCharacter::Target()
 
 void ALinearPlayerCharacter::AdvanceDialogue()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::AdvanceDialogue()");
 	if (ActiveDialogueComponent)
 	{
 		ActiveDialogueComponent->AdvanceDialogue();
 	}
+}
+
+void ALinearPlayerCharacter::UsePotion()
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::UsePotion()");
+	if (CanUsePotion())
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && UsePotionReactionMontage)
+		{
+			AnimInstance->Montage_Play(UsePotionReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		}
+	}
+}
+
+bool ALinearPlayerCharacter::CanUsePotion()
+{
+	// TODO: 
+	// ポーションの数が 1 個以上かどうかもチェック
+	// ポーションを飲んでいる途中に回避や攻撃ができるので、CanXxx() 系を見直す(UsingItem 等のステートを作り、できないようにするとか)
+	return ActionState == EActionState::EAS_Unoccupied;
 }
 
 void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
@@ -1018,7 +1043,6 @@ void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
 	{
 		SaveGameObj->PlayerHealth = Attributes->GetCurrentHealth();
 	}
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnSaveGame() Data extracted successfully.");
 }
 
 void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
