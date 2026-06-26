@@ -117,6 +117,10 @@ public:
 	// ANS_ModifyMoveSpeed などから呼ぶ
 	void OnUsePotionSteering(bool bCanSteer);
 
+	// Level Sequence 再生前 / 後で呼び出すセッタ関数
+	UFUNCTION(BlueprintCallable)
+	void SetInCinematic(bool bInCinematic);
+
 	// ===== Debug =====
 	//UFUNCTION(Exec)
 	//void DebugSaveGame();
@@ -344,5 +348,8 @@ private:
 	// そういったものも含めて、今処理すべきダイアログを格納したもの
 	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<ULinearDialogueComponent> ActiveDialogueComponent;
+
+	// ===== イベントシーン =====
+	bool bIsInCinematic = false; // Level Sequence 再生中かどうかのフラグ
 
 };

@@ -156,6 +156,8 @@ void ALinearPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Tick IsCinematic: {0}", bIsInCinematic);
+
 	// ロック中、カメラを敵に準拠した動きにする
 	if (PlayerTargeting && PlayerTargeting->IsLocked())
 	{
@@ -354,6 +356,8 @@ bool ALinearPlayerCharacter::CanMove()
 {
 	// アイテム使用中でも動ける
 	// ただしここに書くと、↑の CanMove() で一番上の if に該当してしまうので減速処理が効かなくなる
+	if (bIsInCinematic) return false;
+
 	return ActionState == EActionState::EAS_Unoccupied;
 }
 
@@ -390,15 +394,11 @@ void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
 
 void ALinearPlayerCharacter::TryJump()
 {
-	// 何かジャンプ前にさせたいことがあれば、ここで書く
-	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::TryJump()");
+	if (bIsInCinematic) return;
+
 	if (ActionState == EActionState::EAS_Unoccupied)
 	{
 		Super::Jump();
-	}
-	else
-	{
-		//UE_LOGFMT(LogTemp, Warning, "Cannot exec Super::Jump(). Now Actioning.");
 	}
 
 }
@@ -515,6 +515,8 @@ void ALinearPlayerCharacter::OnAttackAnimEnded()
 
 bool ALinearPlayerCharacter::CanAttack()
 {
+	if (bIsInCinematic) return false;
+
 	return
 		ActionState == EActionState::EAS_Unoccupied &&
 		EquippedWeapon != nullptr
@@ -542,6 +544,8 @@ void ALinearPlayerCharacter::StopDefense()
 
 bool ALinearPlayerCharacter::CanDefense()
 {
+	if (bIsInCinematic) return false;
+
 	return
 		ActionState == EActionState::EAS_Unoccupied &&
 		EquippedShield != nullptr
@@ -551,6 +555,8 @@ bool ALinearPlayerCharacter::CanDefense()
 
 void ALinearPlayerCharacter::Interact()
 {
+	if (bIsInCinematic) return;
+
 	// 目の前に IInteractInterface を持った Actor があれば、処理開始
 	if (OverlappingInteractableActor)
 	{
@@ -792,7 +798,8 @@ void ALinearPlayerCharacter::OnRollingFieldNotifyEnd()
 
 bool ALinearPlayerCharacter::CanRolling()
 {
-	// TODO: 攻撃の後隙中にキャンセルさせたい
+	if (bIsInCinematic) return false;
+
 	return 
 		ActionState == EActionState::EAS_Unoccupied &&
 		! GetCharacterMovement()->IsFalling()
@@ -802,6 +809,8 @@ bool ALinearPlayerCharacter::CanRolling()
 
 bool ALinearPlayerCharacter::CanSprint()
 {
+	if (bIsInCinematic) return false;
+
 	return ActionState == EActionState::EAS_Unoccupied;
 }
 
@@ -1025,6 +1034,8 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 
 void ALinearPlayerCharacter::Target()
 {
+	if (bIsInCinematic) return;
+
 	if (PlayerTargeting)
 	{
 		PlayerTargeting->OnLockOnPressed();
@@ -1041,7 +1052,6 @@ void ALinearPlayerCharacter::AdvanceDialogue()
 
 void ALinearPlayerCharacter::UsePotion()
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::UsePotion()");
 	if (CanUsePotion())
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -1054,6 +1064,8 @@ void ALinearPlayerCharacter::UsePotion()
 
 bool ALinearPlayerCharacter::CanUsePotion()
 {
+	if (bIsInCinematic) return false;
+
 	if (Inventories)
 	{
 		return Inventories->CanUsePotion() && ActionState == EActionState::EAS_Unoccupied;
@@ -1088,6 +1100,19 @@ void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
 	}
 
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnLoadGame() Data applied successfully.");
+}
+
+void ALinearPlayerCharacter::SetInCinematic(bool IsCinematic)
+{
+	bIsInCinematic = IsCinematic;
+	if (bIsInCinematic)
+	{
+		// 慣性で滑るのを防ぐため、即座に移動を停止させる
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->StopMovementImmediately();
+		}
+	}
 }
 
 
