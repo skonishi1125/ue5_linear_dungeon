@@ -11,6 +11,7 @@
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PlayerTargetingComponent.h"
+#include "Components/InventoryComponent.h"
 
 // 扱う Actor
 #include "Items/ItemBase.h"
@@ -66,6 +67,7 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 	PlayerTargeting = CreateDefaultSubobject<UPlayerTargetingComponent>(TEXT("PlayerTargeting"));
+	Inventories = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventories"));
 
 }
 
@@ -115,6 +117,12 @@ void ALinearPlayerCharacter::BindOverlayToAttributes()
 		OnHealthPercentChanged(Attributes->GetHealthPercent());
 		OnPoisePercentChanged(Attributes->GetPoisePercent());
 	}
+
+	if (Inventories)
+	{
+		Inventories->NumOfPotionChanged.AddUniqueDynamic(this, &ALinearPlayerCharacter::OnNumberOfPotionChanged);
+		OnNumberOfPotionChanged(Inventories->GetCurrentNumOfPotion());
+	}
 }
 
 // Health, Poise が Attribute で変動があったとき、
@@ -133,6 +141,14 @@ void ALinearPlayerCharacter::OnPoisePercentChanged(float NewPercent)
 	if (LinearDungeonOverlay)
 	{
 		LinearDungeonOverlay->SetPoiseBarPercent(NewPercent);
+	}
+}
+
+void ALinearPlayerCharacter::OnNumberOfPotionChanged(int32 NewNumberOfPotion)
+{
+	if (LinearDungeonOverlay)
+	{
+		LinearDungeonOverlay->SetNumberOfPotionText(NewNumberOfPotion);
 	}
 }
 
@@ -1038,10 +1054,12 @@ void ALinearPlayerCharacter::UsePotion()
 
 bool ALinearPlayerCharacter::CanUsePotion()
 {
-	// TODO: 
-	// ポーションの数が 1 個以上かどうかもチェック
-	// ポーションを飲んでいる途中に回避や攻撃ができるので、CanXxx() 系を見直す(UsingItem 等のステートを作り、できないようにするとか)
-	return ActionState == EActionState::EAS_Unoccupied;
+	if (Inventories)
+	{
+		return Inventories->CanUsePotion() && ActionState == EActionState::EAS_Unoccupied;
+	}
+
+	return false;
 }
 
 void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)

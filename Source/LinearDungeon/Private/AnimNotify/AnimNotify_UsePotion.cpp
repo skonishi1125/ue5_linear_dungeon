@@ -1,7 +1,7 @@
 #include "AnimNotify/AnimNotify_UsePotion.h"
 #include "Characters/LinearPlayerCharacter.h"
 #include "Enemies/EnemyBase.h"
-#include "Components/AttributeComponent.h"
+#include "Components/InventoryComponent.h"
 
 void UAnimNotify_UsePotion::Notify(
 	USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, 
@@ -30,15 +30,14 @@ void UAnimNotify_UsePotion::Notify(
 
 		AActor* OwnerActor = MeshComp->GetOwner();
 
-		// Ownerが誰であろうと、UAttributeComponent を持っていれば取得する
-		UAttributeComponent* Attributes = Cast<UAttributeComponent>(
-			OwnerActor->GetComponentByClass(UAttributeComponent::StaticClass())
+		// Ownerが誰であろうと、UInventoryComponent を持っていれば取得する
+		UInventoryComponent* Inventories = Cast<UInventoryComponent>(
+			OwnerActor->GetComponentByClass(UInventoryComponent::StaticClass())
 		);
 
-		// TODO: ポーションの回復量を渡す
-		if (Attributes)
+		if (Inventories)
 		{
-			Attributes->ReceiveHealthHeal(10.f);
+			Inventories->UsePotion();
 		}
 	}
 

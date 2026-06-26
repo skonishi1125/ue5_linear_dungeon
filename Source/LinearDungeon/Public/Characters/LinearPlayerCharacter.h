@@ -18,8 +18,9 @@ class UInputComponent;
 class UInputMappingContext;
 class UInputAction;
 
-// Health 関連
+// Health, Potion 関連
 class UAttributeComponent;
+class UInventoryComponent;
 
 // アイテム関連
 class AItemBase;
@@ -62,6 +63,7 @@ public:
 	FORCEINLINE void SetCharacterActionState(EActionState NewActionState) { ActionState = NewActionState; }
 	static FORCEINLINE FName GetTag() { return TagName; }
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return Attributes; }
+	FORCEINLINE UInventoryComponent* GetInventoryComponent() const { return Inventories; }
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 
 	// ===== Interface Override ===== 
@@ -244,6 +246,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等
 	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UInventoryComponent> Inventories;
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UPlayerTargetingComponent> PlayerTargeting;
 
 	// ===== SpringArm/Camera 設定値 =====
@@ -328,6 +332,8 @@ private:
 	void OnHealthPercentChanged(float NewPercent);
 	UFUNCTION()
 	void OnPoisePercentChanged(float NewPercent);
+	UFUNCTION()
+	void OnNumberOfPotionChanged(int32 NewNumberOfPotion);
 
 	// ===== Interact 関連 =====
 	UPROPERTY()

@@ -1,12 +1,13 @@
 #include "Items/Potion.h"
 #include "Logging/StructuredLog.h"
 
+#include "Characters/LinearPlayerCharacter.h"
+#include "Components/InventoryComponent.h"
+
 
 void APotion::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOGFMT(LogTemp, Warning, "Potion BeginPlay");
-
 }
 
 void APotion::OnItemBeginOverlap(
@@ -17,16 +18,22 @@ void APotion::OnItemBeginOverlap(
 	Super::OnItemBeginOverlap(
 		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult
 	);
-	UE_LOGFMT(LogTemp, Warning, "APotion::OnItemBeginOverlap");
-}
 
-void APotion::OnItemEndOverlap(
-	UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
-)
-{
-	Super::OnItemEndOverlap(
-		OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex
-	);
-	UE_LOGFMT(LogTemp, Warning, "APotion::OnItemEndOverlap");
+	// Player ‚ª Potion ‚ÉG‚ê‚½‚Æ‚«
+	if (OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		UInventoryComponent* Inventories = Cast<UInventoryComponent>(
+			OtherActor->GetComponentByClass(UInventoryComponent::StaticClass())
+		);
+
+		if (Inventories)
+		{
+			Inventories->AddPotion();
+			// TODO: Œø‰Ê‰¹–Â‚ç‚·
+			Destroy();
+		}
+	}
+
+
+
 }
