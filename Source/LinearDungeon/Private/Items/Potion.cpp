@@ -4,6 +4,10 @@
 #include "Characters/LinearPlayerCharacter.h"
 #include "Components/InventoryComponent.h"
 
+// ‰¹
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
+
 
 void APotion::BeginPlay()
 {
@@ -29,7 +33,10 @@ void APotion::OnItemBeginOverlap(
 		if (Inventories)
 		{
 			Inventories->AddPotion();
-			// TODO: Œø‰Ê‰¹–Â‚ç‚·
+			if (GetSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, GetSound, GetActorLocation());
+			}
 			Destroy();
 		}
 	}
