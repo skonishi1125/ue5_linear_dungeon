@@ -19,6 +19,7 @@ enum class EActionState : uint8
 	EAS_Hitting UMETA(DisplayName = "Hitting"), // ”í’e
 	EAS_Dying UMETA(DisplayName = "Dying"),
 	EAS_InDialogue UMETA(DisplayName = "InDialogue"), // ‰ï˜b’†
+	EAS_UsingItem UMETA(DisplayName = "UsingItem")
 
 };
 

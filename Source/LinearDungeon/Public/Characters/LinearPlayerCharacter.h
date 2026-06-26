@@ -111,6 +111,9 @@ public:
 
 	FVector GetEquipmentDropLocation() const;
 
+	// ポーション使用中、移動速度を調整するためのステアリング
+	// ANS_ModifyMoveSpeed などから呼ぶ
+	void OnUsePotionSteering(bool bCanSteer);
 
 	// ===== Debug =====
 	//UFUNCTION(Exec)
@@ -189,6 +192,7 @@ protected:
 	TObjectPtr<UInputAction> UsePotionAction;
 	void UsePotion();
 	bool CanUsePotion();
+	bool bCanUsePotionSteering = false; // アイテム使用中の方向微調整・微前進の許可フラグ
 
 	// ===== Montages 関連 =====
 	// Attack
@@ -312,6 +316,8 @@ private:
 	// UsePotion
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> UsePotionReactionMontage;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Use Potion")
+	float UsePotionSteeringMultiply = .6f;
 
 	// ===== HUD, Overlay 関連 =====
 	void CacheLinearDungeonOverlay();

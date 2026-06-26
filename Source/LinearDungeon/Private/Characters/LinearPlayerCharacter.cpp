@@ -325,12 +325,19 @@ void ALinearPlayerCharacter::Move(const FInputActionValue& Value)
 			AddMovementInput(ForwardDir, MoveVector.Y * AttackSteeringMultiply);
 			AddMovementInput(RightDir, MoveVector.X * AttackSteeringMultiply);
 		}
+		else if (ActionState == EActionState::EAS_UsingItem && bCanUsePotionSteering)
+		{
+			AddMovementInput(ForwardDir, MoveVector.Y * UsePotionSteeringMultiply);
+			AddMovementInput(RightDir, MoveVector.X * UsePotionSteeringMultiply);
+		}
 
 	}
 }
 
 bool ALinearPlayerCharacter::CanMove()
 {
+	// アイテム使用中でも動ける
+	// ただしここに書くと、↑の CanMove() で一番上の if に該当してしまうので減速処理が効かなくなる
 	return ActionState == EActionState::EAS_Unoccupied;
 }
 
@@ -621,6 +628,11 @@ FVector ALinearPlayerCharacter::GetEquipmentDropLocation() const
 		0.f
 	);
 	return GetActorLocation() + DropDirection * DropDistance;
+}
+
+void ALinearPlayerCharacter::OnUsePotionSteering(bool bCanSteer)
+{
+	bCanUsePotionSteering = bCanSteer;
 }
 
 void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
