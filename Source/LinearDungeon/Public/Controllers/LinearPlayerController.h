@@ -5,12 +5,16 @@
 #include "LinearPlayerController.generated.h"
 
 // Controller が管理する Widget
+class ULinearGameOverWidget;
 class UMenuContainerWidget;
 
 // Enhanced Input
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputLocalPlayerSubsystem;
+
+// 効果音
+class USoundBase;
 
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerController : public APlayerController
@@ -22,10 +26,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override; // キャラクターに Controller が付与したときの処理
 
 	// ===== Widget =====
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMenuContainerWidget> MenuContainerWidgetClass;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ULinearGameOverWidget> LinearGameOverWidgetClass;
 
 	// ===== Enhanced Input 関連 =====
 	virtual void SetupInputComponent() override;
@@ -41,12 +49,25 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UMenuContainerWidget> MenuContainerWidgetInstance;
+	UPROPERTY()
+	TObjectPtr<ULinearGameOverWidget> LinearGameOverWidgetInstance;
 
+	// ===== メニュー開閉関連 =====
 	UFUNCTION()
 	void CloseMenu();
-
 	bool bIsMenuOpen = false;
 
+	// ===== GameOver 関連 =====
+	UFUNCTION()
+	void OnPlayerDied();
+	void ShowGameOverUI();
+	void HideGameOverText();
+	void RestartGame();
+
+	FTimerHandle GameOverTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> GameOverSound;
 
 	
 };

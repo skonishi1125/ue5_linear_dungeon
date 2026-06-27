@@ -9,18 +9,34 @@
 // Widget 
 #include "Components/HUD/MenuContainerWidget.h"
 #include "Components/HUD/SaveLoadMenuWidget.h"
+#include "Components/HUD/LinearGameOverWidget.h"
 
 // UI Navigation のキー操作調整用
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
 
+// ゲームオーバー
+#include "Characters/LinearPlayerCharacter.h"
+#include "Subsystems/LinearSaveSubsystem.h"
+#include "Subsystems/LinearAudioSubsystem.h"
+
+// 音
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
+
 void ALinearPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Widget 生成 
+	// Menu と、GameOver の Widget を管理する
 	if (MenuContainerWidgetClass)
 	{
 		MenuContainerWidgetInstance = CreateWidget<UMenuContainerWidget>(this, MenuContainerWidgetClass);
+	}
+	if (LinearGameOverWidgetClass)
+	{
+		LinearGameOverWidgetInstance = CreateWidget<ULinearGameOverWidget>(this, LinearGameOverWidgetClass);
 	}
 
 	// LoadMenu のロードが済んだときに通知されるデリゲートに登録。
@@ -44,6 +60,21 @@ void ALinearPlayerController::BeginPlay()
 
 }
 
+void ALinearPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	// BeginPlay ではなく、OnPossess (憑依時)で Delegate 登録
+	// BeginPlay だと実行順序の関係で、デリゲート登録に失敗する可能性があるのでこっちでやる
+	if (ALinearPlayerCharacter* LPCharacter = Cast<ALinearPlayerCharacter>(InPawn))
+	{
+		LPCharacter->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearPlayerController::OnPlayerDied);
+		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::OnPossess() Add Delegate");
+	}
+
+
+}
+
 void ALinearPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -59,7 +90,6 @@ void ALinearPlayerController::ToggleMenu()
 {
 	if (!MenuContainerWidgetInstance) return;
 
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::ToggleMenu()");
 
 	if (bIsMenuOpen)
 	{
@@ -119,4 +149,89 @@ void ALinearPlayerController::CloseMenu()
 
 	// ポーズ解除処理
 	//UGameplayStatics::SetGamePaused(this, false);
+}
+
+void ALinearPlayerController::OnPlayerDied()
+{
+	UE_LOGFMT(LogTemp, Warning, "OnPlayerDied()");
+
+	// 死亡時、メニューは閉じる
+	if (bIsMenuOpen)
+	{
+		CloseMenu();
+	}
+
+	// プレイヤーの操作入力を完全に無効化する
+	DisableInput(this);
+	bShowMouseCursor = false;
+
+	// BGM 停止
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())
+		{
+			AudioSubsystem->StopBGM();
+		}
+	}
+
+
+	// 死亡カメラやアニメを見せるため、Timer で待機時間を取る
+	GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ALinearPlayerController::ShowGameOverUI, 3.0f, false);
+
+}
+
+void ALinearPlayerController::ShowGameOverUI()
+{
+	UE_LOGFMT(LogTemp, Warning, "ShowGameOverUI()");
+
+	// 効果音 UI の音などは、PlaySound2Dを使えばよい
+	if (GameOverSound)
+	{
+		UGameplayStatics::PlaySound2D(this, GameOverSound);
+	}
+
+	// GameOver 画面表示
+	if (LinearGameOverWidgetInstance)
+	{
+		LinearGameOverWidgetInstance->AddToViewport();
+		LinearGameOverWidgetInstance->PlayFadeInAnimation();
+
+		// UI表示後、テキストを消すまでの待機時間
+		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ALinearPlayerController::HideGameOverText, 3.0f, false);
+	}
+}
+
+void ALinearPlayerController::HideGameOverText()
+{
+	UE_LOGFMT(LogTemp, Warning, "HideGameOverText()");
+
+	if (LinearGameOverWidgetInstance)
+	{
+		LinearGameOverWidgetInstance->PlayTextFadeOutAnimation();
+
+		// テキストのフェードアウトが完了するまでの待機時間（例: 1.5秒）
+		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ALinearPlayerController::RestartGame, 1.5f, false);
+	}
+}
+
+void ALinearPlayerController::RestartGame()
+{
+	UE_LOGFMT(LogTemp, Warning, "RestartGame()");
+
+	// ゲームオーバーUIを画面から削除
+	if (LinearGameOverWidgetInstance)
+	{
+		LinearGameOverWidgetInstance->RemoveFromParent();
+	}
+
+	// 暫定対応: SaveSubsystem の固定スロット（例: スロット0）をロードしてリトライする
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+		{
+			// TODO: オートセーブデータにする
+			// CharacterState などを戻す
+			SaveSubsystem->LoadGame(0);
+		}
+	}
 }
