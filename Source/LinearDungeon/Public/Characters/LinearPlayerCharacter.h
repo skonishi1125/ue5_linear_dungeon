@@ -248,6 +248,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USpringArmComponent> DeathSpringArm;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> DeathCamera;
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UInventoryComponent> Inventories;

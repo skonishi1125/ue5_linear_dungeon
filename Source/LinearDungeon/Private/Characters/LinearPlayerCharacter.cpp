@@ -56,7 +56,7 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
 	// Component
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmBlankCharacter"));
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = DefaultArmLength;
 	SpringArm->bUsePawnControlRotation = true; // Controler の回転を SpringArmに反映させる
@@ -64,6 +64,14 @@ ALinearPlayerCharacter::ALinearPlayerCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	DeathSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("DeathSpringArm"));
+	DeathSpringArm->SetupAttachment(GetRootComponent());
+	DeathSpringArm->bUsePawnControlRotation = false;
+
+	DeathCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("DeathCamera"));
+	DeathCamera->SetupAttachment(DeathSpringArm);
+	DeathCamera->bAutoActivate = false;
 
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 	PlayerTargeting = CreateDefaultSubobject<UPlayerTargetingComponent>(TEXT("PlayerTargeting"));
@@ -156,7 +164,7 @@ void ALinearPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Tick IsCinematic: {0}", bIsInCinematic);
+	//UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Tick IsCinematic: {0}", bIsInCinematic);
 
 	// ロック中、カメラを敵に準拠した動きにする
 	if (PlayerTargeting && PlayerTargeting->IsLocked())
@@ -363,6 +371,12 @@ bool ALinearPlayerCharacter::CanMove()
 
 void ALinearPlayerCharacter::Look(const FInputActionValue& Value)
 {
+	// 死亡時は、マウス操作を切る
+	if (ActionState == EActionState::EAS_Dying)
+	{
+		return;
+	}
+
 	// ターゲットカメラ中は、マウス操作を切る
 	if (PlayerTargeting && PlayerTargeting->IsLocked())
 	{
@@ -1000,8 +1014,17 @@ void ALinearPlayerCharacter::Die()
 	// Tag を外す
 	Tags.Remove(GetTag());
 
-	// Enemy の CombatTarget を外す, カメラズーム（死亡シーンのカメラ画角にするなど）
-	// そのあたりはデリゲートでやる
+	// DeathCamera 切替え
+	if (Camera && DeathCamera)
+	{
+		Camera->Deactivate();
+		DeathCamera->Activate();
+	}
+	// TODO: 死亡処理通知でやること
+	// * Attack が実行できた時があった（稀。落ち着いたら調査する）
+	// * メニューを開けなくする / メニューを開いている間、時間は止まらないので、その間に死んだらメニューを閉じるようにする
+	// * 補正用 IK Alpha を 0 にする
+	// * GameOver UI を出す
 	OnCharacterDeathDelegate.Broadcast();
 
 }
