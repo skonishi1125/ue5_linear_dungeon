@@ -24,6 +24,14 @@ bool USaveLoadMenuWidget::Initialize()
 	{
 		SlotButton_1->OnClicked.AddDynamic(this, &USaveLoadMenuWidget::OnSlot1Clicked);
 	}
+	if (SlotButton_2)
+	{
+		SlotButton_2->OnClicked.AddDynamic(this, &USaveLoadMenuWidget::OnSlot2Clicked);
+	}
+	if (SlotButton_3)
+	{
+		SlotButton_3->OnClicked.AddDynamic(this, &USaveLoadMenuWidget::OnSlot3Clicked);
+	}
 
 
 	return true;
@@ -52,10 +60,14 @@ void USaveLoadMenuWidget::NativeConstruct()
 	SlotButtons.Empty();
 	SlotButtons.Add(SlotButton_0);
 	SlotButtons.Add(SlotButton_1);
+	SlotButtons.Add(SlotButton_2);
+	SlotButtons.Add(SlotButton_3);
 
 	SlotTimeStamps.Empty();
 	SlotTimeStamps.Add(SlotTimeStamp_0);
 	SlotTimeStamps.Add(SlotTimeStamp_1);
+	SlotTimeStamps.Add(SlotTimeStamp_2);
+	SlotTimeStamps.Add(SlotTimeStamp_3);
 
 	Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
 	Text_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
@@ -202,19 +214,9 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 // (爆速のセーブ / ロードでも、一定のロードがかかるような形にする)
 void USaveLoadMenuWidget::OnSaveLoadCompleted()
 {
-
 	// Pause 中は TimerHandle を使った処理ができないので、Tick でやる
 	bIsProcessingWait = true;
 	ProcessingWaitTime = 0.0f;
-
-	//UWorld* World = GetWorld();
-	//if (World)
-	//{
-	//	// セーブロードは最低 1.0f かかるようにする
-	//	World->GetTimerManager().SetTimer(
-	//		ProcessingTimerHandle,this,	&USaveLoadMenuWidget::FinishProcessingUI,1.0f,false // ループさせない
-	//	);
-	//}
 }
 
 // 通知完了後、1秒後に呼ばれる関数
@@ -222,7 +224,7 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 {
 	UE_LOGFMT(LogTemp, Warning, "USaveLoadMenuWidget::FinishProcessingUI()");
 
-	// Overlay 無効化、ボタン最有効化
+	// Overlay 無効化、ボタン再有効化
 	if (Overlay_Processing)
 	{
 		Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
@@ -250,14 +252,13 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 		{
 			SlotButton_0->SetKeyboardFocus();
 		}
-		UE_LOGFMT(LogTemp, Warning, "ESL_Save");
+		//UE_LOGFMT(LogTemp, Warning, "ESL_Save");
 
 	}
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		OnLoadButtonPressedDelegate.Broadcast();
-		UE_LOGFMT(LogTemp, Warning, "ESL_Load");
-
+		//UE_LOGFMT(LogTemp, Warning, "ESL_Load");
 	}
 }
 

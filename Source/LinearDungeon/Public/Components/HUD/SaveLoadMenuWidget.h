@@ -45,14 +45,28 @@ private:
 	// ===== Widget 内に設置する要素 =====
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> InfoText;
+
+	// AutoSaveSlot
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SlotButton_0;
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock>SlotTimeStamp_0;
+	
+	// 通常 Slot
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SlotButton_1;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock>SlotTimeStamp_0;
-	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock>SlotTimeStamp_1;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SlotButton_2;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock>SlotTimeStamp_2;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SlotButton_3;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock>SlotTimeStamp_3;
+
+	// ぐるぐる回るロード画面
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidget> Overlay_Processing;
 	UPROPERTY(meta = (BindWidget))
@@ -69,6 +83,8 @@ private:
 	// ボタンクリックイベントのラッパーと、実際行うコア関数
 	UFUNCTION() void OnSlot0Clicked() { ExecuteSaveOrLoad(0); }
 	UFUNCTION() void OnSlot1Clicked() { ExecuteSaveOrLoad(1); }
+	UFUNCTION() void OnSlot2Clicked() { ExecuteSaveOrLoad(2); }
+	UFUNCTION() void OnSlot3Clicked() { ExecuteSaveOrLoad(3); }
 	void ExecuteSaveOrLoad(int32 SlotIndex);
 
 	 // 全てのスロットの表示を最新にする関数
