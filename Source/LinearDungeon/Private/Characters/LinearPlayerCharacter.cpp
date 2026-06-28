@@ -1108,6 +1108,12 @@ void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
 	{
 		SaveGameObj->PlayerHealth = Attributes->GetCurrentHealth();
 	}
+
+	if (Inventories)
+	{
+		SaveGameObj->NumOfPotion = Inventories->GetCurrentNumOfPotion();
+	}
+
 }
 
 void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
@@ -1121,8 +1127,23 @@ void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
 	{
 		Attributes->SetCurrentHealth(SaveGameObj->PlayerHealth);
 	}
+	if (Inventories)
+	{
+		Inventories->SetCurrentNumOfPotion(SaveGameObj->NumOfPotion);
+	}
 
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::OnLoadGame() Data applied successfully.");
+	//if (Camera && DeathCamera)
+	//{
+	//	DeathCamera->Deactivate();
+	//	Camera->Activate();
+	//}
+
+	//ActionState = EActionState::EAS_Unoccupied;
+	//DeathPose = EDeathPose::EDP_Alive;
+
+	// TODO: 武器情報をSaveGameObj から読み取って SpawnActor -> EquipWeapon する
+
+
 }
 
 void ALinearPlayerCharacter::SetInCinematic(bool IsCinematic)

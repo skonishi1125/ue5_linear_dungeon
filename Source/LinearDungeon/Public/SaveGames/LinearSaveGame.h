@@ -17,6 +17,10 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     float PlayerHealth;
 
+    // ポーションの数
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData")
+    int32 NumOfPotion;
+
     // セーブ日時
     UPROPERTY(VisibleAnywhere, Category = "SaveData")
     FDateTime SaveDate;

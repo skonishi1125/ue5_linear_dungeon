@@ -224,14 +224,20 @@ void ALinearPlayerController::RestartGame()
 		LinearGameOverWidgetInstance->RemoveFromParent();
 	}
 
-	// 暫定対応: SaveSubsystem の固定スロット（例: スロット0）をロードしてリトライする
-	if (UGameInstance* GI = GetGameInstance())
-	{
-		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
-		{
-			// TODO: オートセーブデータにする
-			// CharacterState などを戻す
-			SaveSubsystem->LoadGame(0);
-		}
-	}
+	// SaveSubsystem ロード処理
+	// ※ Die() で調整した PlayerCharacter の全フラグを調整する必要があるのでかなり大変
+	//if (UGameInstance* GI = GetGameInstance())
+	//{
+	//	if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+	//	{
+	//		// TODO: オートセーブデータにする
+	//		// CharacterState などを戻す
+	//		SaveSubsystem->LoadGame(0);
+	//	}
+	//}
+
+	// Level 名を取得し、開き直す
+	FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
+	UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
+
 }
