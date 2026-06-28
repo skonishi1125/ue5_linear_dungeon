@@ -49,7 +49,7 @@ void ULinearSaveSubsystem::SaveGameCompleted(const FString& SlotName, const int3
     if (bSuccess)
     {
         UE_LOGFMT(LogTemp, Warning, "ULinearSaveSubsystem::SaveGameCompleted() Success. Slot: {0}", SlotName);
-        OnSaveLoadCompleted.Broadcast();
+        OnSaveCompleted.Broadcast();
     }
     else
     {
@@ -109,7 +109,6 @@ void ULinearSaveSubsystem::LoadGameCompleted(const FString& SlotName, const int3
     }
 
     UE_LOGFMT(LogTemp, Warning, "ULinearSaveSubsystem::LoadGameCompleted() Applied Data. Slot: {0}", SlotName);
-    OnSaveLoadCompleted.Broadcast();
 }
 
 // PlayerController.RestartGame() “™‚ÅŽg‚¤

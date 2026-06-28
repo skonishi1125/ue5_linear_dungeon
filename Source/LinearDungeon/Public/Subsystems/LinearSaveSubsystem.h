@@ -9,7 +9,7 @@ class ALinearPlayerCharacter;
 class USaveGame;
 
 // Save / Load 完了通知用デリゲート UI更新などに使う
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSaveLoadCompletedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSaveCompletedDelegate);
 
 UCLASS()
 class LINEARDUNGEON_API ULinearSaveSubsystem : public UGameInstanceSubsystem
@@ -18,7 +18,7 @@ class LINEARDUNGEON_API ULinearSaveSubsystem : public UGameInstanceSubsystem
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "SaveSystem")
-	FOnSaveLoadCompletedDelegate OnSaveLoadCompleted;
+	FOnSaveCompletedDelegate OnSaveCompleted;
 
 	UFUNCTION(BlueprintCallable, Category = "SaveSystem")
 	void SaveGame(int32 SlotIndex);

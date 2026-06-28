@@ -92,7 +92,7 @@ private:
 
 	// SaveSubsystem の  セーブ / ロード完了時の処理 Delegate と紐づける
 	UFUNCTION()
-	void OnSaveLoadCompleted();
+	void OnSaveCompleted();
 	
 	// セーブロード実行時のUIを操作するための変数, 関数など
 	bool bIsProcessingWait = false;

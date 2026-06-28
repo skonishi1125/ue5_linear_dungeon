@@ -46,8 +46,8 @@ void USaveLoadMenuWidget::NativeOnInitialized()
 	{
 		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
 		{
-			SaveSubsystem->OnSaveLoadCompleted.RemoveDynamic(this, &USaveLoadMenuWidget::OnSaveLoadCompleted);
-			SaveSubsystem->OnSaveLoadCompleted.AddDynamic(this, &USaveLoadMenuWidget::OnSaveLoadCompleted);
+			SaveSubsystem->OnSaveCompleted.RemoveDynamic(this, &USaveLoadMenuWidget::OnSaveCompleted);
+			SaveSubsystem->OnSaveCompleted.AddDynamic(this, &USaveLoadMenuWidget::OnSaveCompleted);
 		}
 	}
 }
@@ -243,7 +243,7 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 
 // Subsystem の SaveGame / LoadGame を受け取った後、UI を閉じる処理をタイマーで実行
 // (爆速のセーブ / ロードでも、一定のロードがかかるような形にする)
-void USaveLoadMenuWidget::OnSaveLoadCompleted()
+void USaveLoadMenuWidget::OnSaveCompleted()
 {
 	// Pause 中は TimerHandle を使った処理ができないので、Tick でやる
 	bIsProcessingWait = true;
