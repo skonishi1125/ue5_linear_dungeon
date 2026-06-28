@@ -235,15 +235,27 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 		SaveSubsystem->SetPendingLoad(SlotIndex);
 		bIsProcessingWait = true;
 		ProcessingWaitTime = 0.0f;
-		//SaveSubsystem->LoadGame(SlotIndex);
 	}
 
 }
 
-// Subsystem の SaveGame / LoadGame を受け取った後、UI を閉じる処理をタイマーで実行
-// (爆速のセーブ / ロードでも、一定のロードがかかるような形にする)
+// Subsystem の SaveGame  を受け取った後、UI を閉じる処理をタイマーで実行
+// (爆速のセーブ時に、一定のロードがかかるような形にする)
 void USaveLoadMenuWidget::OnSaveCompleted()
 {
+	// 1. 現在がセーブモードでない場合（ロード画面を開いている時など）は処理を無視する
+	if (CurrentMode != ESaveLoadMode::ESL_Save)
+	{
+		return;
+	}
+
+	// 2. プレイヤーがスロットを押して処理中（UIが表示されている）状態であるか確認する
+	// ※これがないと、セーブ画面を開いて何も押していない時にオートセーブが完了した場合にも反応する
+	if (Overlay_Processing && !Overlay_Processing->IsVisible())
+	{
+		return;
+	}
+
 	// Pause 中は TimerHandle を使った処理ができないので、Tick でやる
 	bIsProcessingWait = true;
 	ProcessingWaitTime = 0.0f;
