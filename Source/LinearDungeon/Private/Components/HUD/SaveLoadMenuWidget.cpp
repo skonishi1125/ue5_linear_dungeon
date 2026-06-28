@@ -196,6 +196,8 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	UGameInstance* GI = GetGameInstance();
 	if (!GI) return;
 
+	SelectedSlotIndex = SlotIndex;
+
 	// 実行時点で、セーブ用の Widget を出す為の処理を行う
 	if (Overlay_Processing)
 	{
@@ -273,8 +275,24 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		OnLoadButtonPressedDelegate.Broadcast();
-		FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
-		UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
+
+		const FString BaseSaveSlotName = TEXT("SaveSlot_");
+		FString SaveSlotName = FString::Printf(TEXT("%s%d"), *BaseSaveSlotName, SelectedSlotIndex);
+
+		// フォールバック用
+		FString LevelNameToLoad = UGameplayStatics::GetCurrentLevelName(this);
+
+		// スロットからセーブされたデータの名前を読み取り、その名前で Level を開く
+		if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
+		{
+			ULinearSaveGame* LoadedGame = Cast<ULinearSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));
+			if (LoadedGame && !LoadedGame->SavedLevelName.IsEmpty())
+			{
+				LevelNameToLoad = LoadedGame->SavedLevelName;
+			}
+		}
+
+		UGameplayStatics::OpenLevel(this, FName(*LevelNameToLoad));
 	}
 }
 

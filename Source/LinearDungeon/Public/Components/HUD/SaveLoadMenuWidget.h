@@ -99,4 +99,7 @@ private:
 	float ProcessingWaitTime = 0.0f;
 	void FinishProcessingUI();
 
+	// 選択されたスロットを記憶しておく変数
+	int32 SelectedSlotIndex = -1;
+
 };

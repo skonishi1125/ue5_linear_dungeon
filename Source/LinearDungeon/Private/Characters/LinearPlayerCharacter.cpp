@@ -1133,6 +1133,7 @@ void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
 		SaveGameObj->EquippedShieldClass = nullptr;
 	}
 
+	SaveGameObj->SavedLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 
 }
 

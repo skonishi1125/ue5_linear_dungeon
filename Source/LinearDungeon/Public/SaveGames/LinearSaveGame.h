@@ -23,7 +23,6 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     TSubclassOf<AShield> EquippedShieldClass;
 
-
     // プレイヤーの体力
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     float PlayerHealth;
@@ -36,4 +35,8 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "SaveData")
     FDateTime SaveDate;
 	
+    // セーブした場所の Level 名
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData")
+    FString SavedLevelName;
+
 };
