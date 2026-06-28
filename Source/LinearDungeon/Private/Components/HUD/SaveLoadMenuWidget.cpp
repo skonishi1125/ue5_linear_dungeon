@@ -109,34 +109,43 @@ void USaveLoadMenuWidget::RefreshSlotDisplay()
 		if (!SlotTimeStamps[i]) continue;
 
 		FString SaveSlotName = FString::Printf(TEXT("%s%d"), *BaseSaveSlotName, i);
+		bool bHasData = UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0);
 
 		// セーブデータが存在するかチェック
-		if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
+		if (bHasData)
 		{
-			// 存在する場合はデータをロード
+			// 存在する場合はデータをロードし、そのデータからタイムスタンプを取り出して Text に記載
 			ULinearSaveGame* LoadedGame = Cast<ULinearSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));
 			if (LoadedGame)
 			{
-				// 日時を指定フォーマットの文字列に変換してセット
 				FString DateString = LoadedGame->SaveDate.ToString(TEXT("%Y.%m.%d %H:%M:%S"));
 				SlotTimeStamps[i]->SetText(FText::FromString(DateString));
 			}
-		}
-		else
-		{
-			// セーブデータが存在しない場合
-			// TimeStamp にメッセージと、ロード画面ならボタンを押せなくする
-			SlotTimeStamps[i]->SetText(FText::FromString(TEXT("NO DATA")));
-			if (CurrentMode == ESaveLoadMode::ESL_Load)
-			{
-				UE_LOGFMT(LogTemp, Warning, "ESaveLoadMode::ESL_Load Mode");
-				SlotButtons[i]->SetIsEnabled(false);
-			}
 			else
 			{
-				// ロード -> セーブと開いたとき、有効化されるようにしておく
-				SlotButtons[i]->SetIsEnabled(true);
+				SlotTimeStamps[i]->SetText(FText::FromString(TEXT("NO DATA")));
 			}
+
+			// ボタン状態の更新
+			if (CurrentMode == ESaveLoadMode::ESL_Save)
+			{
+				if (i == 0)
+				{
+					// セーブモード時、スロット0 (AutoSave) は常に無効（オートセーブ用なので上書きできないようにしておく）
+					SlotButtons[i]->SetIsEnabled(false);
+				}
+				else
+				{
+					// その他のスロットはセーブ可能なので常に有効化
+					SlotButtons[i]->SetIsEnabled(true);
+				}
+			}
+			else if (CurrentMode == ESaveLoadMode::ESL_Load)
+			{
+				// ロードモード時は、データが存在するスロットのみ有効化
+				SlotButtons[i]->SetIsEnabled(bHasData);
+			}
+
 		}
 	}
 }
@@ -160,10 +169,20 @@ void USaveLoadMenuWidget::ActivateMenu(ESaveLoadMode InMode)
 		}
 	}
 
-	// スロットボタンへ UI Focus を移す
-	if (SlotButton_0)
+	RefreshSlotDisplay();
+
+	// フォーカスの設定
+	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
-		SlotButton_0->SetKeyboardFocus();
+		if (SlotButton_1) SlotButton_1->SetKeyboardFocus();
+	}
+	else
+	{
+		// ロードモード時、Slot0 が有効ならフォーカスを当てる
+		if (SlotButton_0 && SlotButton_0->GetIsEnabled())
+		{
+			SlotButton_0->SetKeyboardFocus();
+		}
 	}
 }
 
@@ -225,40 +244,23 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 	UE_LOGFMT(LogTemp, Warning, "USaveLoadMenuWidget::FinishProcessingUI()");
 
 	// Overlay 無効化、ボタン再有効化
-	if (Overlay_Processing)
-	{
-		Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (Text_ProcessingInfo)
-	{
-		Text_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (Circular_ProcessingInfo)
-	{
-		Circular_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
-	}
-	for (UButton* Btn : SlotButtons)
-	{
-		if (Btn) Btn->SetIsEnabled(true);
-	}
+	if (Overlay_Processing) Overlay_Processing->SetVisibility(ESlateVisibility::Hidden);
+	if (Text_ProcessingInfo) Text_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
+	if (Circular_ProcessingInfo) Circular_ProcessingInfo->SetVisibility(ESlateVisibility::Hidden);
 
 	// 処理に応じた元の後処理を実行
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
 		RefreshSlotDisplay();
-
-		// 再びスロットにフォーカスを戻す
-		if (SlotButton_0)
+		if (SlotButton_1)
 		{
-			SlotButton_0->SetKeyboardFocus();
+			SlotButton_1->SetKeyboardFocus();
 		}
-		//UE_LOGFMT(LogTemp, Warning, "ESL_Save");
 
 	}
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		OnLoadButtonPressedDelegate.Broadcast();
-		//UE_LOGFMT(LogTemp, Warning, "ESL_Load");
 	}
 }
 
