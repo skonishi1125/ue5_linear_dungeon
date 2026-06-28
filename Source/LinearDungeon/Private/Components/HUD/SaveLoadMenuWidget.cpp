@@ -121,31 +121,30 @@ void USaveLoadMenuWidget::RefreshSlotDisplay()
 				FString DateString = LoadedGame->SaveDate.ToString(TEXT("%Y.%m.%d %H:%M:%S"));
 				SlotTimeStamps[i]->SetText(FText::FromString(DateString));
 			}
+		}
+		else
+		{
+			SlotTimeStamps[i]->SetText(FText::FromString(TEXT("NO DATA")));
+		}
+
+		// ボタン状態の更新
+		if (CurrentMode == ESaveLoadMode::ESL_Save)
+		{
+			if (i == 0)
+			{
+				// セーブモード時、スロット0 (AutoSave) は常に無効（オートセーブ用なので上書きできないようにしておく）
+				SlotButtons[i]->SetIsEnabled(false);
+			}
 			else
 			{
-				SlotTimeStamps[i]->SetText(FText::FromString(TEXT("NO DATA")));
+				// その他のスロットはセーブ可能なので常に有効化
+				SlotButtons[i]->SetIsEnabled(true);
 			}
-
-			// ボタン状態の更新
-			if (CurrentMode == ESaveLoadMode::ESL_Save)
-			{
-				if (i == 0)
-				{
-					// セーブモード時、スロット0 (AutoSave) は常に無効（オートセーブ用なので上書きできないようにしておく）
-					SlotButtons[i]->SetIsEnabled(false);
-				}
-				else
-				{
-					// その他のスロットはセーブ可能なので常に有効化
-					SlotButtons[i]->SetIsEnabled(true);
-				}
-			}
-			else if (CurrentMode == ESaveLoadMode::ESL_Load)
-			{
-				// ロードモード時は、データが存在するスロットのみ有効化
-				SlotButtons[i]->SetIsEnabled(bHasData);
-			}
-
+		}
+		else if (CurrentMode == ESaveLoadMode::ESL_Load)
+		{
+			// ロードモード時は、データが存在するスロットのみ有効化
+			SlotButtons[i]->SetIsEnabled(bHasData);
 		}
 	}
 }
