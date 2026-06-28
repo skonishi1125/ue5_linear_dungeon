@@ -2,7 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+
 #include "LinearSaveGame.generated.h"
+
+class AWeapon;
+class AShield;
 
 UCLASS()
 class LINEARDUNGEON_API ULinearSaveGame : public USaveGame
@@ -12,6 +16,13 @@ public:
     // プレイヤーの座標・回転・スケール
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     FTransform PlayerTransform;
+
+    // 装備武器 | 盾
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData")
+    TSubclassOf<AWeapon> EquippedWeaponClass;
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData")
+    TSubclassOf<AShield> EquippedShieldClass;
+
 
     // プレイヤーの体力
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")

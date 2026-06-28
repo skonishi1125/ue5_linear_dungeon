@@ -24,7 +24,7 @@ public:
 
 	void Equip(
 		USceneComponent* InParent, FName InSocketName,
-		AActor* NewOwner, APawn* NewInstigator
+		AActor* NewOwner, APawn* NewInstigator, bool bPlaySound = true
 	);
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; } // Character ë§Ç≈ëÄçÏÇ∑ÇÈ
 	void SetMultipliers(float DamageMultiplier, float PoiseMultiplier);

@@ -32,7 +32,7 @@ FText AShield::GetInteractPrompt_Implementation()
 
 void AShield::Equip(
 	USceneComponent* InParent, FName InSocketName,
-	AActor* NewOwner, APawn* NewInstigator
+	AActor* NewOwner, APawn* NewInstigator, bool bPlaySound
 )
 {
 	UE_LOGFMT(LogTemp, Warning, "AShield::Equip()");
@@ -52,7 +52,7 @@ void AShield::Equip(
 	}
 
 	// 音再生
-	if (EquipSound)
+	if (EquipSound && bPlaySound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
 	}

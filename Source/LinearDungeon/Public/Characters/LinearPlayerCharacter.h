@@ -108,8 +108,8 @@ public:
 	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
 
 	// InteractInterface 実行時から盾 / 剣等から呼べるように、public で装備処理を用意しておく
-	void EquipWeapon(AWeapon* InWeapon);
-	void EquipShield(AShield* InShield);
+	void EquipWeapon(AWeapon* InWeapon, bool bPlaySound = true);
+	void EquipShield(AShield* InShield, bool bPlaySound = true);
 
 	FVector GetEquipmentDropLocation() const;
 
@@ -268,10 +268,19 @@ private:
 	// ===== Overlap したアイテム情報の格納と、割り当てるソケット =====
 	UPROPERTY(VisibleInstanceOnly) // World に配置した BP_LinearPC でだけ確認できる設定
 	TObjectPtr<AItemBase> OverlappingItem;
+
+	// 武器
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AWeapon> EquippedWeapon;
+	UPROPERTY(VisibleAnywhere)
+	TSubclassOf<AWeapon> EquippedWeaponClass; // Load 時、装備している武器をここから生成して装備させる
+	
+	// 盾
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	TObjectPtr<AShield> EquippedShield;
+	UPROPERTY(VisibleAnywhere)
+	TSubclassOf<AWeapon> EquippedShieldClass;
+	
 	UPROPERTY(VisibleAnywhere, Category = Equipment)
 	FName RightHandSocketName = "RightHandSocket";
 	UPROPERTY(VisibleAnywhere, Category = Equipment)

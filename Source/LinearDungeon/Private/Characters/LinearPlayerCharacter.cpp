@@ -607,7 +607,7 @@ void ALinearPlayerCharacter::OnDialogueEnd()
 	}
 }
 
-void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
+void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon, bool bPlaySound)
 {
 	// 武器を装備している場合は、それを外して地面に置いて配置する
 	if (EquippedWeapon)
@@ -625,7 +625,7 @@ void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
 			EquippedShield = nullptr;
 		}
 
-		InWeapon->Equip(GetMesh(), InWeapon->GetEquipSocketName(), this, this);
+		InWeapon->Equip(GetMesh(), InWeapon->GetEquipSocketName(), this, this, bPlaySound);
 		CharacterState = InWeapon->GetEquippedCharacterState();
 		EquippedWeapon = InWeapon;
 
@@ -634,7 +634,7 @@ void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon)
 	}
 }
 
-void ALinearPlayerCharacter::EquipShield(AShield* InShield)
+void ALinearPlayerCharacter::EquipShield(AShield* InShield, bool bPlaySound)
 {
 	// 装備武器が両手武器だった場合、外す
 	if (EquippedWeapon && EquippedWeapon->GetEquippedCharacterState() == ECharacterState::ECS_EquippedTwoHandedWeapon)
@@ -645,7 +645,7 @@ void ALinearPlayerCharacter::EquipShield(AShield* InShield)
 
 	if (InShield)
 	{
-		InShield->Equip(GetMesh(), LeftHandSocketName, this, this);
+		InShield->Equip(GetMesh(), LeftHandSocketName, this, this, bPlaySound);
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;// TODO: 盾だけのStateを作ってもよい
 		EquippedShield = InShield;
 
@@ -1114,6 +1114,26 @@ void ALinearPlayerCharacter::OnSaveGame(ULinearSaveGame* SaveGameObj)
 		SaveGameObj->NumOfPotion = Inventories->GetCurrentNumOfPotion();
 	}
 
+	if (EquippedWeapon)
+	{
+		SaveGameObj->EquippedWeaponClass = EquippedWeapon->GetClass();
+
+	}
+	else
+	{
+		SaveGameObj->EquippedWeaponClass = nullptr;
+	}
+
+	if (EquippedShield)
+	{
+		SaveGameObj->EquippedShieldClass = EquippedShield->GetClass();
+	}
+	else
+	{
+		SaveGameObj->EquippedShieldClass = nullptr;
+	}
+
+
 }
 
 void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
@@ -1146,9 +1166,45 @@ void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
 		Inventories->SetCurrentNumOfPotion(SaveGameObj->NumOfPotion);
 	}
 
-	// TODO: 武器情報をSaveGameObj から読み取って SpawnActor -> EquipWeapon する
+	// 武器 | 盾情報の復旧
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (SaveGameObj->EquippedWeaponClass)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+			AWeapon* SpawnedWeapon = World->SpawnActor<AWeapon>(
+				SaveGameObj->EquippedWeaponClass,
+				GetActorLocation(),
+				GetActorRotation(),
+				SpawnParams
+			);
+			if (SpawnedWeapon)
+			{
+				// 既存の装備処理を流用して、手に持たせ、State を更新する
+				EquipWeapon(SpawnedWeapon, false);
+			}
+		}
 
+		if (SaveGameObj->EquippedShieldClass)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			AShield* SpawnedShield = World->SpawnActor<AShield>(
+				SaveGameObj->EquippedShieldClass,
+				GetActorLocation(),
+				GetActorRotation(),
+				SpawnParams
+			);
+			if (SpawnedShield)
+			{
+				EquipShield(SpawnedShield, false);
+			}
+		}
+	}
 }
 
 void ALinearPlayerCharacter::SetInCinematic(bool IsCinematic)

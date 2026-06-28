@@ -21,7 +21,7 @@ public:
 
 	void Equip(
 		USceneComponent* InParent, FName InSocketName,
-		AActor* NewOwner, APawn* NewInstigator
+		AActor* NewOwner, APawn* NewInstigator, bool bPlaySound = true
 	);
 
 	// ‚‚ğÌ‚Ä‚éˆ—

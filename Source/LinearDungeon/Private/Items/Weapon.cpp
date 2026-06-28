@@ -196,7 +196,7 @@ void AWeapon::OnBoxOverlap(
 
 void AWeapon::Equip(
 	USceneComponent* InParent, FName InSocketName,
-	AActor* NewOwner, APawn* NewInstigator
+	AActor* NewOwner, APawn* NewInstigator, bool bPlaySound
 )
 {
 	// Owner, Instigator 設定
@@ -220,7 +220,7 @@ void AWeapon::Equip(
 	}
 
 	// 音再生
-	if (EquipSound)
+	if (EquipSound && bPlaySound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
 	}
