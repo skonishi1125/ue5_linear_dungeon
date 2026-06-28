@@ -10,6 +10,7 @@
 #include "Components/HUD/MenuContainerWidget.h"
 #include "Components/HUD/SaveLoadMenuWidget.h"
 #include "Components/HUD/LinearGameOverWidget.h"
+#include "Components/HUD/LinearRestartWidget.h"
 
 // UI Navigation のキー操作調整用
 #include "Framework/Application/NavigationConfig.h"
@@ -37,6 +38,15 @@ void ALinearPlayerController::BeginPlay()
 	if (LinearGameOverWidgetClass)
 	{
 		LinearGameOverWidgetInstance = CreateWidget<ULinearGameOverWidget>(this, LinearGameOverWidgetClass);
+	}
+	if (LinearRestartWidgetClass)
+	{
+		LinearRestartWidgetInstance = CreateWidget<ULinearRestartWidget>(this, LinearRestartWidgetClass);
+		if (LinearRestartWidgetInstance)
+		{
+			LinearRestartWidgetInstance->AddToViewport();
+			LinearRestartWidgetInstance->PlayFadeOutAnimation();
+		}
 	}
 
 	// LoadMenu のロードが済んだときに通知されるデリゲートに登録。
@@ -71,8 +81,6 @@ void ALinearPlayerController::OnPossess(APawn* InPawn)
 		LPCharacter->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearPlayerController::OnPlayerDied);
 		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::OnPossess() Add Delegate");
 	}
-
-
 }
 
 void ALinearPlayerController::SetupInputComponent()
@@ -216,11 +224,22 @@ void ALinearPlayerController::HideGameOverText()
 
 void ALinearPlayerController::RestartGame()
 {
+	// SaveSubsystem 非同期ロードだけで対応する場合
+	// ※ Die() で調整した PlayerCharacter の全フラグを調整する必要があるのでかなり大変
+	//if (UGameInstance* GI = GetGameInstance())
+	//{
+	//	if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+	//	{
+	//		SaveSubsystem->LoadGame(0);
+	//	}
+	//}
+
 	// ゲームオーバーUIを画面から削除
-	if (LinearGameOverWidgetInstance)
-	{
-		LinearGameOverWidgetInstance->RemoveFromParent();
-	}
+	// → OpenLevel で開き直すので、消さなくてよい
+	//if (LinearGameOverWidgetInstance)
+	//{
+	//	LinearGameOverWidgetInstance->RemoveFromParent();
+	//}
 
 	// ロードするデータの予約をする
 	if (UGameInstance* GI = GetGameInstance())
@@ -231,15 +250,7 @@ void ALinearPlayerController::RestartGame()
 		}
 	}
 
-	// SaveSubsystem ロードだけで対応する場合
-	// ※ Die() で調整した PlayerCharacter の全フラグを調整する必要があるのでかなり大変
-	//if (UGameInstance* GI = GetGameInstance())
-	//{
-	//	if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
-	//	{
-	//		SaveSubsystem->LoadGame(0);
-	//	}
-	//}
+
 
 	// Level 名を取得し、開き直す
 	FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);

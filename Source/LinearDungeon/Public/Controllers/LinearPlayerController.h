@@ -7,6 +7,7 @@
 // Controller が管理する Widget
 class ULinearGameOverWidget;
 class UMenuContainerWidget;
+class ULinearRestartWidget;
 
 // Enhanced Input
 class UInputMappingContext;
@@ -35,6 +36,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ULinearGameOverWidget> LinearGameOverWidgetClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ULinearRestartWidget> LinearRestartWidgetClass;
+
 	// ===== Enhanced Input 関連 =====
 	virtual void SetupInputComponent() override;
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -51,6 +55,8 @@ private:
 	TObjectPtr<UMenuContainerWidget> MenuContainerWidgetInstance;
 	UPROPERTY()
 	TObjectPtr<ULinearGameOverWidget> LinearGameOverWidgetInstance;
+	UPROPERTY()
+	TObjectPtr<ULinearRestartWidget> LinearRestartWidgetInstance;
 
 	// ===== メニュー開閉関連 =====
 	UFUNCTION()
