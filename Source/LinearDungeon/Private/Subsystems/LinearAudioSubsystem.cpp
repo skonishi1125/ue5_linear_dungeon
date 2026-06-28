@@ -8,15 +8,17 @@
 void ULinearAudioSubsystem::PlayBGM(USoundBase* InBGM)
 {
 	if (!InBGM) return;
+	if (BGMAudioComponent && BGMAudioComponent->GetSound() == InBGM) return;
 
 	// Ä¶’†‚Ì BGM ‚ð’âŽ~‚µ‚ÄAÄ¶ˆ—‚ðs‚¤
 	StopBGM();
 
+	UE_LOGFMT(LogTemp, Log, "ULinearAudioSubsystem::PlayBGM");
+
+
 	BGMAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), InBGM);
 	if (BGMAudioComponent)
 	{
-		// Level ‘JˆÚŽž‚à”jŠü‚³‚ê‚È‚¢‚æ‚¤‚É‚·‚é
-		BGMAudioComponent->bIgnoreForFlushing = true;
 		BGMAudioComponent->Play();
 		// •Ê‚Ì BGM ‚ðÄ¶‚·‚é‚Æ‚«‚àA¡‚Ì‰¹—Ê‚ð•ÛŽ‚·‚é
 		BGMAudioComponent->SetVolumeMultiplier(CurrentBGMVolume);

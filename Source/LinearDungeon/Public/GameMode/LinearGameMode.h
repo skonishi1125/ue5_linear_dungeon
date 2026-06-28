@@ -27,6 +27,9 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Audio")
     TMap<EBGMType, USoundBase*> BGMList;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    EBGMType DefaultBGMType = EBGMType::TitleScreen;
+
     UFUNCTION(BlueprintCallable, Category = "Audio")
     void ChangeBGM(EBGMType BGMType);
 

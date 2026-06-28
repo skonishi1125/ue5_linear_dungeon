@@ -14,6 +14,9 @@ void ALinearGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
+	// レベルのデフォルトBGMを再生する
+	ChangeBGM(DefaultBGMType);
+
 	if (UGameInstance* GI = GetGameInstance())
 	{
 		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
