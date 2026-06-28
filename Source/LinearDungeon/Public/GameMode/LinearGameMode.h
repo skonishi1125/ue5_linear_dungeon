@@ -22,6 +22,8 @@ class LINEARDUNGEON_API ALinearGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+    virtual void BeginPlay() override;
+
     UPROPERTY(EditDefaultsOnly, Category = "Audio")
     TMap<EBGMType, USoundBase*> BGMList;
 

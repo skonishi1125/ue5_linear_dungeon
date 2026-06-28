@@ -28,8 +28,18 @@ public:
 	void LoadGame(int32 SlotIndex);
 	void LoadGameCompleted(const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData);
 
+	// ゲーム開始 | Die()後 リトライ処理関連
+	// 次のレベルロード時に読み込むセーブデータを予約する
+	UFUNCTION(BlueprintCallable, Category = "SaveSystem")
+	void SetPendingLoad(int32 SlotIndex);
+	// 予約されたロードがあるか確認し、あればそちらを読み込む
+	bool ConsumePendingLoad(int32& OutSlotIndex);
+
 	
 private:
 	// 固定のスロット名
 	const FString BaseSaveSlotName = TEXT("SaveSlot_");
+
+	bool bHasPendingLoad = false;
+	int32 PendingLoadSlotIndex = -1;
 };

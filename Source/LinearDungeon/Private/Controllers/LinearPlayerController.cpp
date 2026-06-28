@@ -210,28 +210,33 @@ void ALinearPlayerController::HideGameOverText()
 		LinearGameOverWidgetInstance->PlayTextFadeOutAnimation();
 
 		// テキストのフェードアウトが完了するまでの待機時間（例: 1.5秒）
-		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ALinearPlayerController::RestartGame, 1.5f, false);
+		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ALinearPlayerController::RestartGame, 4.f, false);
 	}
 }
 
 void ALinearPlayerController::RestartGame()
 {
-	UE_LOGFMT(LogTemp, Warning, "RestartGame()");
-
 	// ゲームオーバーUIを画面から削除
 	if (LinearGameOverWidgetInstance)
 	{
 		LinearGameOverWidgetInstance->RemoveFromParent();
 	}
 
-	// SaveSubsystem ロード処理
+	// ロードするデータの予約をする
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
+		{
+			SaveSubsystem->SetPendingLoad(0); // 暫定でスロット0を予約
+		}
+	}
+
+	// SaveSubsystem ロードだけで対応する場合
 	// ※ Die() で調整した PlayerCharacter の全フラグを調整する必要があるのでかなり大変
 	//if (UGameInstance* GI = GetGameInstance())
 	//{
 	//	if (ULinearSaveSubsystem* SaveSubsystem = GI->GetSubsystem<ULinearSaveSubsystem>())
 	//	{
-	//		// TODO: オートセーブデータにする
-	//		// CharacterState などを戻す
 	//		SaveSubsystem->LoadGame(0);
 	//	}
 	//}

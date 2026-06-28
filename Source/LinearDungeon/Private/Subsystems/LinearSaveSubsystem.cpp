@@ -68,7 +68,7 @@ void ULinearSaveSubsystem::LoadGame(int32 SlotIndex)
     LoadDelegate.BindUObject(this, &ULinearSaveSubsystem::LoadGameCompleted);
     UGameplayStatics::AsyncLoadGameFromSlot(SaveSlotName, 0, LoadDelegate);
 
-    //// ディスクからデータを読み込む
+    // 通常同期読み込みのパターン
     //ULinearSaveGame* LoadedGameObj = Cast<ULinearSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));
     //if (!LoadedGameObj) return;
 
@@ -110,4 +110,28 @@ void ULinearSaveSubsystem::LoadGameCompleted(const FString& SlotName, const int3
 
     UE_LOGFMT(LogTemp, Warning, "ULinearSaveSubsystem::LoadGameCompleted() Applied Data. Slot: {0}", SlotName);
     OnSaveLoadCompleted.Broadcast();
+}
+
+// PlayerController.RestartGame() 等で使う
+// 死亡時、引数で渡したスロットでロードするようにこの関数を読んで予約すr
+void ULinearSaveSubsystem::SetPendingLoad(int32 SlotIndex)
+{
+    PendingLoadSlotIndex = SlotIndex;
+    bHasPendingLoad = true;
+    UE_LOGFMT(LogTemp, Warning, "ULinearSaveSubsystem::SetPendingLoad() Reserved Slot: {0}", SlotIndex);
+}
+
+// LinearGameMode.BeginPlay() 等で使う
+// 予約済みフラグが true なら、渡された OutSlotIndex を、予約済みスロットの数値で書き換え(&で参照渡しになっているので）
+// その後、BeginPlay() などから SaveSubsystem->LoadGame(SlotToLoad); を呼べば、予約済みスロットをロードできる
+// 終わった後はフラグを消しておく
+bool ULinearSaveSubsystem::ConsumePendingLoad(int32& OutSlotIndex)
+{
+    if (bHasPendingLoad)
+    {
+        OutSlotIndex = PendingLoadSlotIndex;
+        bHasPendingLoad = false;
+        return true;
+    }
+    return false;
 }
