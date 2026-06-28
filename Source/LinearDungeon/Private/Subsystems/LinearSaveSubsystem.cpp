@@ -113,7 +113,7 @@ void ULinearSaveSubsystem::LoadGameCompleted(const FString& SlotName, const int3
 }
 
 // PlayerController.RestartGame() 等で使う
-// 死亡時、引数で渡したスロットでロードするようにこの関数を読んで予約すr
+// 死亡 | 通常ロード時、引数で渡したスロットでロードするようにこの関数を読んで予約する
 void ULinearSaveSubsystem::SetPendingLoad(int32 SlotIndex)
 {
     PendingLoadSlotIndex = SlotIndex;

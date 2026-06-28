@@ -186,6 +186,11 @@ void USaveLoadMenuWidget::ActivateMenu(ESaveLoadMode InMode)
 	}
 }
 
+// Load の流れ
+// スロットを押すと、LOADING...の Widget を出しつつ、ボタンを無効化して連打防止する。
+// bIsProcessingWait という待機フラグを ON にしておいて Tick を起動させる
+// Tick で指定秒数経ったら、FinishProcessingUI() が走る
+
 void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 {
 	UGameInstance* GI = GetGameInstance();
@@ -224,7 +229,12 @@ void USaveLoadMenuWidget::ExecuteSaveOrLoad(int32 SlotIndex)
 	}
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
-		SaveSubsystem->LoadGame(SlotIndex);
+		// ロード用のスロットが押された時の挙動
+		// SaveSubsystem に、ロードするスロットの Index を登録しておく
+		SaveSubsystem->SetPendingLoad(SlotIndex);
+		bIsProcessingWait = true;
+		ProcessingWaitTime = 0.0f;
+		//SaveSubsystem->LoadGame(SlotIndex);
 	}
 
 }
@@ -239,6 +249,8 @@ void USaveLoadMenuWidget::OnSaveLoadCompleted()
 }
 
 // 通知完了後、1秒後に呼ばれる関数
+// Load 時、OpenLevel を実行して自身の Map に対してロードを行う
+// OpenLevel したときに GameMode の BeginPlay が反応し、↑で設定した SetPendingLoad のデータが読まれる
 void USaveLoadMenuWidget::FinishProcessingUI()
 {
 	UE_LOGFMT(LogTemp, Warning, "USaveLoadMenuWidget::FinishProcessingUI()");
@@ -261,6 +273,8 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 	else if (CurrentMode == ESaveLoadMode::ESL_Load)
 	{
 		OnLoadButtonPressedDelegate.Broadcast();
+		FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this);
+		UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
 	}
 }
 
