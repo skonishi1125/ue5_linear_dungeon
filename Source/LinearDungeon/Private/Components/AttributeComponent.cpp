@@ -54,6 +54,12 @@ void UAttributeComponent::TickComponent(
 	UpdatePoiseRecoveryTickEnabled(); // CurrentPoise ‚ª Max ‚É‚È‚Á‚½‚ç Tick() ‚ğØ‚é
 }
 
+void UAttributeComponent::SetCurrentHealth(float SavedHealth)
+{
+	CurrentHealth = SavedHealth;
+	OnHealthPercentChanged.Broadcast(GetHealthPercent());
+}
+
 // “n‚³‚ê‚½’l‚¾‚¯AHP ‚ğ‰ñ•œ
 void UAttributeComponent::ReceiveHealthHeal(float HealPoint)
 {

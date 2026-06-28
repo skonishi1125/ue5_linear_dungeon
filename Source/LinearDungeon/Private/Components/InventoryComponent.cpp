@@ -47,3 +47,9 @@ void UInventoryComponent::UsePotion()
 		NumOfPotionChanged.Broadcast(CurrentNumOfPotion);
 	}
 }
+
+void UInventoryComponent::SetCurrentNumOfPotion(int32 Num)
+{
+	CurrentNumOfPotion = Num;
+	NumOfPotionChanged.Broadcast(CurrentNumOfPotion);
+}

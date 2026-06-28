@@ -19,7 +19,7 @@ public:
 	void AddPotion();
 	void UsePotion();
 	FORCEINLINE int32 GetCurrentNumOfPotion() { return CurrentNumOfPotion; }
-	FORCEINLINE void SetCurrentNumOfPotion(int32 Num) {  CurrentNumOfPotion = Num; }
+	void SetCurrentNumOfPotion(int32 Num);
 	FORCEINLINE bool CanUsePotion() { return CurrentNumOfPotion > 0; }
 
 	FOnNumOfPotionChangedDelegate NumOfPotionChanged;

@@ -1122,6 +1122,20 @@ void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
 
 	// SaveGameObj の情報を自身に反映
 	// (Player に関する情報は自分が取り出して、自分で設定）
+
+	// Die() 時、RestartGame のときに、OpenLevel ではなくこの関数を使って元に戻す場合、
+	// 以下のように、Die()時と全く逆のことを組んでいく必要があり、コードが肥大化する
+	// なので、今回は OpenLevel で 初期値に戻してから、Transform など SaveData の持つデータを反映する形で設計していく
+	//if (Camera && DeathCamera)
+	//{
+	//	DeathCamera->Deactivate();
+	//	Camera->Activate();
+	//}
+
+	//ActionState = EActionState::EAS_Unoccupied;
+	//DeathPose = EDeathPose::EDP_Alive;
+
+
 	SetActorTransform(SaveGameObj->PlayerTransform);
 	if (Attributes)
 	{
@@ -1131,15 +1145,6 @@ void ALinearPlayerCharacter::OnLoadGame(ULinearSaveGame* SaveGameObj)
 	{
 		Inventories->SetCurrentNumOfPotion(SaveGameObj->NumOfPotion);
 	}
-
-	//if (Camera && DeathCamera)
-	//{
-	//	DeathCamera->Deactivate();
-	//	Camera->Activate();
-	//}
-
-	//ActionState = EActionState::EAS_Unoccupied;
-	//DeathPose = EDeathPose::EDP_Alive;
 
 	// TODO: 武器情報をSaveGameObj から読み取って SpawnActor -> EquipWeapon する
 
