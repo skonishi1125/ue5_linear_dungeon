@@ -51,8 +51,8 @@ void ULinearPlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	// 長物を持っているときの左手補正
 	LeftHandIKAlpha = 0.f;
 	if (LinearPlayerCharacter && 
+		LinearPlayerCharacter->GetCharacterActionState() != EActionState::EAS_Dying &&
 		LinearPlayerCharacter->GetCharacterState() == ECharacterState::ECS_EquippedTwoHandedWeapon && 
-		! IsFalling && // ジャンプ中は長物でも補正しない
 		LinearPlayerCharacter->GetEquippedWeapon()
 	)
 	{
