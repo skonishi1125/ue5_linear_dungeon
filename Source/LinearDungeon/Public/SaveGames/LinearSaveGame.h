@@ -39,4 +39,8 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "SaveData")
     FString SavedLevelName;
 
+    // クリア済みイベントの ID を保存するリスト
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData|Events")
+    TSet<FName> ClearedEvents;
+
 };

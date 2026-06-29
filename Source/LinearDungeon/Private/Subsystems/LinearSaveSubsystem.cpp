@@ -5,6 +5,7 @@
 #include "Characters/LinearPlayerCharacter.h"
 #include "Components/AttributeComponent.h"
 #include "Interfaces/SaveInterface.h"
+#include "Subsystems/LinearEventSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
 void ULinearSaveSubsystem::SaveGame(int32 SlotIndex)
@@ -28,6 +29,12 @@ void ULinearSaveSubsystem::SaveGame(int32 SlotIndex)
         {
             SaveInterface->OnSaveGame(SaveGameObj);
         }
+    }
+
+    // イベントフラグ情報を保存
+    if (ULinearEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<ULinearEventSubsystem>())
+    {
+        SaveGameObj->ClearedEvents = EventSubsystem->GetClearedEvents();
     }
 
     // セーブ処理
@@ -96,6 +103,13 @@ void ULinearSaveSubsystem::LoadGameCompleted(const FString& SlotName, const int3
     ULinearSaveGame* LoadedGameObj = Cast<ULinearSaveGame>(LoadedGameData);
     if (!LoadedGameObj) return;
 
+    // イベントフラグ復元
+    if (ULinearEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<ULinearEventSubsystem>())
+    {
+        EventSubsystem->SetClearedEvents(LoadedGameObj->ClearedEvents);
+    }
+
+    // 各 Actor の個別ロード処理
     TArray<AActor*> SaveableActors;
     UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USaveInterface::StaticClass(), SaveableActors);
 
