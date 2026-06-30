@@ -8,6 +8,8 @@
 
 void ULinearTitleMenuContainer::NativeConstruct()
 {
+	Super::NativeConstruct();
+
 	if (WBP_LinearTitleMenu)
 	{
 		WBP_LinearTitleMenu->OnTitleNewGameRequestedDelegate.AddUniqueDynamic(this, &ULinearTitleMenuContainer::HandleTitleNewGameRequested);
@@ -33,4 +35,22 @@ void ULinearTitleMenuContainer::HandleTitleLoadMenuRequested()
 void ULinearTitleMenuContainer::HandleTitleQuitGameRequested()
 {
 	UE_LOGFMT(LogTemp, Warning, "ULinearTitleMenuContainer::HandleTitleQuitGameRequested()");
+}
+
+void ULinearTitleMenuContainer::HandleCancelInput()
+{
+	UE_LOGFMT(LogTemp, Warning, "ULinearTitleMenuContainer::HandleCancelInput()");
+	if (!MenuSwitcher) return;
+
+	// 現在表示されているのが SaveLoadMenu である場合のみ、メインメニューへ戻る
+	if (MenuSwitcher->GetActiveWidget() == WBP_SaveLoadMenu)
+	{
+		MenuSwitcher->SetActiveWidget(WBP_LinearTitleMenu);
+
+		if (WBP_LinearTitleMenu)
+		{
+			// 戻った際、コントローラー操作が途切れないようにフォーカスを当て直す
+			WBP_LinearTitleMenu->FocusFirstButton();
+		}
+	}
 }

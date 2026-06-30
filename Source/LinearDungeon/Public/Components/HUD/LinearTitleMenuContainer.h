@@ -33,4 +33,8 @@ public:
 	void HandleTitleLoadMenuRequested();
 	UFUNCTION()
 	void HandleTitleQuitGameRequested();
+
+	// TitlePlayerController ‚Å CloseTitleSubMenu ‚ª‰Ÿ‚³‚ê‚½Žž
+	UFUNCTION()
+	void HandleCancelInput();
 };

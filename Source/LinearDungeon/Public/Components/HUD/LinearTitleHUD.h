@@ -11,6 +11,9 @@ class LINEARDUNGEON_API ALinearTitleHUD : public AHUD
 {
 	GENERATED_BODY()
 
+public:
+	ULinearTitleMenuContainer* GetMenuContainer() const { return LinearTitleMenuContainerInstance; }
+
 protected:
 	virtual void BeginPlay() override;
 

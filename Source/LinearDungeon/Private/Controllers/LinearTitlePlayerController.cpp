@@ -10,6 +10,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
 
+// CloseTitleSubMenu と HUD, Container との紐づけ
+#include "Components/HUD/LinearTitleHUD.h"
+#include "Components/HUD/LinearTitleMenuContainer.h"
+
 void ALinearTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -62,8 +66,15 @@ void ALinearTitlePlayerController::SetupInputComponent()
 
 void ALinearTitlePlayerController::CloseTitleSubMenu()
 {
-	// 現状効かないので、理由を探る。↑の SetupInputComponent は発火しているので、DefaultPawn などが問題だろうか？
 	UE_LOGFMT(LogTemp, Warning, "ALinearTitlePlayerController::CloseTitleSubMenu()");
 	
-	// TODO: Title の LoadMenu などのサブメニューを閉じる処理を書く
+	if (ALinearTitleHUD* TitleHUD = Cast<ALinearTitleHUD>(GetHUD()))
+	{
+		// HUD が保持している Container の、サブメニューを閉じる処理を呼ぶ
+		if (ULinearTitleMenuContainer* Container = TitleHUD->GetMenuContainer())
+		{
+			Container->HandleCancelInput();
+		}
+	}
+
 }
