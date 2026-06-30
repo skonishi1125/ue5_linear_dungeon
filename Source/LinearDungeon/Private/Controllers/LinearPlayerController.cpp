@@ -29,6 +29,12 @@ void ALinearPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Title -> ゲーム画面と遷移したときの設計
+	// InputOnly とし、マウスが画面外に出ないような形をとる
+	FInputModeGameOnly InputMode;
+	InputMode.SetConsumeCaptureMouseDown(true);
+	SetInputMode(InputMode);
+
 	// Widget 生成 
 	// Menu と、GameOver の Widget を管理する
 	if (MenuContainerWidgetClass)

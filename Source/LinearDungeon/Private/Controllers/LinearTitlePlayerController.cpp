@@ -14,13 +14,24 @@ void ALinearTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 入力モードをUI専用 (UI Only) に設定
-	FInputModeUIOnly InputMode;
+	// UI Only ではなく、GameAndUI に設定して、
+	// LinearPlayerController の Enhanced Input に移った時も効くようにする
+	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 
 	// マウスカーソルを表示
 	bShowMouseCursor = true;
+
+	// Enhanced Input 初期設定
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		if (TitleMenuMappingContext)
+		{
+			// 優先度 0 でコンテキストを追加
+			Subsystem->AddMappingContext(TitleMenuMappingContext, 0);
+		}
+	}
 
 	// UMGナビゲーションキーのカスタマイズ
 	if (FSlateApplication::IsInitialized())
