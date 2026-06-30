@@ -1,6 +1,10 @@
 #include "Controllers/LinearTitlePlayerController.h"
 #include "Logging/StructuredLog.h"
 
+// 配置したカメラを探して、視点を切り替える挙動の TActorIterator に使う
+#include "Camera/CameraActor.h"
+#include "EngineUtils.h"
+
 // UI Navigation のキー操作調整用
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
@@ -17,6 +21,21 @@
 void ALinearTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// TitleLevelに配置された最初の CameraActor を探して、それをタイトル画面の視点にする
+	if (UWorld* World = GetWorld())
+	{
+		for (TActorIterator<ACameraActor> It(World); It; ++It)
+		{
+			ACameraActor* TitleCamera = *It;
+			if (TitleCamera)
+			{
+				// 別途 Camera 側で、Constrain Aspect Ratio を false にしておこう
+				SetViewTargetWithBlend(TitleCamera);
+				break;
+			}
+		}
+	}
 
 	// UI Only ではなく、GameAndUI に設定して、
 	// LinearPlayerController の Enhanced Input に移った時も効くようにする
