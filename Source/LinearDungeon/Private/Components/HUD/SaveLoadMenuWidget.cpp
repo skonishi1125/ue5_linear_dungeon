@@ -2,7 +2,6 @@
 #include "Logging/StructuredLog.h"
 
 #include "Subsystems/LinearSaveSubsystem.h"
-#include "Characters/LinearPlayerCharacter.h"
 #include "SaveGames/LinearSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/Button.h"
@@ -277,9 +276,9 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 	if (CurrentMode == ESaveLoadMode::ESL_Save)
 	{
 		RefreshSlotDisplay();
-		if (SlotButton_1)
+		if (SlotButtons.IsValidIndex(SelectedSlotIndex) && SlotButtons[SelectedSlotIndex])
 		{
-			SlotButton_1->SetKeyboardFocus();
+			SlotButtons[SelectedSlotIndex]->SetKeyboardFocus();
 		}
 
 	}
