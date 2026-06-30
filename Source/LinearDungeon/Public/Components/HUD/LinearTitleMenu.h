@@ -9,6 +9,7 @@ class UButton;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTitleNewGameRequestedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTitleLoadMenuRequestedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTitleSettingsRequestedDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTitleQuitGameRequestedDelegate);
 
 UCLASS()
@@ -24,6 +25,8 @@ public:
 	FOnTitleNewGameRequestedDelegate OnTitleNewGameRequestedDelegate;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnTitleLoadMenuRequestedDelegate OnTitleLoadMenuRequestedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnTitleSettingsRequestedDelegate OnTitleSettingsRequestedDelegate;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnTitleQuitGameRequestedDelegate OnTitleQuitGameRequestedDelegate;
 
@@ -43,8 +46,14 @@ private:
 	void OnLoadButtonClicked();
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SettingsButton;
+	UFUNCTION()
+	void OnSettingsButtonClicked();
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> QuitGameButton;
 	UFUNCTION()
 	void OnQuitGameButtonClicked();
+
 	
 };

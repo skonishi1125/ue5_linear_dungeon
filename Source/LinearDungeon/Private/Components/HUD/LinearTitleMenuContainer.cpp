@@ -4,6 +4,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/HUD/SaveLoadMenuWidget.h"
 #include "Components/HUD/LinearTitleMenu.h"
+#include "Components/HUD/SettingsMenuWidget.h"
 
 
 void ULinearTitleMenuContainer::NativeConstruct()
@@ -14,6 +15,7 @@ void ULinearTitleMenuContainer::NativeConstruct()
 	{
 		WBP_LinearTitleMenu->OnTitleNewGameRequestedDelegate.AddUniqueDynamic(this, &ULinearTitleMenuContainer::HandleTitleNewGameRequested);
 		WBP_LinearTitleMenu->OnTitleLoadMenuRequestedDelegate.AddUniqueDynamic(this, &ULinearTitleMenuContainer::HandleTitleLoadMenuRequested);
+		WBP_LinearTitleMenu->OnTitleSettingsRequestedDelegate.AddUniqueDynamic(this, &ULinearTitleMenuContainer::HandleTitleSettingsMenuRequested);
 		WBP_LinearTitleMenu->OnTitleQuitGameRequestedDelegate.AddUniqueDynamic(this, &ULinearTitleMenuContainer::HandleTitleQuitGameRequested);
 	}
 }
@@ -37,19 +39,33 @@ void ULinearTitleMenuContainer::HandleTitleQuitGameRequested()
 	UE_LOGFMT(LogTemp, Warning, "ULinearTitleMenuContainer::HandleTitleQuitGameRequested()");
 }
 
+void ULinearTitleMenuContainer::HandleTitleSettingsMenuRequested()
+{
+	if (MenuSwitcher && WBP_SettingsMenu)
+	{
+		MenuSwitcher->SetActiveWidget(WBP_SettingsMenu);
+	}
+}
+
 void ULinearTitleMenuContainer::HandleCancelInput()
 {
-	UE_LOGFMT(LogTemp, Warning, "ULinearTitleMenuContainer::HandleCancelInput()");
 	if (!MenuSwitcher) return;
 
-	// 現在表示されているのが SaveLoadMenu である場合のみ、メインメニューへ戻る
 	if (MenuSwitcher->GetActiveWidget() == WBP_SaveLoadMenu)
 	{
 		MenuSwitcher->SetActiveWidget(WBP_LinearTitleMenu);
 
 		if (WBP_LinearTitleMenu)
 		{
-			// 戻った際、コントローラー操作が途切れないようにフォーカスを当て直す
+			WBP_LinearTitleMenu->FocusFirstButton();
+		}
+	}
+	else if (MenuSwitcher->GetActiveWidget() == WBP_SettingsMenu)
+	{
+		MenuSwitcher->SetActiveWidget(WBP_LinearTitleMenu);
+
+		if (WBP_LinearTitleMenu)
+		{
 			WBP_LinearTitleMenu->FocusFirstButton();
 		}
 	}
