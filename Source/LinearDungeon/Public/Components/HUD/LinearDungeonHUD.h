@@ -14,8 +14,16 @@ class LINEARDUNGEON_API ALinearDungeonHUD : public AHUD
 public:
 	FORCEINLINE ULinearDungeonOverlay* GetOverlay() const { return Overlay; }
 
+	// LevelSequence 中、画面左上の UI を切るための関数
+	UFUNCTION(BlueprintCallable)
+	void SetOverlayVisibility(bool bIsVisible);
+
 protected:
 	virtual void BeginPlay() override;
+
+	// レベル開始時にHUDを非表示状態にするかどうかのフラグ
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	bool bStartHidden = false;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -24,5 +32,5 @@ private:
 	// ダメージを受けたときなど、この Overlay 経由で HUD のパラメータを調整することになる
 	UPROPERTY()
 	TObjectPtr<ULinearDungeonOverlay> Overlay;
-	
+
 };
