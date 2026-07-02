@@ -5,6 +5,8 @@
 #include "Components/HUD/SaveLoadMenuWidget.h"
 #include "Components/HUD/LinearTitleMenu.h"
 #include "Components/HUD/SettingsMenuWidget.h"
+#include "Kismet/GameplayStatics.h"
+
 
 
 void ULinearTitleMenuContainer::NativeConstruct()
@@ -22,7 +24,8 @@ void ULinearTitleMenuContainer::NativeConstruct()
 
 void ULinearTitleMenuContainer::HandleTitleNewGameRequested()
 {
-	UE_LOGFMT(LogTemp, Warning, "ULinearTitleMenuContainer::HandleTitleNewGameRequested()");
+	FString OpeningLevelName = "OpeningLevel";
+	UGameplayStatics::OpenLevel(this, FName(*OpeningLevelName));
 }
 
 void ULinearTitleMenuContainer::HandleTitleLoadMenuRequested()
