@@ -33,7 +33,7 @@ void ADoorBase::Interact_Implementation(AActor* InstigatorActor)
 {
 	UE_LOGFMT(LogTemp, Warning, "ADoorBase::Interact_Implementation");
 
-	if (bIsMoving) return;
+	if (bIsOpen) return;
 
 	// ñ⁄ïWÇÃäpìxÇê›íË
 	bIsOpen = true;
@@ -94,6 +94,8 @@ void ADoorBase::OnDoorBeginOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
+	if (bIsOpen) return;
+
 	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
 	if (LinearPlayerCharacter)
 	{
@@ -106,6 +108,8 @@ void ADoorBase::OnDoorEndOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex
 )
 {
+	if (bIsOpen) return;
+
 	ALinearPlayerCharacter* LinearPlayerCharacter = Cast<ALinearPlayerCharacter>(OtherActor);
 	if (LinearPlayerCharacter)
 	{
