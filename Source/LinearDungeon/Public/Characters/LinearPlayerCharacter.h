@@ -50,6 +50,7 @@ class UInteractMarker;
 
 
 
+
 UCLASS()
 class LINEARDUNGEON_API ALinearPlayerCharacter : public ALinearCharacterBase, public IHitInterface, public ISaveInterface
 {
@@ -104,8 +105,12 @@ public:
 	void OnCheckCombo();// CheckCombo 先行入力を受け付けたとき、次の Montage_Play を実行する関数
 	void OnAttackSteering(bool bCanSteer); // コンボ中のステアリング制御
 
-	// 死亡処理のデリゲート
+	// 死亡処理
+	// デリゲート
 	FOnCharacterDeathDelegate OnCharacterDeathDelegate;
+	// 落下時など、外から Player の死亡を呼ぶことができる関数
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ForceKill(EDeathCause Cause);
 
 	// InteractInterface 実行時から盾 / 剣等から呼べるように、public で装備処理を用意しておく
 	void EquipWeapon(AWeapon* InWeapon, bool bPlaySound = true);
@@ -222,8 +227,8 @@ protected:
 	float HardStaggerThreshold = 20.f;
 	UFUNCTION(BlueprintCallable)
 	void OnHitReactionAnimEnded();
-	void Die();
-	void PlayDeathMontage();
+	void Die(EDeathCause Cause = EDeathCause::EDC_Normal);
+	void PlayDeathMontage(EDeathCause Cause);
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive; // 死亡時のポーズ
 
@@ -333,6 +338,8 @@ private:
 	TObjectPtr<UAnimMontage> DeathMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TObjectPtr<UAnimMontage> FallDeathMontage;
 
 	// UsePotion
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

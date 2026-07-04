@@ -33,6 +33,13 @@ enum class EDeathPose : uint8
 };
 
 UENUM(BlueprintType)
+enum class EDeathCause : uint8
+{
+	EDC_Normal UMETA(DisplayName = "Normal Hit"),
+	EDC_Fall UMETA(DisplayName = "Fall")
+};
+
+UENUM(BlueprintType)
 enum class EAttackCollisionType : uint8
 {
 	EAC_RightHand UMETA(DisplayName = "Right Hand"),

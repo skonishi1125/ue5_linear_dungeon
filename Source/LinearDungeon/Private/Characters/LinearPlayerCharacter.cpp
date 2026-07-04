@@ -1000,16 +1000,27 @@ void ALinearPlayerCharacter::OnHitReactionAnimEnded()
 	ActionState = EActionState::EAS_Unoccupied;
 }
 
-void ALinearPlayerCharacter::Die()
+void ALinearPlayerCharacter::ForceKill(EDeathCause Cause)
 {
-	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Die()");
+	if (Attributes)
+	{
+		Attributes->SetCurrentHealth(0.f);
+		OnHealthPercentChanged(0.f);
+	}
 
-	PlayDeathMontage();
+	Die(Cause);
+}
+
+void ALinearPlayerCharacter::Die(EDeathCause Cause)
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Die() Cause:: {0}", UEnum::GetValueAsString(Cause));
 	ActionState = EActionState::EAS_Dying; // 死亡時は、この EAS から変わることはない
 
 	// Collision 無効化 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	PlayDeathMontage(Cause);
 
 	// Tag を外す
 	Tags.Remove(GetTag());
@@ -1020,26 +1031,26 @@ void ALinearPlayerCharacter::Die()
 		Camera->Deactivate();
 		DeathCamera->Activate();
 	}
-	// TODO: 死亡処理通知でやること
-	// * Attack が実行できた時があった（稀。落ち着いたら調査する）
-	// * メニューを開けなくする / メニューを開いている間、時間は止まらないので、その間に死んだらメニューを閉じるようにする
-	// * 補正用 IK Alpha を 0 にする
-	// * GameOver UI を出す
+
 	OnCharacterDeathDelegate.Broadcast();
 
 }
 
-void ALinearPlayerCharacter::PlayDeathMontage()
+void ALinearPlayerCharacter::PlayDeathMontage(EDeathCause Cause)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && DeathMontage && DeathMontageSectionNames.Num() > 0)
-	{
-		AnimInstance->Montage_Play(DeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 
-		const int32 Selection = FMath::RandRange(0, 1);
-		FName SectionName = FName();
-		switch (Selection)
+	switch (Cause)
+	{
+	case EDeathCause::EDC_Normal:
+		if (AnimInstance && DeathMontage && DeathMontageSectionNames.Num() > 0)
 		{
+			AnimInstance->Montage_Play(DeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+
+			const int32 Selection = FMath::RandRange(0, 1);
+			FName SectionName = FName();
+			switch (Selection)
+			{
 			case 0:
 				SectionName = DeathMontageSectionNames[0];
 				DeathPose = EDeathPose::EDP_Death1;
@@ -1050,8 +1061,22 @@ void ALinearPlayerCharacter::PlayDeathMontage()
 				break;
 			default:
 				break;
+			}
+			AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
 		}
-		AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+		break;
+	case EDeathCause::EDC_Fall:
+		if (AnimInstance && FallDeathMontage)
+		{
+			AnimInstance->Montage_Play(FallDeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		}
+		break;
+	default:
+		if (AnimInstance && FallDeathMontage)
+		{
+			AnimInstance->Montage_Play(FallDeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
+		}
+		break;
 	}
 }
 
