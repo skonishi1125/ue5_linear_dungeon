@@ -40,7 +40,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Properties")
 	TObjectPtr<UStaticMeshComponent> DoorMesh;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties")
 	TObjectPtr<UStaticMeshComponent> RightDoorMesh; // 左右扉があるときの、右側の扉. null になり得る。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Properties")
 	TObjectPtr<UBoxComponent> BoxComponent;
