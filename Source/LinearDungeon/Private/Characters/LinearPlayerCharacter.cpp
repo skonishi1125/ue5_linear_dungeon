@@ -1027,10 +1027,17 @@ void ALinearPlayerCharacter::Die(EDeathCause Cause)
 	Tags.Remove(GetTag());
 
 	// DeathCamera 切替え
-	if (Camera && DeathCamera)
+
+	if (Camera && DeathCamera && DeathSpringArm)
 	{
 		Camera->Deactivate();
 		DeathCamera->Activate();
+
+		if (Cause == EDeathCause::EDC_Fall)
+		{
+			DeathSpringArm->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
+			DeathSpringArm->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		}
 	}
 
 	OnCharacterDeathDelegate.Broadcast();
