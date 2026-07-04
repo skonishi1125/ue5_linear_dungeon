@@ -231,6 +231,8 @@ protected:
 	void PlayDeathMontage(EDeathCause Cause);
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive; // 死亡時のポーズ
+	UPROPERTY(BlueprintReadOnly, Category = "Combat")
+	EDeathCause CurrentDeathCause = EDeathCause::EDC_Normal;
 
 	// ===== Interact 関連 =====
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -340,6 +342,8 @@ private:
 	TArray<FName> DeathMontageSectionNames{ FName("Death1"), FName("Death2")};
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> FallDeathMontage;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<USoundBase> FallDeathVoice;
 
 	// UsePotion
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

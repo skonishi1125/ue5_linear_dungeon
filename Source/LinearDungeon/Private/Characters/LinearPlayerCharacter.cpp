@@ -1015,6 +1015,7 @@ void ALinearPlayerCharacter::Die(EDeathCause Cause)
 {
 	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::Die() Cause:: {0}", UEnum::GetValueAsString(Cause));
 	ActionState = EActionState::EAS_Dying; // 死亡時は、この EAS から変わることはない
+	CurrentDeathCause = Cause;
 
 	// Collision 無効化 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -1067,6 +1068,7 @@ void ALinearPlayerCharacter::PlayDeathMontage(EDeathCause Cause)
 		break;
 	case EDeathCause::EDC_Fall:
 		// Anim BP 側で対応するので、処理を書かない
+		if (FallDeathVoice) UGameplayStatics::PlaySoundAtLocation(this, FallDeathVoice, GetActorLocation());
 		break;
 	default:
 		break;
