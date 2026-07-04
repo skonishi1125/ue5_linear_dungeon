@@ -1066,16 +1066,9 @@ void ALinearPlayerCharacter::PlayDeathMontage(EDeathCause Cause)
 		}
 		break;
 	case EDeathCause::EDC_Fall:
-		if (AnimInstance && FallDeathMontage)
-		{
-			AnimInstance->Montage_Play(FallDeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		}
+		// Anim BP 側で対応するので、処理を書かない
 		break;
 	default:
-		if (AnimInstance && FallDeathMontage)
-		{
-			AnimInstance->Montage_Play(FallDeathMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
-		}
 		break;
 	}
 }
