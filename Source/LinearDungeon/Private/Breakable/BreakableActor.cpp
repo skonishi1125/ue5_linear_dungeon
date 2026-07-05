@@ -3,6 +3,7 @@
 
 #include "GeometryCollection/GeometryCollectionComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Chaos/ChaosGameplayEventDispatcher.h"
 
 #include "Items/ItemBase.h"
@@ -17,14 +18,14 @@ ABreakableActor::ABreakableActor()
 	GeometryCollection->SetGenerateOverlapEvents(true);
 	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	// îjï–Ç™ Pawn Ç…ä±è¬ÇµÇ»Ç¢ÇÊÇ§Ç…ê›íË
-	// GC é©ëÃÇÃ Collision ÇÕé’ífÇµÇƒÅACapsuleComponent ë§Ç≈ Block Ç∑ÇÈå`ÇÇ∆ÇÈ
+	// GC é©ëÃÇÃ Collision ÇÕé’ífÇµÇƒÅABoxCollision ë§Ç≈ Block Ç∑ÇÈå`ÇÇ∆ÇÈ
 	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	GeometryCollection->SetNotifyBreaks(true);
 
-	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	Capsule->SetupAttachment(GetRootComponent());
-	Capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	Capsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	BoxCollision->SetupAttachment(GetRootComponent());
+	BoxCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	BoxCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 
 	// Event Dispatcher ê›íË
