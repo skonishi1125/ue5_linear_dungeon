@@ -43,8 +43,9 @@ private:
 	UFUNCTION()
 	void ClearCombatTarget();
 
+	// PlayerCharacter €–S‚ÌƒfƒŠƒQ[ƒg
 	UFUNCTION()
-	void ResetCharacterDie();
+	void OnPlayerCharacterDied();
 
 	
 };

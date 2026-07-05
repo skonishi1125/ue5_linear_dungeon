@@ -156,7 +156,7 @@ void AEnemyBase::Tick(float DeltaTime)
 
 void AEnemyBase::Die()
 {
-	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
+	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
 
 	// U‚èŒü‚«‚ÌI—¹‹y‚ÑAˆÚ“®‚ÌŠ®¬‚ðŽ~‚ß‚Ä–³Œø‰»
 	bIsTrackingTarget = false;
@@ -169,7 +169,7 @@ void AEnemyBase::Die()
 
 	if (OverheadStatusWidgetComponent)
 	{
-		UE_LOGFMT(LogTemp, Warning, "OverheadStatusWidgetComponent OFF");
+		//UE_LOGFMT(LogTemp, Warning, "OverheadStatusWidgetComponent OFF");
 		OverheadStatusWidgetComponent->SetVisibility(false);
 	}
 
@@ -601,7 +601,7 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 			if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(InstigatorPawn))
 			{
 				// Delegate “o˜^
-				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &AEnemyBase::ResetCharacterDie);
+				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &AEnemyBase::OnPlayerCharacterDied);
 			}
 
 
@@ -703,11 +703,12 @@ void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
 
 }
 
-
-void AEnemyBase::ResetCharacterDie()
+// PlayerCharacter Ž€–SŽž‚Ìˆ—
+// Ž‹“_‚ÌŒã‚ë‚©‚ç‰£‚ç‚ê‚½Žž‚È‚Ç‚ÉAƒfƒŠƒQ[ƒg‚Æ‚µ‚Ä“o˜^‚³‚ê‚é
+// ¦Ž‹“_‚É“ü‚Á‚½Žž‚à“o˜^‚³‚ê‚é‚ªA‚»‚ê‚ÍEnemyAIController ‘¤‚Å‘Î‰ž‚µ‚Ä‚¢‚é
+void AEnemyBase::OnPlayerCharacterDied()
 {
-	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::ResetCharacterDie()");
-
+	// AIController ‘¤‚Ì PlayerDied ‚Å‚à“¯‚¶ˆ—‚ð‘‚¢‚Ä‚¢‚é‚Ì‚ÅA•s‹ï‡‚ª‹N‚«‚½‚Æ‚«‚Í—v’²®
 	if (CachedAIController)
 	{
 		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
@@ -715,5 +716,11 @@ void AEnemyBase::ResetCharacterDie()
 			BB->SetValueAsBool(FName("IsTargetDied"), true);
 		}
 	}
+
+	if (OverheadStatusWidgetComponent)
+	{
+		OverheadStatusWidgetComponent->SetVisibility(false);
+	}
+
 }
 

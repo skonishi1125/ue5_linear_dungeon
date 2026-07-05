@@ -213,7 +213,7 @@ private:
 
 	// Character ‚Ì Die ƒfƒŠƒQ[ƒg‚É•R‚Ã‚¯‚éŠÖ”
 	UFUNCTION()
-	void ResetCharacterDie();
+	void OnPlayerCharacterDied();
 
 
 

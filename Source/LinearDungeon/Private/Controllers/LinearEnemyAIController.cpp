@@ -81,7 +81,7 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 			if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(Actor))
 			{
 				// AddDynamic ‚Å‚Í‚È‚­ AddUniqueDynamic ‚ðŽg‚Á‚ÄAŽ‹ŠE‚É“ü‚é‚½‚Ñ‚É“o˜^‚³‚ê‚é‚Ì‚ð–h‚®
-				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::ResetCharacterDie);
+				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::OnPlayerCharacterDied);
 			}
 		}
 		else
@@ -121,7 +121,7 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 	//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
 }
 
-void ALinearEnemyAIController::ResetCharacterDie()
+void ALinearEnemyAIController::OnPlayerCharacterDied()
 {
 	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 	{
