@@ -7,6 +7,7 @@
 #include "Interfaces/SaveInterface.h"
 #include "Subsystems/LinearEventSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystems/LinearFlagSubsystem.h"
 
 void ULinearSaveSubsystem::SaveGame(int32 SlotIndex)
 {
@@ -35,6 +36,12 @@ void ULinearSaveSubsystem::SaveGame(int32 SlotIndex)
     if (ULinearEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<ULinearEventSubsystem>())
     {
         SaveGameObj->ClearedEvents = EventSubsystem->GetClearedEvents();
+    }
+
+    // EventManager 等で管理しているフラグ保存
+    if (ULinearFlagSubsystem* FlagSubsystem = GetGameInstance()->GetSubsystem<ULinearFlagSubsystem>())
+    {
+        SaveGameObj->SavedFlags = FlagSubsystem->GetAllFlags();
     }
 
     // セーブ処理
@@ -103,10 +110,16 @@ void ULinearSaveSubsystem::LoadGameCompleted(const FString& SlotName, const int3
     ULinearSaveGame* LoadedGameObj = Cast<ULinearSaveGame>(LoadedGameData);
     if (!LoadedGameObj) return;
 
-    // イベントフラグ復元
+    // Level Sequence などイベントフラグ復元
     if (ULinearEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<ULinearEventSubsystem>())
     {
         EventSubsystem->SetClearedEvents(LoadedGameObj->ClearedEvents);
+    }
+
+    // EncounterManager などの進行フラグ復元
+    if (ULinearFlagSubsystem* FlagSubsystem = GetGameInstance()->GetSubsystem<ULinearFlagSubsystem>())
+    {
+        FlagSubsystem->RestoreAllFlags(LoadedGameObj->SavedFlags);
     }
 
     // 各 Actor の個別ロード処理

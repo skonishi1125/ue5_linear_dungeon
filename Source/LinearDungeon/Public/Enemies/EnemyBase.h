@@ -25,6 +25,9 @@ class ALinearEnemyAIController;
 class UBoxComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
+// 敵 死亡処理
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedDelegate, AEnemyBase*, DeadEnemy);
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -70,6 +73,10 @@ public:
 
 	// 怯みモーションから出す、スタン区間通知用
 	void OnStaggerEnd();
+
+	// Enemy 死亡時のデリゲート
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnEnemyDiedDelegate OnEnemyDied;
 
 protected:
 	virtual void BeginPlay() override;

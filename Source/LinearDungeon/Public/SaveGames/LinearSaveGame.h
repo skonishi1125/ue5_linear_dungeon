@@ -43,4 +43,9 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "SaveData|Events")
     TSet<FName> ClearedEvents;
 
+    // 汎用進行フラグ（敵の全滅、宝箱の取得、NPCの会話状況など）を保存するリスト
+    // TSet: 重複登録を防ぐ, Contains などが高速に行える
+    UPROPERTY(BlueprintReadWrite, Category = "SaveData|Flags")
+    TSet<FName> SavedFlags;
+
 };

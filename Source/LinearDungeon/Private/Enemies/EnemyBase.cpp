@@ -209,6 +209,8 @@ void AEnemyBase::Die()
 
 	}
 
+	OnEnemyDied.Broadcast(this);
+
 }
 
 void AEnemyBase::OnRightHandOverlap(
