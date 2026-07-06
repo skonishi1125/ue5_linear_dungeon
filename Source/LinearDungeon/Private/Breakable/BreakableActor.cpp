@@ -20,6 +20,8 @@ ABreakableActor::ABreakableActor()
 	// ”j•Ð‚ª Pawn ‚ÉŠ±Â‚µ‚È‚¢‚æ‚¤‚ÉÝ’è
 	// GC Ž©‘Ì‚Ì Collision ‚ÍŽÕ’f‚µ‚ÄABoxCollision ‘¤‚Å Block ‚·‚éŒ`‚ð‚Æ‚é
 	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	// GC “¯Žmi”ò‚ñ‚¾”j•Ð‚ª•Ê‚Ì GC ‚ð“|‚·‚Ì‚ð–h‚®j
+	GeometryCollection->SetCollisionResponseToChannel(ECollisionChannel::ECC_Destructible, ECollisionResponse::ECR_Ignore);
 	GeometryCollection->SetNotifyBreaks(true);
 
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
