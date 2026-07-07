@@ -38,6 +38,13 @@ void UBTService_CheckAttackRange::TickNode(
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (BlackboardComp == nullptr) return;
 
+	// 攻撃中は攻撃範囲のチェック処理をしない
+	// (突進攻撃などをすると、途中でLongRange から 通常の Range に移行し、処理が上書きされてしまうから)
+	if (BlackboardComp->GetValueAsBool(FName("IsAttacking")))
+	{
+		return;
+	}
+
 	// Blackboard から TargetActor (Playerのこと） 取得
 	// ※ BB 側の TargetActor 自体は、ALinearEnemyAIController::OnTargetDetected の視覚処理で取得している
 	// AI Controller には BT を割り当てているので、そこ経由で BB を参照できている

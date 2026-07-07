@@ -133,8 +133,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	double AttackRadius = 150.f; // Enemy が攻撃モーションに入るまでの範囲
 
+	// Enemy の長い攻撃モーションに入るまでの距離
+	// LongAttack を持たない敵もいるので、そういったケースを考慮して デフォルト 50 にしておく
 	UPROPERTY(EditAnywhere)
-	double LongAttackRadius = 200.f; // Enemy の長い攻撃モーションに入るまでの距離
+	double LongAttackRadius = 50.f; 
 
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)

@@ -1,6 +1,8 @@
 #include "BT/BTTaskNode_LongAttack.h"
 #include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Enemies/EnemyBase.h"
+#include "BT/BTService_CheckAttackRange.h"
 
 UBTTaskNode_LongAttack::UBTTaskNode_LongAttack()
 {
@@ -21,6 +23,11 @@ EBTNodeResult::Type UBTTaskNode_LongAttack::ExecuteTask(UBehaviorTreeComponent& 
 	AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn());
 	if (EnemyPawn == nullptr) return EBTNodeResult::Failed;
 
+	if (UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent())
+	{
+		BlackboardComp->SetValueAsBool(FName("IsAttacking"), true);
+	}
+
 	// UŒ‚ˆ—
 	CachedOwnerComp = &OwnerComp; // AttackEnd ‚Å OwnerComp ‚ðŽg‚¤‚½‚ß‚ÉŠi”[‚µ‚Ä‚¨‚­
 	EnemyPawn->OnAttackEndDelegate.AddUniqueDynamic(this, &UBTTaskNode_LongAttack::HandleLongAttackFinished);
@@ -34,6 +41,12 @@ void UBTTaskNode_LongAttack::HandleLongAttackFinished()
 {
 	if (CachedOwnerComp)
 	{
+		if (UBlackboardComponent* BlackboardComp = CachedOwnerComp->GetBlackboardComponent())
+		{
+			BlackboardComp->SetValueAsBool(FName("IsAttacking"), false);
+			BlackboardComp->SetValueAsEnum(FName("CombatRangeState"), static_cast<uint8>(ECombatRangeState::None));
+		}
+
 		AAIController* AIController = CachedOwnerComp->GetAIOwner();
 		if (AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn()))
 		{
