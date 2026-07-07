@@ -246,7 +246,7 @@ void AEnemyBase::OnLeftLegOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-PerformAttackTrace(LeftLegBoxTraceStart, LeftLegBoxTraceEnd, TEXT("LeftLeg"));
+	PerformAttackTrace(LeftLegBoxTraceStart, LeftLegBoxTraceEnd, TEXT("LeftLeg"));
 }
 
 // BoxTrace -> Damage ‹¤’Êˆ—
