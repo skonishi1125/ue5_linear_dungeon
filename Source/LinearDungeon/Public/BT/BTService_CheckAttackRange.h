@@ -5,6 +5,14 @@
 
 #include "BTService_CheckAttackRange.generated.h"
 
+UENUM(BlueprintType)
+enum class ECombatRangeState : uint8
+{
+	None        UMETA(DisplayName = "None"),
+	ShortRange  UMETA(DisplayName = "Short Range"),
+	LongRange   UMETA(DisplayName = "Long Range")
+};
+
 UCLASS()
 class LINEARDUNGEON_API UBTService_CheckAttackRange : public UBTService_BlackboardBase
 {

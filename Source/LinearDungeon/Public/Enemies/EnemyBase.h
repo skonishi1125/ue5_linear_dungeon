@@ -69,7 +69,9 @@ public:
 	// 巡回ポイントを、Behavior Tree 等から呼び出すための関数
 	AActor* OnGetNextPatrolTarget();
 	double OnGetAttackRadius() const { return AttackRadius; }
+	double OnGetLongAttackRadius() const { return LongAttackRadius; }
 	void OnPerformAttack();
+	void OnPerformLongAttack();
 
 	// 怯みモーションから出す、スタン区間通知用
 	void OnStaggerEnd();
@@ -131,6 +133,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	double AttackRadius = 150.f; // Enemy が攻撃モーションに入るまでの範囲
 
+	UPROPERTY(EditAnywhere)
+	double LongAttackRadius = 200.f; // Enemy の長い攻撃モーションに入るまでの距離
+
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes; // HP 等の情報
@@ -155,6 +160,8 @@ private:
 	// TArray として 攻撃パターンを持たせることで、敵に応じて色々な攻撃パターンを持たせられるようにする
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TArray<UAnimMontage*> AttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	TArray<UAnimMontage*> LongAttackMontages;
 
 	// BT 用
 	TObjectPtr<ALinearEnemyAIController> CachedAIController;

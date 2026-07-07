@@ -459,6 +459,22 @@ void AEnemyBase::OnPerformAttack()
 	}
 }
 
+void AEnemyBase::OnPerformLongAttack()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && LongAttackMontages.Num() > 0)
+	{
+		int32 MaxRange = LongAttackMontages.Num() - 1;
+		const int32 AttackIndex = FMath::RandRange(0, MaxRange);
+
+		if (LongAttackMontages[AttackIndex] != nullptr)
+		{
+			AnimInstance->Montage_Play(LongAttackMontages[AttackIndex], 1.0f);
+		}
+	}
+}
+
 
 void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
