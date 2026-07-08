@@ -176,7 +176,15 @@ private:
 
 	// ===== çUåÇèàóù =====
 	// BoxTrace ã§í èàóù
-	void PerformAttackTrace(USceneComponent* TraceStart, USceneComponent* TraceEnd, const FString& DebugSocketName);
+	//void PerformAttackTrace(USceneComponent* TraceStart, USceneComponent* TraceEnd, const FString& DebugSocketName);
+
+	FVector ResolveImpactPoint(
+		USceneComponent* TraceStart, USceneComponent* TraceEnd,
+		UPrimitiveComponent* AttackBox, UPrimitiveComponent* OtherComp,
+		bool bFromSweep, const FHitResult& SweepResult
+	);
+
+	void ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint);
 
 	// Collision
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))

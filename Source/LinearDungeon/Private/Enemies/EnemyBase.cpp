@@ -219,7 +219,18 @@ void AEnemyBase::OnRightHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	PerformAttackTrace(RightHandBoxTraceStart, RightHandBoxTraceEnd, TEXT("RightHand"));
+	// Player 以外はスルー
+	if (!OtherActor || !OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		return;
+	}
+
+	// BoxTrace 用意（失敗時は、近い値が ImpactPoint として入るようにしている）
+	const FVector ImpactPoint = ResolveImpactPoint(
+		RightHandBoxTraceStart, RightHandBoxTraceEnd,
+		OverlappedComponent, OtherComp, bFromSweep, SweepResult);
+
+	ApplyMeleeHit(OtherActor, ImpactPoint);
 }
 
 void AEnemyBase::OnRightLegOverlap(
@@ -228,7 +239,18 @@ void AEnemyBase::OnRightLegOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	PerformAttackTrace(RightLegBoxTraceStart, RightLegBoxTraceEnd, TEXT("RightLeg"));
+	// Player 以外はスルー
+	if (!OtherActor || !OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		return;
+	}
+
+	// BoxTrace 用意（失敗時は、近い値が ImpactPoint として入るようにしている）
+	const FVector ImpactPoint = ResolveImpactPoint(
+		RightLegBoxTraceStart, RightLegBoxTraceEnd,
+		OverlappedComponent, OtherComp, bFromSweep, SweepResult);
+
+	ApplyMeleeHit(OtherActor, ImpactPoint);
 }
 
 void AEnemyBase::OnLeftHandOverlap(
@@ -237,7 +259,18 @@ void AEnemyBase::OnLeftHandOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	PerformAttackTrace(LeftHandBoxTraceStart, LeftHandBoxTraceEnd, TEXT("LeftHand"));
+	// Player 以外はスルー
+	if (!OtherActor || !OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		return;
+	}
+
+	// BoxTrace 用意（失敗時は、近い値が ImpactPoint として入るようにしている）
+	const FVector ImpactPoint = ResolveImpactPoint(
+		LeftHandBoxTraceStart, LeftHandBoxTraceEnd,
+		OverlappedComponent, OtherComp, bFromSweep, SweepResult);
+
+	ApplyMeleeHit(OtherActor, ImpactPoint);
 }
 
 void AEnemyBase::OnLeftLegOverlap(
@@ -246,8 +279,26 @@ void AEnemyBase::OnLeftLegOverlap(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	PerformAttackTrace(LeftLegBoxTraceStart, LeftLegBoxTraceEnd, TEXT("LeftLeg"));
+	// Player 以外はスルー
+	if (!OtherActor || !OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	{
+		return;
+	}
+
+	// BoxTrace 用意（失敗時は、近い値が ImpactPoint として入るようにしている）
+	const FVector ImpactPoint = ResolveImpactPoint(
+		LeftLegBoxTraceStart, LeftLegBoxTraceEnd,
+		OverlappedComponent, OtherComp, bFromSweep, SweepResult);
+
+	ApplyMeleeHit(OtherActor, ImpactPoint);
+
+	//PerformAttackTrace(LeftLegBoxTraceStart, LeftLegBoxTraceEnd, TEXT("LeftLeg"));
 }
+
+/*
+	BoxTrace がうまくいかなかったとき、攻撃処理自体うまくいかなかったので、以下の2つに分けた
+	* ResolveImpactPoint
+	* ApplyMeleeHit
 
 // BoxTrace -> Damage 共通処理
 void AEnemyBase::PerformAttackTrace(USceneComponent* TraceStart, USceneComponent* TraceEnd, const FString& DebugSocketName)
@@ -274,7 +325,7 @@ void AEnemyBase::PerformAttackTrace(USceneComponent* TraceStart, USceneComponent
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore, 
-		EDrawDebugTrace::None, 
+		EDrawDebugTrace::ForDuration,
 		BoxHit, 
 		true
 	);
@@ -305,6 +356,71 @@ void AEnemyBase::PerformAttackTrace(USceneComponent* TraceStart, USceneComponent
 
 		BoxIgnoreActors.AddUnique(HitActor);
 	}
+}
+
+*/
+
+
+FVector AEnemyBase::ResolveImpactPoint(
+	USceneComponent* TraceStart, USceneComponent* TraceEnd, 
+	UPrimitiveComponent* AttackBox, UPrimitiveComponent* OtherComp, 
+	bool bFromSweep, const FHitResult& SweepResult
+)
+{
+	// 1) まずTraceで正確な接触点を狙う（当たれば一番きれい）
+	if (TraceStart && TraceEnd)
+	{
+		TArray<AActor*> Ignore; Ignore.Add(this);
+		FHitResult BoxHit;
+		const bool bHit = UKismetSystemLibrary::BoxTraceSingle(
+			this, TraceStart->GetComponentLocation(), TraceEnd->GetComponentLocation(),
+			FVector(5.f), TraceStart->GetComponentRotation(),
+			ETraceTypeQuery::TraceTypeQuery1, false, Ignore,
+			EDrawDebugTrace::None, BoxHit, true);
+		if (bHit)
+		{
+			return BoxHit.ImpactPoint;
+		}
+	}
+
+	// 2) Overlap が Sweep 由来なら、その接触点を使う
+	if (bFromSweep && !SweepResult.ImpactPoint.IsZero())
+	{
+		return SweepResult.ImpactPoint;
+	}
+
+	// 3) 攻撃箱に一番近い「相手の表面上の点」（血しぶき位置として自然）
+	if (OtherComp)
+	{
+		FVector Closest;
+		if (OtherComp->GetClosestPointOnCollision(AttackBox->GetComponentLocation(), Closest) > 0.f)
+		{
+			return Closest;
+		}
+	}
+
+	// 4) 最後の保険: 攻撃箱そのものの位置
+	return AttackBox->GetComponentLocation();
+}
+
+void AEnemyBase::ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint)
+{
+	if (!HitActor || BoxIgnoreActors.Contains(HitActor))
+	{
+		return;
+	}
+
+	const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
+	const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
+	
+	UGameplayStatics::ApplyDamage(HitActor, FinalDamage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+
+	if (IHitInterface* HitInterface = Cast<IHitInterface>(HitActor))
+	{
+		HitInterface->Execute_GetHit(HitActor, ImpactPoint, FinalPoiseDamage);
+	}
+
+	BoxIgnoreActors.AddUnique(HitActor);
 }
 
 
