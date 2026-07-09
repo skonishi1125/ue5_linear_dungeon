@@ -80,6 +80,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyDiedDelegate OnEnemyDied;
 
+	// ボスかどうかのゲッタ
+	FORCEINLINE bool IsBoss() const { return bIsBoss; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -232,6 +235,18 @@ private:
 	UFUNCTION()
 	void OnPlayerCharacterDied();
 
+	bool bIsDied = false;
+
+	// ボス関連
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Boss", meta = (AllowPrivateAccess = "true"))
+	bool bIsBoss = false;
+	UPROPERTY(EditAnywhere, Category = "Boss", meta = (AllowPrivateAccess = "true", EditCondition = "bIsBoss"))
+	FText BossName;
+
+	bool bBossHealthBarShown = false;
+
+	void ShowBossHealthBar();
+	void HideBossHealthBar();
 
 
 };

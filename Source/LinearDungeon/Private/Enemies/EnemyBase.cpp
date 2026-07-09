@@ -21,6 +21,10 @@
 // 攻撃判定
 #include "Components/BoxComponent.h"
 
+// ボス関連
+#include "Components/HUD/LinearDungeonHUD.h"
+#include "GameFramework/PlayerController.h"
+
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -157,6 +161,7 @@ void AEnemyBase::Tick(float DeltaTime)
 void AEnemyBase::Die()
 {
 	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
+	bIsDied = true;
 
 	// 振り向きの終了及び、移動の完成を止めて無効化
 	bIsTrackingTarget = false;
@@ -171,6 +176,11 @@ void AEnemyBase::Die()
 	{
 		//UE_LOGFMT(LogTemp, Warning, "OverheadStatusWidgetComponent OFF");
 		OverheadStatusWidgetComponent->SetVisibility(false);
+	}
+
+	if (bIsBoss)
+	{
+		HideBossHealthBar();
 	}
 
 	// AI Controller 側の 憑依解除
@@ -622,14 +632,19 @@ void AEnemyBase::GetHit_Implementation(
 	const FVector& ImpactPoint, const float FinalPoiseDamage
 )
 {
+	if (bIsDied) return;
+
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
 	UE_LOGFMT(LogTemp, Warning, "FinalPoiseDamage: {0}", FinalPoiseDamage);
 
-
-	// OverheadStatusWidgetComponent 表示
-	if (OverheadStatusWidgetComponent && !OverheadStatusWidgetComponent->IsVisible())
+	// ボスでなければ、殴られた時に OverheadStatusWidgetComponent 表示
+		// バー表示（ボスは HUD の画面バー、通常敵は頭上バー）
+	if (bIsBoss)
 	{
-		//UE_LOGFMT(LogTemp, Warning, "HealthBarWidget ON");
+		ShowBossHealthBar();
+	}
+	else if (OverheadStatusWidgetComponent && !OverheadStatusWidgetComponent->IsVisible())
+	{
 		OverheadStatusWidgetComponent->SetVisibility(true);
 	}
 
@@ -856,3 +871,38 @@ void AEnemyBase::OnPlayerCharacterDied()
 
 }
 
+void AEnemyBase::ShowBossHealthBar()
+{
+	if (bBossHealthBarShown)
+	{
+		return;
+	}
+	APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+	if (!PC)
+	{
+		return;
+	}
+	if (ALinearDungeonHUD* HUD = Cast<ALinearDungeonHUD>(PC->GetHUD()))
+	{
+		HUD->ShowBossHealthBar(Attributes, BossName);
+		bBossHealthBarShown = true;
+	}
+}
+
+void AEnemyBase::HideBossHealthBar()
+{
+	if (!bBossHealthBarShown)
+	{
+		return;
+	}
+	APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+	if (!PC)
+	{
+		return;
+	}
+	if (ALinearDungeonHUD* HUD = Cast<ALinearDungeonHUD>(PC->GetHUD()))
+	{
+		HUD->HideBossHealthBar();
+		bBossHealthBarShown = false;
+	}
+}

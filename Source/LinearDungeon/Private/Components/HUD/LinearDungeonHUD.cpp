@@ -1,5 +1,6 @@
 #include "Components/HUD/LinearDungeonHUD.h"
 #include "Logging/StructuredLog.h"
+#include "Components/HUD/BossHealthBarWidget.h"
 
 #include "Components/HUD/LinearDungeonOverlay.h"
 
@@ -39,5 +40,41 @@ void ALinearDungeonHUD::SetOverlayVisibility(bool bIsVisible)
 	{
 		UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::SetOverlayVisibility() No Overlay.");
 
+	}
+}
+
+void ALinearDungeonHUD::ShowBossHealthBar(UAttributeComponent* BossAttributes, const FText& BossName)
+{
+	if (!BossAttributes || !BossHealthBarClass)
+	{
+		return;
+	}
+
+	APlayerController* Controller = GetOwningPlayerController();
+	if (!Controller)
+	{
+		return;
+	}
+
+	if (!BossHealthBar)
+	{
+		BossHealthBar = CreateWidget<UBossHealthBarWidget>(Controller, BossHealthBarClass);
+		if (!BossHealthBar)
+		{
+			return;
+		}
+		BossHealthBar->AddToViewport();
+	}
+	BossHealthBar->SetBossName(BossName);
+	BossHealthBar->BindToAttributes(BossAttributes);
+	BossHealthBar->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ALinearDungeonHUD::HideBossHealthBar()
+{
+	if (BossHealthBar)
+	{
+		BossHealthBar->UnbindFromAttributes();
+		BossHealthBar->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

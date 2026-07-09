@@ -5,6 +5,8 @@
 #include "LinearDungeonHUD.generated.h"
 
 class ULinearDungeonOverlay;
+class UBossHealthBarWidget;
+class UAttributeComponent;
 
 UCLASS()
 class LINEARDUNGEON_API ALinearDungeonHUD : public AHUD
@@ -17,6 +19,10 @@ public:
 	// LevelSequence 中、画面左上の UI を切るための関数
 	UFUNCTION(BlueprintCallable)
 	void SetOverlayVisibility(bool bIsVisible);
+
+	// ボスのバーの表示調整用
+	void ShowBossHealthBar(UAttributeComponent* BossAttributes, const FText& BossName);
+	void HideBossHealthBar();
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,5 +38,12 @@ private:
 	// ダメージを受けたときなど、この Overlay 経由で HUD のパラメータを調整することになる
 	UPROPERTY()
 	TObjectPtr<ULinearDungeonOverlay> Overlay;
+
+	// ボスの HealthBarWidget 関連
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UBossHealthBarWidget> BossHealthBarClass;
+
+	UPROPERTY()
+	TObjectPtr<UBossHealthBarWidget> BossHealthBar;
 
 };
