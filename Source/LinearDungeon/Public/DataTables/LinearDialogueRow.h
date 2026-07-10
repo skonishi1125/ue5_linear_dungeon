@@ -29,7 +29,7 @@ struct LINEARDUNGEON_API FLinearDialogueRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialogue")
 	FText SpeakerName; // ナレーターが話す場合、Null (空欄)にもなり得る
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialogue")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialogue", meta = (MultiLine = "true"))
 	TArray<FText> DialogueLines;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dialogue")
