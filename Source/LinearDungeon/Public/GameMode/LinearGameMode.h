@@ -9,9 +9,9 @@
 UENUM(BlueprintType)
 enum class EBGMType : uint8
 {
-    TitleScreen UMETA(DisplayName = "Title Screen"),
-    Field UMETA(DisplayName = "Field"),
-    Boss UMETA(DisplayName = "Boss")
+    Opening UMETA(DisplayName = "Opening"),
+    MainDungeon UMETA(DisplayName = "MainDungeon"),
+    Ending UMETA(DisplayName = "Ending")
 };
 
 class USoundBase;
@@ -28,7 +28,7 @@ public:
     TMap<EBGMType, USoundBase*> BGMList;
 
     UPROPERTY(EditDefaultsOnly, Category = "Audio")
-    EBGMType DefaultBGMType = EBGMType::TitleScreen;
+    EBGMType DefaultBGMType = EBGMType::Opening;
 
     UFUNCTION(BlueprintCallable, Category = "Audio")
     void ChangeBGM(EBGMType BGMType);
