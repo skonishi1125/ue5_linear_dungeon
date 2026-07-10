@@ -3,6 +3,7 @@
 
 #include "Characters/LinearPlayerCharacter.h"
 #include "Components/InventoryComponent.h"
+#include "Components/SphereComponent.h"
 
 // ‰¹
 #include "Sound/SoundBase.h"
@@ -12,6 +13,14 @@
 void APotion::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (OverlapSphere && PickupActivationDelay > 0.f)
+	{
+		OverlapSphere->SetGenerateOverlapEvents(false);
+		GetWorldTimerManager().SetTimer(
+			PickupEnableTimer, this, &APotion::EnablePickup, PickupActivationDelay, false
+		);
+	}
 }
 
 void APotion::OnItemBeginOverlap(
@@ -40,7 +49,14 @@ void APotion::OnItemBeginOverlap(
 			Destroy();
 		}
 	}
+}
 
-
-
+void APotion::EnablePickup()
+{
+	if (OverlapSphere)
+	{
+		OverlapSphere->SetGenerateOverlapEvents(true);
+		// Šù‚ÉƒvƒŒƒCƒ„[‚ªã‚Éæ‚Á‚Ä‚¢‚éê‡‚Å‚à BeginOverlap ‚ðÄ”­‰Î
+		OverlapSphere->UpdateOverlaps();
+	}
 }

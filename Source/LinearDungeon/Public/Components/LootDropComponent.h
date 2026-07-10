@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,6 +5,7 @@
 #include "LootDropComponent.generated.h"
 
 class UDataTable;
+class AItemBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LINEARDUNGEON_API ULootDropComponent : public UActorComponent
@@ -24,8 +23,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
-	TObjectPtr<UDataTable> LootTable;
+	// DataTable を使った形だが、現状ポーションしか無く過剰なので使わないことにする
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	//TObjectPtr<UDataTable> LootTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot")
+	TSubclassOf<AItemBase> DropItemClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DropRate = 1.0f;
 
 	bool bIsExecDrop = false;
 		

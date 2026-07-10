@@ -24,5 +24,13 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Properties")
 	TObjectPtr<USoundBase> GetSound;
+
+	// アイテムが拾えるようになるまでの時間
+	// 壺などをローリングで割った時、即取得になり取れたか分かりづらいのでディレイをかける
+	UPROPERTY(EditAnywhere, Category = "Potion")
+	float PickupActivationDelay = 0.7f;
+
+	void EnablePickup();
+	FTimerHandle PickupEnableTimer;
 	
 };
