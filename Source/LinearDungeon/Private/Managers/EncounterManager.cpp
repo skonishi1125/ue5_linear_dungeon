@@ -6,6 +6,8 @@
 #include "Subsystems/LinearFlagSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Interfaces/MovingDoorInterface.h"
+
 AEncounterManager::AEncounterManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -31,9 +33,18 @@ void AEncounterManager::BeginPlay()
 						Enemy->Destroy();
 					}
 				}
+
 				if (TargetDoor)
 				{
-					TargetDoor->Destroy();
+					if (TargetDoor->Implements<UMovingDoorInterface>())
+					{
+						IMovingDoorInterface::Execute_PlayOpen(TargetDoor, true);
+					}
+					else
+					{
+						// Interface 未実装のドアは アニメなどはなく Destroy するだけ
+						TargetDoor->Destroy();
+					}
 				}
 
 				return; // 監視処理をスキップ
@@ -63,7 +74,14 @@ void AEncounterManager::HandleEnemyDied(AEnemyBase* DeadEnemy)
 	{
 		if (TargetDoor)
 		{
-			TargetDoor->Destroy();
+			if (TargetDoor->Implements<UMovingDoorInterface>())
+			{
+				IMovingDoorInterface::Execute_PlayOpen(TargetDoor, false);
+			}
+			else
+			{
+				TargetDoor->Destroy();
+			}
 		}
 
 		// クリア通知
