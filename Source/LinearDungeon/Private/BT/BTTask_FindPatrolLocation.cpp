@@ -42,9 +42,6 @@ EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeCompone
 	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
 	{
 		UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
-		UE_LOGFMT(LogTemp, Error, "[PATROL ENTER] CombatTarget={0} RangeState={1}",
-			CT ? CT->GetName() : FString("NULL"),
-			BB->GetValueAsEnum(FName("CombatRangeState")));
 	}
 
 	return EBTNodeResult::Failed;
