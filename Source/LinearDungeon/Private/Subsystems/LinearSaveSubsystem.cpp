@@ -32,13 +32,13 @@ void ULinearSaveSubsystem::SaveGame(int32 SlotIndex)
         }
     }
 
-    // イベントフラグ情報を保存
+    // LevelSequence で行われる イベントフラグ情報
     if (ULinearEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<ULinearEventSubsystem>())
     {
         SaveGameObj->ClearedEvents = EventSubsystem->GetClearedEvents();
     }
 
-    // EventManager 等で管理しているフラグ保存
+    // 敵とのエンカウント(EncounterManager)など、FlagSubsystem で管理しているフラグ保存
     if (ULinearFlagSubsystem* FlagSubsystem = GetGameInstance()->GetSubsystem<ULinearFlagSubsystem>())
     {
         SaveGameObj->SavedFlags = FlagSubsystem->GetAllFlags();

@@ -33,7 +33,7 @@ void APotion::OnItemBeginOverlap(
 	);
 
 	// Player ‚ª Potion ‚ÉG‚ê‚½‚Æ‚«
-	if (OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+	if (OtherActor && OtherActor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
 	{
 		UInventoryComponent* Inventories = Cast<UInventoryComponent>(
 			OtherActor->GetComponentByClass(UInventoryComponent::StaticClass())
