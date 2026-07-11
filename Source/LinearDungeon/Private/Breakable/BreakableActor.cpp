@@ -6,7 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Chaos/ChaosGameplayEventDispatcher.h"
 
-#include "Items/ItemBase.h"
+//#include "Items/ItemBase.h"
 #include "Components/LootDropComponent.h"
 
 ABreakableActor::ABreakableActor()

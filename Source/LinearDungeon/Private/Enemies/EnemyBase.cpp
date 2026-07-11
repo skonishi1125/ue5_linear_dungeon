@@ -25,6 +25,8 @@
 #include "Components/HUD/LinearDungeonHUD.h"
 #include "GameFramework/PlayerController.h"
 
+#include "Components/LootDropComponent.h"
+
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -105,6 +107,9 @@ AEnemyBase::AEnemyBase()
 	LeftLegBoxTraceStart->SetupAttachment(GetMesh(), FName("calf_l"));
 	LeftLegBoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Left Leg Box Trace End"));
 	LeftLegBoxTraceEnd->SetupAttachment(GetMesh(), FName("calf_l"));
+
+	// 固有 Component 割当（アイテムドロップ）
+	LootDropComponent = CreateDefaultSubobject<ULootDropComponent>(TEXT("LootDropComponent"));
 
 }
 
@@ -187,6 +192,15 @@ void AEnemyBase::Die()
 	if (CachedAIController)
 	{
 		CachedAIController->HandleEnemyDeath();
+	}
+
+	// アイテムドロップ 処理
+	if (LootDropComponent)
+	{
+		// 自身の位置を渡して、ドロップ処理自体はコンポーネントに委譲
+		LootDropComponent->ExecuteDrop(GetActorLocation(), GetActorRotation());
+		UE_LOGFMT(LogTemp, Warning, "Item Drop!");
+
 	}
 
 	// 一定時間経過したら、Destroy されるようにする

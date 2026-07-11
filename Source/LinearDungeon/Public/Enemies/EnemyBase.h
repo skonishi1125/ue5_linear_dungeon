@@ -28,6 +28,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 // ìG éÄñSèàóù
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedDelegate, AEnemyBase*, DeadEnemy);
 
+// ÉhÉçÉbÉvèàóù
+class ULootDropComponent;
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -247,6 +250,9 @@ private:
 
 	void ShowBossHealthBar();
 	void HideBossHealthBar();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULootDropComponent> LootDropComponent;
 
 
 };
