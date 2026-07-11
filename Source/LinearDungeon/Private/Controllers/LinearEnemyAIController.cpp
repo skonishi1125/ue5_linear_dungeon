@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
+#include "Enemies/EnemyBase.h"
 
 ALinearEnemyAIController::ALinearEnemyAIController()
 {
@@ -83,6 +84,16 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 				// AddDynamic ではなく AddUniqueDynamic を使って、視界に入るたびに登録されるのを防ぐ
 				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::OnPlayerCharacterDied);
 			}
+
+			// ボスの時は、視線に入った時点で表示を出す
+			if (AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn()))
+			{
+				if (Enemy->IsBoss())
+				{
+					Enemy->ShowBossHealthBar();
+				}
+			}
+
 		}
 	}
 	else
@@ -100,6 +111,12 @@ void ALinearEnemyAIController::ClearCombatTarget()
 		BlackboardComp->ClearValue(FName("CombatTarget"));
 		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
 	}
+
+	if (AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn()))
+	{
+		Enemy->SetOverheadStatusVisible(false);
+	}
+
 }
 
 void ALinearEnemyAIController::HandleEnemyDeath()

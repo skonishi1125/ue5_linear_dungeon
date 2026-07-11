@@ -86,6 +86,13 @@ public:
 	// ボスかどうかのゲッタ
 	FORCEINLINE bool IsBoss() const { return bIsBoss; }
 
+	// EnemyAIController などから、CombatTarget をリセットした際に OverheadStatus を消す時に呼ぶ
+	void SetOverheadStatusVisible(bool bVisible = false);
+
+	// ボスの HUD 表示
+	void ShowBossHealthBar();
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -248,7 +255,6 @@ private:
 
 	bool bBossHealthBarShown = false;
 
-	void ShowBossHealthBar();
 	void HideBossHealthBar();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

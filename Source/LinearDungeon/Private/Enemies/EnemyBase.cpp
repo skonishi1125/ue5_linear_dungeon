@@ -113,6 +113,14 @@ AEnemyBase::AEnemyBase()
 
 }
 
+void AEnemyBase::SetOverheadStatusVisible(bool bVisible)
+{
+	if (OverheadStatusWidgetComponent)
+	{
+		OverheadStatusWidgetComponent->SetVisibility(bVisible);
+	}
+}
+
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
