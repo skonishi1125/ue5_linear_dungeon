@@ -1,4 +1,6 @@
 #include "BT/BTTaskNode_LongAttack.h"
+#include "Logging/StructuredLog.h"
+
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Enemies/EnemyBase.h"
@@ -16,6 +18,9 @@ UBTTaskNode_LongAttack::UBTTaskNode_LongAttack()
 EBTNodeResult::Type UBTTaskNode_LongAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
+
+	//UE_LOGFMT(LogTemp, Warning, "[LongAttack] Execute enter");
+
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (AIController == nullptr) return EBTNodeResult::Failed;

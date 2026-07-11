@@ -1,4 +1,6 @@
 #include "BT/BTTask_FindPatrolLocation.h"
+#include "Logging/StructuredLog.h"
+
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Enemies/EnemyBase.h"
@@ -35,6 +37,14 @@ EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeCompone
 		);
 
 		return EBTNodeResult::Succeeded; // ¬Œ÷
+	}
+
+	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
+	{
+		UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
+		UE_LOGFMT(LogTemp, Error, "[PATROL ENTER] CombatTarget={0} RangeState={1}",
+			CT ? CT->GetName() : FString("NULL"),
+			BB->GetValueAsEnum(FName("CombatRangeState")));
 	}
 
 	return EBTNodeResult::Failed;

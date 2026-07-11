@@ -53,6 +53,7 @@ void UBTService_CheckAttackRange::TickNode(
 	{
 		// UŒ‚”ÍˆÍ‘ÎÛŠO‚Å‚ ‚é‚±‚Æ‚ð–¾‹L
 		// GetSelectedBlackboardKey: BT ‚Ìƒm[ƒh“à•”‚ÅÝ’è‚µ‚½ABB Key ‚Ì‚±‚Æ
+		UE_LOGFMT(LogTemp, Warning, "[Range] Target=NULL -> None");
 		BlackboardComp->SetValueAsEnum(GetSelectedBlackboardKey(), static_cast<uint8>(ECombatRangeState::None));
 		return;
 	}
@@ -76,32 +77,6 @@ void UBTService_CheckAttackRange::TickNode(
 	}
 
 
-	//UE_LOGFMT(LogTemp, Log, 
-	//	"Service Tick - Distance: {0}, AttackRadius: {1}, Result: {2}", DistanceToTarget, EnemyBase->OnGetAttackRadius(), bInAttackRange
-	//);
-
 	// Œ‹‰Ê‚ð Blackboard ‚É‘‚«ž‚Þ (InAttackRange ‚É•R•t‚¯‚é)
 	BlackboardComp->SetValueAsEnum(GetSelectedBlackboardKey(), static_cast<uint8>(CurrentState));
 }
-
-//void UBTService_CheckAttackRange::DrawDebugDistanceToTarget(UBehaviorTreeComponent& OwnerComp)
-//{
-//	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-//	if (BlackboardComp == nullptr) return;
-//
-//	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(BlackboardTargetName));
-//	if (TargetActor == nullptr)
-//	{
-//		BlackboardComp->SetValueAsBool(GetSelectedBlackboardKey(), false);
-//		return;
-//	}
-//
-//	AAIController* AIController = OwnerComp.GetAIOwner();
-//	AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
-//
-//	if (AIController && EnemyBase)
-//	{
-//		DRAW_SPHERE(TargetActor->GetActorLocation());
-//		DRAW_SPHERE(EnemyBase->GetActorLocation());
-//	}
-//}

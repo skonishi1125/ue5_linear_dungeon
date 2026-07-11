@@ -84,10 +84,6 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::OnPlayerCharacterDied);
 			}
 		}
-		else
-		{
-			//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() Actor doesn't have Tags ");
-		}
 	}
 	else
 	{
@@ -102,7 +98,7 @@ void ALinearEnemyAIController::ClearCombatTarget()
 	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 	{
 		BlackboardComp->ClearValue(FName("CombatTarget"));
-		//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
+		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
 	}
 }
 

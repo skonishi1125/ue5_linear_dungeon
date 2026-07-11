@@ -254,5 +254,4 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ULootDropComponent> LootDropComponent;
 
-
-};
+	};

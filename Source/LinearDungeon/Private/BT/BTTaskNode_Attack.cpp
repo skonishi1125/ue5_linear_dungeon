@@ -1,4 +1,6 @@
 #include "BT/BTTaskNode_Attack.h"
+#include "Logging/StructuredLog.h"
+
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Enemies/EnemyBase.h"
@@ -17,6 +19,8 @@ UBTTaskNode_Attack::UBTTaskNode_Attack()
 EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
+
+	//UE_LOGFMT(LogTemp, Warning, "[Attack] Execute enter");
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (AIController == nullptr) return EBTNodeResult::Failed;

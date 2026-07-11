@@ -156,6 +156,22 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (CachedAIController)
+	{
+		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
+		{
+			UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
+			if (CT)
+			{
+				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: {0}", CT->GetName());
+			}
+			else
+			{
+				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: None");
+			}
+		}
+	}
+
 	// 攻撃モーション中の特定期間(NotifyState) でフラグが制御されている間、相手に振り向く
 	if (bIsTrackingTarget)
 	{
@@ -555,7 +571,6 @@ void AEnemyBase::OnTrackingTarget(bool bIsTracking)
 {
 	bIsTrackingTarget = bIsTracking;
 	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::OnTrackingTarget: {0}", bIsTracking);
-
 }
 
 AActor* AEnemyBase::OnGetNextPatrolTarget()
