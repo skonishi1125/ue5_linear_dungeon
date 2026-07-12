@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "Perception/AIPerceptionComponent.h" // FAIStimulus は struct なので、.h で定義する
+#include "Enemies/EnemyBase.h"
 
 #include "LinearEnemyAIController.generated.h"
 
@@ -33,6 +34,9 @@ private:
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAISenseConfig_Sight> SightConfig;
+
+	UFUNCTION()
+	void ApplySightConfig(const FEnemySightConfig& Settings);
 
 	// 使用する Behavior Tree の格納先
 	UPROPERTY(EditDefaultsOnly, Category = "AI")

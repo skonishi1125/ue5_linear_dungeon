@@ -51,12 +51,34 @@ void ALinearEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	// 視野角設定取り込み
+	if (const AEnemyBase* Enemy = Cast<AEnemyBase>(InPawn))
+	{
+		ApplySightConfig(Enemy->GetSightSettings());
+	}
+
 	// EnemyBase に Controller が憑依成功時、BehaviorTree を起動する
 	if (BehaviorTreeAsset)
 	{
 		RunBehaviorTree(BehaviorTreeAsset);
 	}
 }
+
+// 視野角関連設定
+void ALinearEnemyAIController::ApplySightConfig(const FEnemySightConfig& Settings)
+{
+	if (!SightConfig || !AIPerceptionComponent) return;
+
+	SightConfig->SightRadius = Settings.SightRadius;
+	SightConfig->LoseSightRadius = Settings.LoseSightRadius;
+	SightConfig->PeripheralVisionAngleDegrees = Settings.PeripheralVisionAngleDegrees;
+	SightConfig->SetMaxAge(Settings.MaxAge);
+	// Affiliation はロジック側の共通設定なので constructor のままでOK
+	// 変更を反映するため再登録する
+	AIPerceptionComponent->ConfigureSense(*SightConfig);
+	AIPerceptionComponent->RequestStimuliListenerUpdate();
+}
+
 
 // 視覚検知処理
 // AI Controller に紐づけられた Blackboard に対して、指定の Key に取得した情報を入れる

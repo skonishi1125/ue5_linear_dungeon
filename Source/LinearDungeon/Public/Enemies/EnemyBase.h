@@ -31,6 +31,21 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedDelegate, AEnemyBase*, D
 // ドロップ処理
 class ULootDropComponent;
 
+// EnemyAIController の UAIPerceptionComponent に渡す設定値などを Struct で管理して渡せるようにしておく
+USTRUCT(BlueprintType)
+struct FEnemySightConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, Category = "AI|Sight")
+	float SightRadius = 1000.f; // 管理できる距離
+	UPROPERTY(EditAnywhere, Category = "AI|Sight")
+	float LoseSightRadius = 1100.f; // 相手を見失う距離 SightRadius よりも大きくする
+	UPROPERTY(EditAnywhere, Category = "AI|Sight")
+	float PeripheralVisionAngleDegrees = 60.f; // 正面から見た視野の広がり 60 = 実質、前方 120° が範囲
+	UPROPERTY(EditAnywhere, Category = "AI|Sight")
+	float MaxAge = 5.f; // ターゲットを見失った後の、情報保持時間
+};
+
 UCLASS()
 class LINEARDUNGEON_API AEnemyBase : public ACharacter, public IHitInterface
 {
@@ -92,6 +107,7 @@ public:
 	// ボスの HUD 表示
 	void ShowBossHealthBar();
 
+	FORCEINLINE const FEnemySightConfig& GetSightSettings() const { return SightSettings; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -259,5 +275,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ULootDropComponent> LootDropComponent;
+
+	// AIController に渡す、視野設定値
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FEnemySightConfig SightSettings;
 
 	};
