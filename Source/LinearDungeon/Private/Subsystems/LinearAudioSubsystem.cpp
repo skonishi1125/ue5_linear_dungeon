@@ -5,7 +5,7 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-void ULinearAudioSubsystem::PlayBGM(USoundBase* InBGM)
+void ULinearAudioSubsystem::PlayBGM(USoundBase* InBGM, EBGMType BGMType)
 {
 	if (!InBGM) return;
 	if (BGMAudioComponent && BGMAudioComponent->GetSound() == InBGM) return;

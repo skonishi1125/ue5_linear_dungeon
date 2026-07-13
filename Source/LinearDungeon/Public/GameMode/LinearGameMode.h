@@ -11,6 +11,7 @@ enum class EBGMType : uint8
 {
     Opening UMETA(DisplayName = "Opening"),
     MainDungeon UMETA(DisplayName = "MainDungeon"),
+    Boss UMETA(DisplayName = "Boss"),
     Ending UMETA(DisplayName = "Ending")
 };
 

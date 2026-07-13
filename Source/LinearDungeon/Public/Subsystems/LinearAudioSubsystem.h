@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "GameMode/LinearGameMode.h"
+
 #include "LinearAudioSubsystem.generated.h"
 
 class USoundBase;
@@ -17,7 +19,7 @@ public:
 
 	// BGMÇÃçƒê∂
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void PlayBGM(USoundBase* InBGM);
+	void PlayBGM(USoundBase* InBGM, EBGMType BGMType = EBGMType::Opening);
 
 	// BGMÇÃí‚é~
 	UFUNCTION(BlueprintCallable, Category = "Audio")

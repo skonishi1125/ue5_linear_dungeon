@@ -9,6 +9,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 
 #include "Enemies/EnemyBase.h"
+#include "Subsystems/LinearAudioSubsystem.h"
+#include "GameMode/LinearGameMode.h"
 
 ALinearEnemyAIController::ALinearEnemyAIController()
 {
@@ -113,6 +115,12 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 				if (Enemy->IsBoss())
 				{
 					Enemy->ShowBossHealthBar();
+
+					// BGM 再生(重複チェックなどは GameMode, AudioSubsystem に任せる)
+					if (ALinearGameMode* GameMode = GetWorld()->GetAuthGameMode<ALinearGameMode>())
+					{
+						GameMode->ChangeBGM(EBGMType::Boss);
+					}
 				}
 			}
 
