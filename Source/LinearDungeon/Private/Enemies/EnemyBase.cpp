@@ -24,6 +24,7 @@
 // ƒ{ƒXŠÖ˜A
 #include "Components/HUD/LinearDungeonHUD.h"
 #include "GameFramework/PlayerController.h"
+#include "Subsystems/LinearAudioSubsystem.h"
 
 #include "Components/LootDropComponent.h"
 
@@ -211,6 +212,13 @@ void AEnemyBase::Die()
 	if (bIsBoss)
 	{
 		HideBossHealthBar();
+		// BGM ‚à~‚ß‚é
+		ULinearAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<ULinearAudioSubsystem>();
+		if (AudioSubsystem)
+		{
+			AudioSubsystem->StopBGM();
+		}
+
 	}
 
 	// AI Controller ‘¤‚Ì œßˆË‰ğœ
