@@ -125,8 +125,13 @@ void AWeapon::OnBoxOverlap(
 	// 多段ヒット防止
 	if (BoxIgnoreActors.Contains(OtherActor))
 	{
+		UE_LOGFMT(LogTemp, Warning, "Ignore!");
 		return;
 	}
+
+	// スカりをチェック
+	UE_LOGFMT(LogTemp, Warning, "OnBoxOverlap fired! Other={0}", OtherActor ? OtherActor->GetName() : TEXT("null"));
+
 	// ダメージ計算
 	const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 	const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
