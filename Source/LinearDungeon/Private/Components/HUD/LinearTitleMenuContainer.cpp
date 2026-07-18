@@ -24,8 +24,14 @@ void ULinearTitleMenuContainer::NativeConstruct()
 
 void ULinearTitleMenuContainer::HandleTitleNewGameRequested()
 {
-	FString OpeningLevelName = "OpeningLevel";
-	UGameplayStatics::OpenLevel(this, FName(*OpeningLevelName));
+	if (!NextLevel.IsNull())
+	{
+		UGameplayStatics::OpenLevelBySoftObjectPtr(this, NextLevel);
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Error, "OpeningLevel is not configured in ULinearTitleMenuContainer.");
+	}
 }
 
 void ULinearTitleMenuContainer::HandleTitleLoadMenuRequested()

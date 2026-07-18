@@ -42,4 +42,7 @@ public:
 	// TitlePlayerController ‚Å CloseTitleSubMenu ‚ª‰Ÿ‚³‚ê‚½Žž
 	UFUNCTION()
 	void HandleCancelInput();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
+	TSoftObjectPtr<UWorld> NextLevel;
 };

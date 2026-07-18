@@ -290,7 +290,7 @@ void USaveLoadMenuWidget::FinishProcessingUI()
 		FString SaveSlotName = FString::Printf(TEXT("%s%d"), *BaseSaveSlotName, SelectedSlotIndex);
 
 		// フォールバック用
-		FString LevelNameToLoad = UGameplayStatics::GetCurrentLevelName(this);
+		FString LevelNameToLoad = UGameplayStatics::GetCurrentLevelName(this, true);
 
 		// スロットからセーブされたデータの名前を読み取り、その名前で Level を開く
 		if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, 0))
