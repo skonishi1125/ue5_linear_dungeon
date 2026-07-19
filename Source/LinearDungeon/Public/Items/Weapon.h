@@ -87,6 +87,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	TObjectPtr<UBoxComponent> WeaponBox;
 
+	// UŒ‚‚Ì ImpactPoint ”»’è ‚Æ ‚»‚ê‚ğg‚Á‚½UŒ‚ˆ—
+	UFUNCTION()
+	FVector ResolveImpactPoint(
+		USceneComponent* TraceStart, USceneComponent* TraceEnd,
+		UPrimitiveComponent* AttackBox, UPrimitiveComponent* OtherComp,
+		bool bFromSweep, const FHitResult& SweepResult
+	);
+
+	UFUNCTION()
+	void ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint);
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float BaseDamage = 20.f; // Šî‘bUŒ‚—Í
 	float CurrentDamageMultiplier = 1.f;

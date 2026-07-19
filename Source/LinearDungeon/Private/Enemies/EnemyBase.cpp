@@ -424,7 +424,7 @@ FVector AEnemyBase::ResolveImpactPoint(
 	bool bFromSweep, const FHitResult& SweepResult
 )
 {
-	// 1) まずTraceで正確な接触点を狙う（当たれば一番きれい）
+	// Trace で正確な接触点の取得を試す
 	if (TraceStart && TraceEnd)
 	{
 		TArray<AActor*> Ignore; Ignore.Add(this);
@@ -433,20 +433,21 @@ FVector AEnemyBase::ResolveImpactPoint(
 			this, TraceStart->GetComponentLocation(), TraceEnd->GetComponentLocation(),
 			FVector(5.f), TraceStart->GetComponentRotation(),
 			ETraceTypeQuery::TraceTypeQuery1, false, Ignore,
-			EDrawDebugTrace::None, BoxHit, true);
+			EDrawDebugTrace::None, BoxHit, true
+		);
 		if (bHit)
 		{
 			return BoxHit.ImpactPoint;
 		}
 	}
 
-	// 2) Overlap が Sweep 由来なら、その接触点を使う
+	// Overlap が Sweep から取得できたならそちらを使う
 	if (bFromSweep && !SweepResult.ImpactPoint.IsZero())
 	{
 		return SweepResult.ImpactPoint;
 	}
 
-	// 3) 攻撃箱に一番近い「相手の表面上の点」（血しぶき位置として自然）
+	// Trace 等で取得できなければ、攻撃判定の Box に一番近い表面上の点を取得
 	if (OtherComp)
 	{
 		FVector Closest;
@@ -456,7 +457,7 @@ FVector AEnemyBase::ResolveImpactPoint(
 		}
 	}
 
-	// 4) 最後の保険: 攻撃箱そのものの位置
+	// それでも取得できなければ、Box 自体の点を ImpacePoint とする
 	return AttackBox->GetComponentLocation();
 }
 
