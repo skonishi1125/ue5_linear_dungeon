@@ -4,6 +4,8 @@
 #include "GameFramework/PlayerController.h"
 #include "LinearPlayerController.generated.h"
 
+class ALinearPlayerCharacter;
+
 // Controller Ç™ä«óùÇ∑ÇÈ Widget
 class ULinearGameOverWidget;
 class UMenuContainerWidget;
@@ -51,6 +53,9 @@ protected:
 
 
 private:
+	UPROPERTY()
+	TObjectPtr<ALinearPlayerCharacter> CachedLinearPlayerCharacter;
+
 	UPROPERTY()
 	TObjectPtr<UMenuContainerWidget> MenuContainerWidgetInstance;
 	UPROPERTY()

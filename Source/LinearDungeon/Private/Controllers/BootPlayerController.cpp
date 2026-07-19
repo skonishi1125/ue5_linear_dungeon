@@ -18,7 +18,7 @@ void ABootPlayerController::BeginPlay()
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(
-		TransitionTimerHandle, this, &ABootPlayerController::ExecuteTransition, 3.f,false
+		TransitionTimerHandle, this, &ABootPlayerController::ExecuteTransition, 5.f, false
 	);
 }
 

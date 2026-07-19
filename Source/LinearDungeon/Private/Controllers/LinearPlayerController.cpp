@@ -16,8 +16,12 @@
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
 
-// ゲームオーバー
+// ToogleMenu
 #include "Characters/LinearPlayerCharacter.h"
+#include "Characters/CharacterTypes.h"
+#include "Subsystems/LinearSequenceSubsystem.h"
+
+// ゲームオーバー
 #include "Subsystems/LinearSaveSubsystem.h"
 #include "Subsystems/LinearAudioSubsystem.h"
 
@@ -81,9 +85,9 @@ void ALinearPlayerController::OnPossess(APawn* InPawn)
 
 	// BeginPlay ではなく、OnPossess (憑依時)で Delegate 登録
 	// BeginPlay だと実行順序の関係で、デリゲート登録に失敗する可能性があるのでこっちでやる
-	if (ALinearPlayerCharacter* LPCharacter = Cast<ALinearPlayerCharacter>(InPawn))
+	if (CachedLinearPlayerCharacter = Cast<ALinearPlayerCharacter>(InPawn))
 	{
-		LPCharacter->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearPlayerController::OnPlayerDied);
+		CachedLinearPlayerCharacter->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearPlayerController::OnPlayerDied);
 		UE_LOGFMT(LogTemp, Warning, "ALinearPlayerController::OnPossess() Add Delegate");
 	}
 }
@@ -101,16 +105,32 @@ void ALinearPlayerController::SetupInputComponent()
 
 void ALinearPlayerController::ToggleMenu()
 {
+
 	if (!MenuContainerWidgetInstance) return;
 
 
 	if (bIsMenuOpen)
 	{
+		// 何かの拍子にメニューが開きっぱなしになった場合のため、閉じれるようにだけはしておく
 		CloseMenu();
 	}
 	else
 	{
-		// OpenMenu() としてしまってもよいが。
+		// 会話中の場合弾く
+		if (CachedLinearPlayerCharacter->GetCharacterActionState() != EActionState::EAS_Unoccupied) return;
+
+		// Level Sequence 再生中の場合弾く
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (ULinearSequenceSubsystem* SequenceSubsystem = GI->GetSubsystem<ULinearSequenceSubsystem>())
+			{
+				if (SequenceSubsystem->IsPlayingSequence())
+				{
+					return;
+				}
+			}
+		}
+
 
 		bIsMenuOpen = true;
 		// メニューを開く処理
