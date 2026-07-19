@@ -11,6 +11,8 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
+	InitializeGraphicsSettings();
+
 	if (UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0))
 	{
 		if (ULinearSettingsSaveGame* LoadedSettings = Cast<ULinearSettingsSaveGame>(UGameplayStatics::LoadGameFromSlot(SettingsSlotName, 0)))
@@ -31,6 +33,34 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		}
 	}
 }
+
+// GameUserSettings.ini から既存の設定を読み込み、
+// セーブデータが存在しない場合は初回起動とみなしてベンチマークに沿った設定値とする
+void ULinearSettingsSubsystem::InitializeGraphicsSettings()
+{
+	if (!GEngine) return;
+
+	UGameUserSettings* UserSettings = GEngine->GetGameUserSettings();
+	if (!UserSettings) return;
+
+	UserSettings->LoadSettings(false);
+
+	bool bIsFirstBoot = UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0);
+
+	if (! bIsFirstBoot)
+	{
+		UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Playing Graphics Benchmark");
+		UserSettings->RunHardwareBenchmark();
+		UserSettings->ApplyHardwareBenchmarkResults();
+	}
+	else
+	{
+		UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Exist SettingData.");
+	}
+
+	UserSettings->ApplySettings(false);
+}
+
 
 // 設定ファイルの保存処理
 void ULinearSettingsSubsystem::SaveSettings()
