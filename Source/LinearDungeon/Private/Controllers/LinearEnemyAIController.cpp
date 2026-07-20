@@ -87,51 +87,55 @@ void ALinearEnemyAIController::ApplySightConfig(const FEnemySightConfig& Setting
 // BT には BB が紐づいているので、そちらを経由して BB の値を参照できる
 void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
 {
+	// Player 以外は考慮しない
+	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
+
+	// 視覚以外は考慮しない
+	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		if (Actor->ActorHasTag(ALinearPlayerCharacter::GetTag()))
+		// Player を追いかけなくなるまでの猶予時間をリセットする
+		GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
+		//UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+
+		// Behavior Tree を操作するため、 Blackboard 内部の CombatTarget に Actor をセットする
+		if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 		{
-			// タイマーリセット
-			GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
+			BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
+		}
 
+		// Delegate で、Player が死亡したときに CombatTarget をリセットするように登録
+		// AddDynamic ではなく AddUniqueDynamic で、視界に入るたびに登録されるのを防ぐ
+		if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(Actor))
+		{
+			LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::OnPlayerCharacterDied);
+		}
 
-			//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
-			// Blackboard コンポーネントを取得し、CombatTarget に Actor をセットする
-			if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
+		// ボスの時は、視線に入った時点で表示を出す
+		if (AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn()))
+		{
+			if (Enemy->IsBoss())
 			{
-				BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
-			}
+				Enemy->ShowBossHealthBar();
 
-			// Delegate で、Player が死亡したときに CombatTarget をリセットするように登録
-			if (ALinearPlayerCharacter* LP_Character = Cast<ALinearPlayerCharacter>(Actor))
-			{
-				// AddDynamic ではなく AddUniqueDynamic を使って、視界に入るたびに登録されるのを防ぐ
-				LP_Character->OnCharacterDeathDelegate.AddUniqueDynamic(this, &ALinearEnemyAIController::OnPlayerCharacterDied);
-			}
-
-			// ボスの時は、視線に入った時点で表示を出す
-			if (AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn()))
-			{
-				if (Enemy->IsBoss())
+				// BGM 再生(重複チェックなどは GameMode, AudioSubsystem に任せる)
+				// 本当は BGM, UI 表示なども別途委託したほうが良いが、ボスが 1 体なのでここで設計する
+				if (ALinearGameMode* GameMode = GetWorld()->GetAuthGameMode<ALinearGameMode>())
 				{
-					Enemy->ShowBossHealthBar();
-
-					// BGM 再生(重複チェックなどは GameMode, AudioSubsystem に任せる)
-					if (ALinearGameMode* GameMode = GetWorld()->GetAuthGameMode<ALinearGameMode>())
-					{
-						GameMode->ChangeBGM(EBGMType::Boss);
-					}
+					GameMode->ChangeBGM(EBGMType::Boss);
 				}
 			}
-
 		}
 	}
 	else
 	{
+		// 視点から外れて指定秒数経ったとき、Player を見失う処理を走らせる
 		GetWorld()->GetTimerManager().SetTimer(
 			LoseTargetTimer, this, &ALinearEnemyAIController::ClearCombatTarget, 6.0f, false
 		);
 	}
+
 }
 
 void ALinearEnemyAIController::ClearCombatTarget()
@@ -139,7 +143,7 @@ void ALinearEnemyAIController::ClearCombatTarget()
 	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
 	{
 		BlackboardComp->ClearValue(FName("CombatTarget"));
-		UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
+		UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::ClearCombatTarget() Target forgotten.");
 	}
 
 	if (AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn()))
