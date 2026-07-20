@@ -66,7 +66,7 @@ FText AWeapon::GetInteractPrompt_Implementation()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOGFMT(LogTemp, Warning, "Weapon BeginPlay");
+	//UE_LOGFMT(LogTemp, Warning, "Weapon BeginPlay");
 	if (WeaponBox)
 	{
 		WeaponBox->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnBoxOverlap);

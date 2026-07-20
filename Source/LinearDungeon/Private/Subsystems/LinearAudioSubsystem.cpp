@@ -13,7 +13,7 @@ void ULinearAudioSubsystem::PlayBGM(USoundBase* InBGM, EBGMType BGMType)
 	// Ä¶’†‚Ì BGM ‚ð’âŽ~‚µ‚ÄAÄ¶ˆ—‚ðs‚¤
 	StopBGM();
 
-	UE_LOGFMT(LogTemp, Log, "ULinearAudioSubsystem::PlayBGM");
+	//UE_LOGFMT(LogTemp, Log, "ULinearAudioSubsystem::PlayBGM");
 
 
 	BGMAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), InBGM);
@@ -48,7 +48,7 @@ void ULinearAudioSubsystem::SetBGMVolume(float ClampedVolume)
 	{
 		BGMAudioComponent->SetVolumeMultiplier(ClampedVolume);
 		CurrentBGMVolume = ClampedVolume;
-		UE_LOGFMT(LogTemp, Warning, "ULinearAudioSubsystem::SetBGMVolume() Settings ClampedVolume!");
+		//UE_LOGFMT(LogTemp, Warning, "ULinearAudioSubsystem::SetBGMVolume() Settings ClampedVolume!");
 	}
 
 }

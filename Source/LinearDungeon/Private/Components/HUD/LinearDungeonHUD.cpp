@@ -21,10 +21,10 @@ void ALinearDungeonHUD::BeginPlay()
 				Overlay->SetVisibility(ESlateVisibility::Hidden);
 			}
 			Overlay->AddToViewport();
-			UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::BeginPlay()");
+			//UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::BeginPlay()");
 		}
 	}
-	UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::BeginPlay() Finish");
+	//UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::BeginPlay() Finish");
 
 }
 
@@ -34,11 +34,11 @@ void ALinearDungeonHUD::SetOverlayVisibility(bool bIsVisible)
 	{
 		ESlateVisibility NewVisibility = bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 		Overlay->SetVisibility(NewVisibility);
-		UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::SetOverlayVisibility {0}", bIsVisible);
+		//UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::SetOverlayVisibility {0}", bIsVisible);
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::SetOverlayVisibility() No Overlay.");
+		//UE_LOGFMT(LogTemp, Warning, "ALinearDungeonHUD::SetOverlayVisibility() No Overlay.");
 
 	}
 }

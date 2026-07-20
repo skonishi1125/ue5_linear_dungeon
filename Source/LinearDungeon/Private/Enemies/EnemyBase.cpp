@@ -673,14 +673,14 @@ void AEnemyBase::PossessedBy(AController* NewController)
 	// Controller が憑依したときに一度だけ呼ばれる関数
 	CachedAIController = Cast<ALinearEnemyAIController>(NewController);
 
-	if (CachedAIController)
-	{
-		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Successfully cached ALE_AIController.");
-	}
-	else
-	{
-		UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Failed cached ALE_AIController.");
-	}
+	//if (CachedAIController)
+	//{
+	//	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Successfully cached ALE_AIController.");
+	//}
+	//else
+	//{
+	//	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::PossessedBy() Failed cached ALE_AIController.");
+	//}
 
 	// このタイミングではまだ、AIController は RunBehaviorTree を実行していない
 	// なので、BB のキャッシュ対応などは一旦しない
@@ -692,8 +692,8 @@ void AEnemyBase::GetHit_Implementation(
 {
 	if (bIsDied) return;
 
-	UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
-	UE_LOGFMT(LogTemp, Warning, "FinalPoiseDamage: {0}", FinalPoiseDamage);
+	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation()");
+	//UE_LOGFMT(LogTemp, Warning, "FinalPoiseDamage: {0}", FinalPoiseDamage);
 
 	// ボスでなければ、殴られた時に OverheadStatusWidgetComponent 表示
 		// バー表示（ボスは HUD の画面バー、通常敵は頭上バー）
@@ -714,7 +714,7 @@ void AEnemyBase::GetHit_Implementation(
 		const bool bIsStaggered = Attributes->IsStaggeredWithPoise(FinalPoiseDamage, ExcessPoiseDamage);
 		if (bIsStaggered)
 		{
-			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
+			//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
 
 			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
@@ -736,13 +736,13 @@ void AEnemyBase::GetHit_Implementation(
 		else
 		{
 			// ポイズが残っている場合は怯まない（スーパーアーマー状態）
-			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise intact(No reaction)");
+			//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise intact(No reaction)");
 		}
 	}
 	else
 	{
 		// 死亡処理, アニメ再生
-		UE_LOGFMT(LogTemp, Warning, "Die");
+		//UE_LOGFMT(LogTemp, Warning, "Die");
 		Die();
 	}
 

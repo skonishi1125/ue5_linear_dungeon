@@ -121,7 +121,7 @@ void USettingsMenuWidget::OnBGMSliderValueChanged(float Value)
 		{
 			float ClampedVolume = FMath::Clamp(Value, 0.01f, 1.0f);
 			SettingsSubsystem->SetBGMVolume(ClampedVolume);
-			UE_LOGFMT(LogTemp, Warning, "USettingsMenuWidget::OnBGMSliderValueChanged() {0}", ClampedVolume);
+			//UE_LOGFMT(LogTemp, Warning, "USettingsMenuWidget::OnBGMSliderValueChanged() {0}", ClampedVolume);
 		}
 
 		//if (ULinearAudioSubsystem* AudioSubsystem = GI->GetSubsystem<ULinearAudioSubsystem>())

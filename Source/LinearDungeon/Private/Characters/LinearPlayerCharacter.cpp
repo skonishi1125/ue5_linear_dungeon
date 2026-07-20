@@ -83,7 +83,7 @@ void ALinearPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	Tags.Add(TagName);
-	UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
+	//UE_LOGFMT(LogTemp, Warning, "Attached Tags. Name: {0}", ALinearPlayerCharacter::GetTag());
 
 	if (PlayerTargeting)
 	{

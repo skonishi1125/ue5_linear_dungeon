@@ -49,13 +49,13 @@ void ULinearSettingsSubsystem::InitializeGraphicsSettings()
 
 	if (! bIsFirstBoot)
 	{
-		UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Playing Graphics Benchmark");
+		//UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Playing Graphics Benchmark");
 		UserSettings->RunHardwareBenchmark();
 		UserSettings->ApplyHardwareBenchmarkResults();
 	}
 	else
 	{
-		UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Exist SettingData.");
+		//UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Exist SettingData.");
 	}
 
 	UserSettings->ApplySettings(false);
@@ -81,7 +81,7 @@ void ULinearSettingsSubsystem::SetBGMVolume(float ClampedVolume)
 {
 	ThisBGMVolume = ClampedVolume;
 	SaveSettings();
-	UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetBGMVolume()");
+	//UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::SetBGMVolume()");
 
 	if (UGameInstance* GI = GetGameInstance())
 	{
