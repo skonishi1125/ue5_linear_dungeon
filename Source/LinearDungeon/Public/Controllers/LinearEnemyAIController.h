@@ -28,6 +28,9 @@ protected:
 	// AI Perception 感知時に走らせる関数（EnemyBase から移行）
 	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
+
+	void OnTargetForgotten(AActor* Actor);
+
 private:
 	// ===== Components =====
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))

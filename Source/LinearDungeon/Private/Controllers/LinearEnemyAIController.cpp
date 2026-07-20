@@ -21,11 +21,6 @@ ALinearEnemyAIController::ALinearEnemyAIController()
 	// 視覚パラメータの初期設定
 	if (SightConfig)
 	{
-		SightConfig->SightRadius = 1000.f; // 視認可能な半径
-		SightConfig->LoseSightRadius = 1100.f; // 見失う半径（チラつき防止のため少し大きめに設定する）
-		SightConfig->PeripheralVisionAngleDegrees = 60.f; // 視野角
-		SightConfig->SetMaxAge(3.f); // 記憶保持時間
-
 		// どの所属（敵、味方、中立）を検知するか
 		// デフォルトでは全て検知しない設定のため、明示的にtrueにする
 		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
@@ -42,10 +37,12 @@ void ALinearEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 視線に入ったかどうかの処理をデリゲートで紐づける
+	// 視線に入った / MaxAge が経過し、記憶から消えたときに走る Delegate
 	if (AIPerceptionComponent)
 	{
 		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ALinearEnemyAIController::OnTargetDetected);
+		AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ALinearEnemyAIController::OnTargetForgotten);
+
 	}
 }
 
@@ -95,8 +92,6 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		// Player を追いかけなくなるまでの猶予時間をリセットする
-		GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
 		//UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
 
 		// Behavior Tree を操作するため、 Blackboard 内部の CombatTarget に Actor をセットする
@@ -128,13 +123,14 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 			}
 		}
 	}
-	else
-	{
-		// 視点から外れて指定秒数経ったとき、Player を見失う処理を走らせる
-		GetWorld()->GetTimerManager().SetTimer(
-			LoseTargetTimer, this, &ALinearEnemyAIController::ClearCombatTarget, 6.0f, false
-		);
-	}
+}
+
+void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
+{
+	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
+
+	// MaxAge 経過後に Delegate 経由でこの関数が走った時、ClearCombatTarget() 実行
+	ClearCombatTarget();
 
 }
 
