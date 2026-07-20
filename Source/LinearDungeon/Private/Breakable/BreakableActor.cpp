@@ -74,7 +74,7 @@ void ABreakableActor::Tick(float DeltaTime)
 
 // Weapon ���� GetHit ���ĂԎ��̌ŗL�d�l�ݒ�p
 void ABreakableActor::GetHit_Implementation(
-	const FVector& ImpactPoint, const float PoiseDamage
+	const FVector& ImpactPoint, const float PoiseDamage, bool bIsParry
 )
 {
 	UE_LOGFMT(LogTemp, Warning, " ABreakableActor::GetHit_Implementation()");

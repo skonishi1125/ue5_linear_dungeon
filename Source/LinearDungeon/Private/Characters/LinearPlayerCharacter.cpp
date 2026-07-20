@@ -94,6 +94,12 @@ void ALinearPlayerCharacter::BeginPlay()
 	BindOverlayToAttributes();
 }
 
+void ALinearPlayerCharacter::SetParryWindowEnabled(bool bEnabled)
+{
+	UE_LOGFMT(LogTemp, Warning, "ALinearPlayerCharacter::SetParryWindowEnabled {0}", bEnabled);
+	bIsParryWindowEnabled = bEnabled;
+}
+
 // Overlay をメンバ変数に格納する
 void ALinearPlayerCharacter::CacheLinearDungeonOverlay()
 {
@@ -553,6 +559,7 @@ void ALinearPlayerCharacter::StopDefense()
 	if (ActionState == EActionState::EAS_Defensing)
 	{
 		ActionState = EActionState::EAS_Unoccupied;
+		bIsParryWindowEnabled = false;
 	}
 }
 
@@ -865,7 +872,7 @@ float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 
 // ダメージ後、状況に応じた処理
 void ALinearPlayerCharacter::GetHit_Implementation(
-	const FVector& ImpactPoint, const float FinalPoiseDamage
+	const FVector& ImpactPoint, const float FinalPoiseDamage, bool bIsParry
 )
 {
 	// 防御に成功したときでも死亡しているケースがあるので、その場合は即座に死亡処理に移る

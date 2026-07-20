@@ -468,6 +468,17 @@ void AEnemyBase::ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint)
 		return;
 	}
 
+	if (ALinearPlayerCharacter* PlayerCharacter = Cast<ALinearPlayerCharacter>(HitActor))
+	{
+		// プレイヤーがパリィ受付期間中であるか判定
+		if (PlayerCharacter->IsParryWindowEnabled()) 
+		{
+			UE_LOGFMT(LogTemp, Warning, "Parry!");
+			IHitInterface::Execute_GetHit(this, ImpactPoint, 500.f, true);
+			return;
+		}
+	}
+
 	const float FinalDamage = BaseDamage * CurrentDamageMultiplier;
 	const float FinalPoiseDamage = BasePoiseDamage * CurrentPoiseMultiplier;
 	
@@ -475,7 +486,7 @@ void AEnemyBase::ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint)
 
 	if (IHitInterface* HitInterface = Cast<IHitInterface>(HitActor))
 	{
-		HitInterface->Execute_GetHit(HitActor, ImpactPoint, FinalPoiseDamage);
+		HitInterface->Execute_GetHit(HitActor, ImpactPoint, FinalPoiseDamage, false);
 	}
 
 	BoxIgnoreActors.AddUnique(HitActor);
@@ -676,7 +687,7 @@ void AEnemyBase::PossessedBy(AController* NewController)
 }
 
 void AEnemyBase::GetHit_Implementation(
-	const FVector& ImpactPoint, const float FinalPoiseDamage
+	const FVector& ImpactPoint, const float FinalPoiseDamage, bool bIsParry
 )
 {
 	if (bIsDied) return;
@@ -739,16 +750,27 @@ void AEnemyBase::GetHit_Implementation(
 	//if (OverheadStatusWidgetComponent)
 	//	OverheadStatusWidgetComponent->SetPoisePercent(Attributes->GetPoisePercent());
 
-	if (HitSound)
+	if (!bIsParry)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+		}
+		if (HitParticle && GetWorld())
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(), HitParticle, ImpactPoint
+			);
+		}
 	}
-
-	if (HitParticle && GetWorld())
+	else
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(), HitParticle, ImpactPoint
-		);
+		// パリィ用効果音
+		if (ParrySound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ParrySound, ImpactPoint);
+
+		}
 	}
 
 }

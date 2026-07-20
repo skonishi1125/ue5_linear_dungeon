@@ -198,7 +198,7 @@ void AWeapon::ApplyMeleeHit(AActor* HitActor, const FVector& ImpactPoint)
 
 	if (IHitInterface* HitInterface = Cast<IHitInterface>(HitActor))
 	{
-		HitInterface->Execute_GetHit(HitActor, ImpactPoint, FinalPoiseDamage);
+		HitInterface->Execute_GetHit(HitActor, ImpactPoint, FinalPoiseDamage, false);
 	}
 
 	// 同一攻撃中の多段ヒット防止

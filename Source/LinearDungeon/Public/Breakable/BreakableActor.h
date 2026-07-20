@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	// Interface ‚Ì Override
 	virtual void GetHit_Implementation(
-		const FVector& ImpactPoint, const float PoiseDamage
+		const FVector& ImpactPoint, const float PoiseDamage, bool bIsParry
 	) override;
 
 protected:

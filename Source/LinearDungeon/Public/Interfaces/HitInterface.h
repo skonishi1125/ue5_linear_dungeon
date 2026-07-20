@@ -16,5 +16,5 @@ class LINEARDUNGEON_API IHitInterface
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintNativeEvent)
-	void GetHit(const FVector& ImpactPoint, const float PoiseDamage);
+	void GetHit(const FVector& ImpactPoint, const float PoiseDamage, bool bIsParry = false);
 };

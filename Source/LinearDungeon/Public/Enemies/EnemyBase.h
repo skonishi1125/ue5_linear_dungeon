@@ -61,7 +61,7 @@ public:
 
 	// Interface ÇÃ Override
 	virtual void GetHit_Implementation(
-		const FVector& ImpactPoint, const float FinalPoiseDamage
+		const FVector& ImpactPoint, const float FinalPoiseDamage, bool bIsParry
 	) override;
 
 	// AActor ÇÃéùÇ¬ TakeDamage Override
@@ -181,6 +181,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Sounds)
 	TObjectPtr<USoundBase> HitSound;
+
+	UPROPERTY(EditAnywhere, Category = Sounds)
+	TObjectPtr<USoundBase> ParrySound;
 
 	UPROPERTY(EditAnywhere, Category = Particles)
 	TObjectPtr<UParticleSystem> HitParticle;

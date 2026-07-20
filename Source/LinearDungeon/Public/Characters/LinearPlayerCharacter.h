@@ -69,7 +69,7 @@ public:
 
 	// ===== Interface Override ===== 
 	virtual void GetHit_Implementation(
-		const FVector& ImpactPoint, const float FinalPoiseDamage
+		const FVector& ImpactPoint, const float FinalPoiseDamage, bool bIsParry
 	) override;
 	virtual void OnSaveGame(ULinearSaveGame* SaveGameObj) override;
 	virtual void OnLoadGame(ULinearSaveGame* SaveGameObj) override;
@@ -93,6 +93,9 @@ public:
 		class AController* EventInstigator, AActor* DamageCauser
 	) override;
 
+	// パリィ受付フラグ設定
+	void SetParryWindowEnabled(bool bEnabled);
+	FORCEINLINE bool IsParryWindowEnabled() { return bIsParryWindowEnabled; }
 
 	// AM_Attack Notify から呼び出す関数
 	// 武器の判定有効 - 無効化
@@ -170,6 +173,7 @@ protected:
 	void StartDefense();
 	void StopDefense();
 	bool CanDefense();
+	bool bIsParryWindowEnabled = false; // パリィ受付
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
