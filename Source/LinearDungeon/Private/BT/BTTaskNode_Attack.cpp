@@ -29,11 +29,6 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 	AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn());
 	if (EnemyPawn == nullptr) return EBTNodeResult::Failed;
 
-	//if (UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent())
-	//{
-	//	BlackboardComp->SetValueAsBool(FName("IsAttacking"), true);
-	//}
-
 	// UŒ‚ˆ—
 	CachedOwnerComp = &OwnerComp; // AttackEnd ‚Å OwnerComp ‚ðŽg‚¤‚½‚ß‚ÉŠi”[‚µ‚Ä‚¨‚­
 	EnemyPawn->OnAttackEndDelegate.AddUniqueDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
