@@ -720,10 +720,12 @@ void AEnemyBase::GetHit_Implementation(
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
 			if (CachedAIController)
 			{
-				if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
-				{
-					BB->SetValueAsBool(FName("IsStaggered"), true);
-				}
+				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Staggered.");
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Staggered);
+				//if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
+				//{
+				//	BB->SetValueAsBool(FName("IsStaggered"), true);
+				//}
 			}
 
 			// 怯みアニメの再生
@@ -782,7 +784,23 @@ void AEnemyBase::OnStaggerEnd()
 	{
 		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
 		{
-			BB->SetValueAsBool(FName("IsStaggered"), false);
+			UObject* CombatTarget = BB->GetValueAsObject(FName("CombatTarget"));
+
+			if (IsValid(CombatTarget))
+			{
+				UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd Chase");
+				// ターゲットが存在する場合は暫定的に Chase へ移行
+				// 直後の TickNode で距離が近ければ Attacking へ上書きされる
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Chase);
+			}
+			else
+			{
+				// ターゲットが存在しない場合は Idle へ移行
+				UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd IDLE");
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Idle);
+			}
+
+			UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd CombatTarget: {0}", CombatTarget->GetName());
 		}
 	}
 }

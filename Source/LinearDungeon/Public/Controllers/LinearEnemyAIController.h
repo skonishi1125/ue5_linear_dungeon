@@ -4,6 +4,7 @@
 #include "AIController.h"
 #include "Perception/AIPerceptionComponent.h" // FAIStimulus は struct なので、.h で定義する
 #include "Enemies/EnemyBase.h"
+#include "Characters/CharacterTypes.h"
 
 #include "LinearEnemyAIController.generated.h"
 
@@ -19,6 +20,10 @@ public:
 
 	// 死亡時、Enemy から AI Controller の処理を止めるための public 関数
 	void HandleEnemyDeath();
+
+	// EnemyBase など、外部から AI の Enemy AI State を変更する関数
+	void ChangeAIState(EEnemyAIState NewState);
+
 protected:
 	virtual void BeginPlay() override;
 

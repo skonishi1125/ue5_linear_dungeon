@@ -1,6 +1,9 @@
 #include "BT/BTService_UpdateEnemyAIState.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Characters/CharacterTypes.h"
+#include "AIController.h"
+#include "Enemies/EnemyBase.h"
+
 
 UBTService_UpdateEnemyAIState::UBTService_UpdateEnemyAIState()
 {
@@ -20,18 +23,63 @@ void UBTService_UpdateEnemyAIState::TickNode(
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return;
 
-	// TODO: 怯み
+	// 現在の State が怯み （死亡も入れるなら、それも）自動更新は行わない
+	uint8 CurrentStateNum = BlackboardComp->GetValueAsEnum(StateKey.SelectedKeyName);
+	EEnemyAIState CurrentState = static_cast<EEnemyAIState>(CurrentStateNum);
+	if (CurrentState == EEnemyAIState::EEAIS_Staggered)
+	{
+		return;
+	}
 
 	UObject* CombatTarget = BlackboardComp->GetValueAsObject(CombatTargetKey.SelectedKeyName);
 
 	// ターゲットの有無で Patrol / Chase を切り替える
 	if (!IsValid(CombatTarget))
 	{
-		BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+		// TODO: PatrolTarget の所持可否を t/f で持つ 暫定で true
+		bool bHasPatrolRoute = true;
+		if (bHasPatrolRoute)
+		{
+			BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+		}
+		else
+		{
+			BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Idle));
+		}
 	}
 	else
 	{
-		BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
+		// Chase処理
+		// 敵の攻撃範囲を EnemyBase から取得して、距離に応じた State を入れる
+		AAIController* AIController = OwnerComp.GetAIOwner();
+		if (!AIController || !AIController->GetPawn()) return;
+
+		AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
+		if (EnemyBase == nullptr) return;
+
+		AActor* CombatTargetActor = Cast<AActor>(CombatTarget);
+
+		if (CombatTargetActor)
+		{
+			const double DistanceToTarget = (CombatTargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
+			if (DistanceToTarget <= EnemyBase->OnGetAttackRadius())
+			{
+				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_ShortRange));
+
+			}
+			else if (DistanceToTarget <= EnemyBase->OnGetLongAttackRadius())
+			{
+				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_LongRange));
+			}
+			else
+			{
+				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
+				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
+			}
+
+		}
 	}
 
 }

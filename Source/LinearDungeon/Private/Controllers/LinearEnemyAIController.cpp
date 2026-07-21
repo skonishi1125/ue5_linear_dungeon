@@ -164,6 +164,14 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 	//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
 }
 
+void ALinearEnemyAIController::ChangeAIState(EEnemyAIState NewState)
+{
+	if (UBlackboardComponent* BB = GetBlackboardComponent())
+	{
+		BB->SetValueAsEnum(FName("CurrentEnemyAIState"), static_cast<uint8>(NewState));
+	}
+}
+
 void ALinearEnemyAIController::OnPlayerCharacterDied()
 {
 	if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
