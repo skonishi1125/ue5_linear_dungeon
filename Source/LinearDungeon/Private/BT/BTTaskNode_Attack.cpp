@@ -1,10 +1,11 @@
 #include "BT/BTTaskNode_Attack.h"
 #include "Logging/StructuredLog.h"
 
-#include "AIController.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "Controllers/LinearEnemyAIController.h"
 #include "Enemies/EnemyBase.h"
 #include "BT/BTService_CheckAttackRange.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 UBTTaskNode_Attack::UBTTaskNode_Attack()
 {
@@ -28,10 +29,10 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 	AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn());
 	if (EnemyPawn == nullptr) return EBTNodeResult::Failed;
 
-	if (UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent())
-	{
-		BlackboardComp->SetValueAsBool(FName("IsAttacking"), true);
-	}
+	//if (UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent())
+	//{
+	//	BlackboardComp->SetValueAsBool(FName("IsAttacking"), true);
+	//}
 
 	// çUåÇèàóù
 	CachedOwnerComp = &OwnerComp; // AttackEnd Ç≈ OwnerComp ÇégÇ§ÇΩÇﬂÇ…äiî[ÇµÇƒÇ®Ç≠
@@ -42,24 +43,52 @@ EBTNodeResult::Type UBTTaskNode_Attack::ExecuteTask(UBehaviorTreeComponent& Owne
 
 }
 
-void UBTTaskNode_Attack::HandleAttackFinished()
+EBTNodeResult::Type UBTTaskNode_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if (CachedOwnerComp)
+	// Staggered ìôÇÃäÑÇËçûÇ›Ç™î≠ê∂ÇµÅAã≠êßíÜífÇ≥ÇÍÇΩèÍçáÇÃèàóù
+	if (AAIController* AIController = OwnerComp.GetAIOwner())
 	{
-		if (UBlackboardComponent* BlackboardComp = CachedOwnerComp->GetBlackboardComponent())
-		{
-			BlackboardComp->SetValueAsBool(FName("IsAttacking"), false);
-			BlackboardComp->SetValueAsEnum(FName("CombatRangeState"), static_cast<uint8>(ECombatRangeState::None));
-		}
-
-		AAIController* AIController = CachedOwnerComp->GetAIOwner();
 		if (AEnemyBase* EnemyPawn = Cast<AEnemyBase>(AIController->GetPawn()))
 		{
-			// ëΩèdé¿çsÇñhÇÆÇΩÇﬂÇ…âèúÇµÇƒÇ®Ç≠
+			//ÉfÉäÉQÅ[Égâèú
 			EnemyPawn->OnAttackEndDelegate.RemoveDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
 		}
-
-		// Task ÇÃê¨å˜Ç BT Ç…í ím
-		FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 	}
+	CachedOwnerComp = nullptr;
+
+	return Super::AbortTask(OwnerComp, NodeMemory);
+}
+
+void UBTTaskNode_Attack::HandleAttackFinished()
+{
+	if (!IsValid(CachedOwnerComp)) return;
+
+	AAIController* AIController = CachedOwnerComp->GetAIOwner();
+	if (!IsValid(AIController)) return;
+
+	if (AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn()))
+	{
+		EnemyBase->OnAttackEndDelegate.RemoveDynamic(this, &UBTTaskNode_Attack::HandleAttackFinished);
+	}
+
+	if (ALinearEnemyAIController* LinearAIController = Cast<ALinearEnemyAIController>(AIController))
+	{
+		if (UBlackboardComponent* BB = CachedOwnerComp->GetBlackboardComponent())
+		{
+			// åªç›ÇÃ State Ç Blackboard Ç©ÇÁéÊìæÇµÅAAttacking ÇÃèÍçáÇæÇØ Chase Ç…à⁄çsÇ∑ÇÈ
+			// Å¶Ç±ÇÃÉKÅ[ÉhÇ™ñ≥Ç¢Ç∆ÅAÉpÉäÉBÇ‚îÌíeÇ≈çUåÇÇ™íÜífÇ≥ÇÍÇƒ Staggered Ç…Ç»Ç¡ÇΩÇ∆Ç´ÅA
+			// ë¶ç¿Ç… Staggered -> Chase Ç…ñﬂÇ¡ÇƒÅAëfëÅÇ≠çUåÇÇ™åJÇËï‘Ç≥ÇÍÇƒÇµÇ‹Ç§
+			uint8 CurrentStateNum = BB->GetValueAsEnum(FName("CurrentEnemyAIState"));
+			EEnemyAIState CurrentState = static_cast<EEnemyAIState>(CurrentStateNum);
+
+			if (CurrentState == EEnemyAIState::EEAIS_Attacking)
+			{
+				LinearAIController->ChangeAIState(EEnemyAIState::EEAIS_Chase);
+			}
+		}
+	}
+
+	// Task ÇÃê¨å˜Ç BT Ç…í ím
+	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+
 }

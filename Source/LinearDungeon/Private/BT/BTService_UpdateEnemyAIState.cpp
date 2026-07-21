@@ -23,10 +23,10 @@ void UBTService_UpdateEnemyAIState::TickNode(
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return;
 
-	// 現在の State が怯み （死亡も入れるなら、それも）自動更新は行わない
+	// 現在の State が怯み, 攻撃中は自動更新は行わない
 	uint8 CurrentStateNum = BlackboardComp->GetValueAsEnum(StateKey.SelectedKeyName);
 	EEnemyAIState CurrentState = static_cast<EEnemyAIState>(CurrentStateNum);
-	if (CurrentState == EEnemyAIState::EEAIS_Staggered)
+	if (CurrentState == EEnemyAIState::EEAIS_Staggered || CurrentState == EEnemyAIState::EEAIS_Attacking)
 	{
 		return;
 	}

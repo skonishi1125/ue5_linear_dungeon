@@ -716,16 +716,12 @@ void AEnemyBase::GetHit_Implementation(
 		{
 			//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
 
-			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
+			// 怯み中に BT の動きを止める
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
 			if (CachedAIController)
 			{
 				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Staggered.");
 				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Staggered);
-				//if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
-				//{
-				//	BB->SetValueAsBool(FName("IsStaggered"), true);
-				//}
 			}
 
 			// 怯みアニメの再生
