@@ -49,3 +49,23 @@ enum class EAttackCollisionType : uint8
 	EAC_BothHands UMETA(DisplayName = "Both Hands"),
 	EAC_BothLegs UMETA(DisplayName = "Both Legs")
 };
+
+UENUM(BlueprintType)
+enum class EEnemyAIState : uint8
+{
+	EEAIS_Idle        UMETA(DisplayName = "Idle"),
+	EEAIS_Patrol      UMETA(DisplayName = "Patrol"),
+	EEAIS_Chase       UMETA(DisplayName = "Chase"),
+	EEAIS_Attacking      UMETA(DisplayName = "Attacking"),
+	EEAIS_LostTarget  UMETA(DisplayName = "Lost Target"),
+	EEAIS_Staggered  UMETA(DisplayName = "Staggered") // çUåÇÇêHÇÁÇ¡ÇƒãØÇ›íÜ
+};
+
+UENUM(BlueprintType)
+enum class EEnemyAICombatRangeState : uint8
+{
+	EEAICRS_None        UMETA(DisplayName = "None"),
+	EEAICRS_ShortRange  UMETA(DisplayName = "Short Range"),
+	EEAICRS_LongRange   UMETA(DisplayName = "Long Range")
+};
+
