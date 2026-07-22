@@ -5,6 +5,7 @@
 
 #include "BTService_CheckAttackRange.generated.h"
 
+// TODO: è¡Ç∑
 UENUM(BlueprintType)
 enum class ECombatRangeState : uint8
 {

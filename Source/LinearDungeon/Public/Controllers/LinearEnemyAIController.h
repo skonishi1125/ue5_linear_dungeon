@@ -4,6 +4,7 @@
 #include "AIController.h"
 #include "Perception/AIPerceptionComponent.h" // FAIStimulus は struct なので、.h で定義する
 #include "Enemies/EnemyBase.h"
+#include "Characters/CharacterTypes.h"
 
 #include "LinearEnemyAIController.generated.h"
 
@@ -19,6 +20,10 @@ public:
 
 	// 死亡時、Enemy から AI Controller の処理を止めるための public 関数
 	void HandleEnemyDeath();
+
+	// EnemyBase など、外部から AI の Enemy AI State を変更する関数
+	void ChangeAIState(EEnemyAIState NewState);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -29,7 +34,9 @@ protected:
 	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
 
-	void OnTargetForgotten(AActor* Actor);
+	// 視点が外れたときに発火する想定だったが、動作が不安定だったので Timer で対応することにした
+	//UFUNCTION() // 今更だが、無いと AddDynamic などに登録しても適用されないので注意
+	//void OnTargetForgotten(AActor* Actor);
 
 private:
 	// ===== Components =====

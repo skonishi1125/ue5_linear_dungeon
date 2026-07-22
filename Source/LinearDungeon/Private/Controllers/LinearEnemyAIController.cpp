@@ -16,7 +16,7 @@ ALinearEnemyAIController::ALinearEnemyAIController()
 {
 	// Component 生成処理(EnemyBaseに紐づける)
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
-	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("InitSightConfig"));
 	
 	// 視覚パラメータの初期設定
 	if (SightConfig)
@@ -41,8 +41,7 @@ void ALinearEnemyAIController::BeginPlay()
 	if (AIPerceptionComponent)
 	{
 		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ALinearEnemyAIController::OnTargetDetected);
-		AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ALinearEnemyAIController::OnTargetForgotten);
-
+		//AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ALinearEnemyAIController::OnTargetForgotten);
 	}
 }
 
@@ -66,14 +65,14 @@ void ALinearEnemyAIController::OnPossess(APawn* InPawn)
 // 視野角関連設定
 void ALinearEnemyAIController::ApplySightConfig(const FEnemySightConfig& Settings)
 {
-	if (!SightConfig || !AIPerceptionComponent) return;
+	if (! AIPerceptionComponent || !SightConfig) return;
+
 
 	SightConfig->SightRadius = Settings.SightRadius;
 	SightConfig->LoseSightRadius = Settings.LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = Settings.PeripheralVisionAngleDegrees;
 	SightConfig->SetMaxAge(Settings.MaxAge);
-	// Affiliation はロジック側の共通設定なので constructor のままでOK
-	// 変更を反映するため再登録する
+	// Affiliation はロジック側の共通設定なので constructor のままでよい。変更を反映するため再登録する
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->RequestStimuliListenerUpdate();
 }
@@ -90,15 +89,22 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	// 視覚以外は考慮しない
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+	if (!BlackboardComp) return;
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		//UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+		//if (SightConfig)
+		//	UE_LOGFMT(LogTemp, Warning, "MaxAge: {0}", SightConfig->GetMaxAge());
 
-		// Behavior Tree を操作するため、 Blackboard 内部の CombatTarget に Actor をセットする
-		if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
-		{
-			BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
-		}
+		// 再発見時はタイマーをリセットして紐づけた関数を発火させない
+		GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
+
+		// Behavior Tree 制御用設定
+		// BB 内部の CombatTarget に Actor を, 視線が通っていることを示すフラグを有効化
+		BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
+		BlackboardComp->SetValueAsBool(FName("HasLineOfSight"), true);
 
 		// Delegate で、Player が死亡したときに CombatTarget をリセットするように登録
 		// AddDynamic ではなく AddUniqueDynamic で、視界に入るたびに登録されるのを防ぐ
@@ -123,16 +129,29 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 			}
 		}
 	}
+	else
+	{
+		// 視界から外れたときの処理
+		BlackboardComp->SetValueAsBool(FName("HasLineOfSight"), false);
+		float MemoryDuration = 3.0f; // デフォルトのフォールバック値 （後でMaxAgeで上書きする）
+		if (SightConfig)
+		{
+			MemoryDuration = SightConfig->GetMaxAge();
+		}
+		GetWorld()->GetTimerManager().SetTimer(
+			LoseTargetTimer, this, &ALinearEnemyAIController::ClearCombatTarget, MemoryDuration, false
+		);
+	}
 }
 
-void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
-{
-	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
-
-	// MaxAge 経過後に Delegate 経由でこの関数が走った時、ClearCombatTarget() 実行
-	ClearCombatTarget();
-
-}
+// MaxAge 経過後処理(視点が外れた時点で発火するわけではない)
+// 経過後に Delegate 経由でこの関数が走る
+//void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
+//{
+//	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
+//
+//	ClearCombatTarget();
+//}
 
 void ALinearEnemyAIController::ClearCombatTarget()
 {
@@ -162,6 +181,14 @@ void ALinearEnemyAIController::HandleEnemyDeath()
 	}
 
 	//UE_LOGFMT(LogTemp, Log, "ALinearEnemyAIController::HandleEnemyDeath() Brain and Perception stopped.");
+}
+
+void ALinearEnemyAIController::ChangeAIState(EEnemyAIState NewState)
+{
+	if (UBlackboardComponent* BB = GetBlackboardComponent())
+	{
+		BB->SetValueAsEnum(FName("CurrentEnemyAIState"), static_cast<uint8>(NewState));
+	}
 }
 
 void ALinearEnemyAIController::OnPlayerCharacterDied()

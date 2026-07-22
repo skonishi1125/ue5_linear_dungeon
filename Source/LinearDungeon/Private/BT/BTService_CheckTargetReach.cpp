@@ -1,8 +1,10 @@
 #include "BT/BTService_CheckTargetReach.h"
 #include "Logging/StructuredLog.h"
+
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 #include "GameFramework/Actor.h"
+#include "AIController.h"
 
 
 UBTService_CheckTargetReach::UBTService_CheckTargetReach()
@@ -28,21 +30,34 @@ void UBTService_CheckTargetReach::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		return;
 	}
 
-	// CombatTarget の 座標が、NavMesh 上に存在するかの判定結果を IsTargetReachableKey に格納
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController || !AIController->GetPawn()) return;
+
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-	if (!NavSys)
+	bool bIsReachable = false;
+
+	if (NavSys)
 	{
-		BlackboardComp->SetValueAsBool(IsTargetReachableKey.SelectedKeyName, false);
-		return;
+		// AIのNavAgentPropertiesと現在座標に適合するNavigationDataを取得
+		const ANavigationData* NavData = NavSys->GetNavDataForProps(
+			AIController->GetNavAgentPropertiesRef(),
+			AIController->GetPawn()->GetActorLocation()
+		);
+
+		if (NavData)
+		{
+			FPathFindingQuery Query(
+				AIController,
+				*NavData,
+				AIController->GetPawn()->GetActorLocation(),
+				TargetActor->GetActorLocation()
+			);
+
+			// AIからターゲットへの有効な経路が存在するかを判定
+			bIsReachable = NavSys->TestPathSync(Query, EPathFindingMode::Regular);
+		}
 	}
 
-	FNavLocation ProjectedLocation;
-	const bool bIsOnNavMesh = NavSys->ProjectPointToNavigation(
-		TargetActor->GetActorLocation(),
-		ProjectedLocation,
-		QueryExtent // 許容範囲(Location から、(100, 100, 100) 程度の誤差なら OK
-	);
-
-	BlackboardComp->SetValueAsBool(IsTargetReachableKey.SelectedKeyName, bIsOnNavMesh);
+	BlackboardComp->SetValueAsBool(IsTargetReachableKey.SelectedKeyName, bIsReachable);
 
 }

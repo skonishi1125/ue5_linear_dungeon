@@ -429,7 +429,7 @@ void ALinearPlayerCharacter::Attack()
 
 	if (CanAttack())
 	{
-		PlayAttackMontage(); // 1団目の攻撃開始
+		PlayAttackMontage(); // 1段目の攻撃開始
 		ActionState = EActionState::EAS_Attacking;
 	}
 	else if (ActionState == EActionState::EAS_Attacking && bCanSaveAttack)
@@ -447,6 +447,12 @@ void ALinearPlayerCharacter::PlayAttackMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	TArray<UAnimMontage*> ExecMontages;
+
+	// 攻撃履歴リセット
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->BoxIgnoreActors.Empty();
+	}
 
 	// 参照で受け取ったほうがいいだろうか？
 	// Halberd のケース
@@ -486,6 +492,11 @@ void ALinearPlayerCharacter::OnCanSaveAttack(bool bCanSave)
 
 void ALinearPlayerCharacter::OnCheckCombo()
 {
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->BoxIgnoreActors.Empty();
+	}
+
 	// 先行入力が保存されていれば、次の攻撃セクションへ移行する
 	if (bSaveAttack)
 	{
@@ -685,7 +696,6 @@ void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
 		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->BoxIgnoreActors.Empty();
 		EquippedWeapon->SetMultipliers(DamageMultiplier, PoiseMultiplier);
 	}
 }

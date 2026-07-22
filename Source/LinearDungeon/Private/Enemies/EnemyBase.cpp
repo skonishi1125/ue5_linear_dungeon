@@ -166,21 +166,21 @@ void AEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// デバッグ用 CombatTarget チェック
-	if (CachedAIController)
-	{
-		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
-		{
-			UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
-			if (CT)
-			{
-				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: {0}", CT->GetName());
-			}
-			else
-			{
-				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: None");
-			}
-		}
-	}
+	//if (CachedAIController)
+	//{
+	//	if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
+	//	{
+	//		UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
+	//		if (CT)
+	//		{
+	//			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: {0}", CT->GetName());
+	//		}
+	//		else
+	//		{
+	//			UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Tick CombatTarget: None");
+	//		}
+	//	}
+	//}
 
 	// 攻撃モーション中の特定期間(NotifyState) でフラグが制御されている間、相手に振り向く
 	if (bIsTrackingTarget)
@@ -716,14 +716,12 @@ void AEnemyBase::GetHit_Implementation(
 		{
 			//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
 
-			// BB IsStaggered フラグを有効化して、怯み中に BT の動きを止める
+			// 怯み中に BT の動きを止める
 			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
 			if (CachedAIController)
 			{
-				if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
-				{
-					BB->SetValueAsBool(FName("IsStaggered"), true);
-				}
+				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Staggered.");
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Staggered);
 			}
 
 			// 怯みアニメの再生
@@ -782,7 +780,23 @@ void AEnemyBase::OnStaggerEnd()
 	{
 		if (UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent())
 		{
-			BB->SetValueAsBool(FName("IsStaggered"), false);
+			UObject* CombatTarget = BB->GetValueAsObject(FName("CombatTarget"));
+
+			if (IsValid(CombatTarget))
+			{
+				UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd Chase");
+				// ターゲットが存在する場合は暫定的に Chase へ移行
+				// 直後の TickNode で距離が近ければ Attacking へ上書きされる
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Chase);
+			}
+			else
+			{
+				// ターゲットが存在しない場合は Idle へ移行
+				UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd IDLE");
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Idle);
+			}
+
+			UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd CombatTarget: {0}", CombatTarget->GetName());
 		}
 	}
 }

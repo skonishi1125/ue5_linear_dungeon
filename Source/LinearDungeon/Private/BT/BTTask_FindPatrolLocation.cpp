@@ -27,21 +27,18 @@ EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeCompone
 		return EBTNodeResult::Failed;
 	}
 
-	// EnemyBase から次の巡回先 Actor を取得
-	// Blackboard に位置情報を Vector として書き込む
+	// EnemyBase で用意した PatrolTarget 取得処理から次の巡回先 Actor を取得し、BB に位置情報 Vector 書込
 	AActor* NextTarget = EnemyBase->OnGetNextPatrolTarget();
 	if (NextTarget != nullptr)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(
-			GetSelectedBlackboardKey(), NextTarget->GetActorLocation()
-		);
-
-		return EBTNodeResult::Succeeded; // 成功
-	}
-
-	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
-	{
-		UObject* CT = BB->GetValueAsObject(FName("CombatTarget"));
+		UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			BlackboardComp->SetValueAsVector(
+				GetSelectedBlackboardKey(), NextTarget->GetActorLocation()
+			);
+			return EBTNodeResult::Succeeded;
+		}
 	}
 
 	return EBTNodeResult::Failed;
