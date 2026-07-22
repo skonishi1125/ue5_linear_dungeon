@@ -1047,9 +1047,9 @@ void ALinearPlayerCharacter::Die(EDeathCause Cause)
 	ActionState = EActionState::EAS_Dying; // 死亡時は、この EAS から変わることはない
 	CurrentDeathCause = Cause;
 
-	// Collision 無効化 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	// Collision 無効化 不要かも。
+	/*GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);*/
 
 	PlayDeathMontage(Cause);
 
