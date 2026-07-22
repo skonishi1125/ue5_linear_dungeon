@@ -189,6 +189,15 @@ void AEnemyBase::Tick(float DeltaTime)
 	}
 }
 
+void AEnemyBase::ForceKill()
+{
+	if (Attributes)
+	{
+		Attributes->SetCurrentHealth(0.f);
+	}
+	Die();
+}
+
 void AEnemyBase::Die()
 {
 	//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::Die()");
@@ -795,8 +804,6 @@ void AEnemyBase::OnStaggerEnd()
 				UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd IDLE");
 				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Idle);
 			}
-
-			UE_LOGFMT(LogTemp, Warning, "OnStaggerEnd CombatTarget: {0}", CombatTarget->GetName());
 		}
 	}
 }

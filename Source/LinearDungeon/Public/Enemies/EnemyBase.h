@@ -94,6 +94,10 @@ public:
 	// 怯みモーションから出す、スタン区間通知用
 	void OnStaggerEnd();
 
+	// 落下トリガーからなど、外部的に呼べる死亡処理
+	UFUNCTION(BlueprintCallable)
+	void ForceKill();
+
 	// Enemy 死亡時のデリゲート
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnEnemyDiedDelegate OnEnemyDied;
