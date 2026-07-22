@@ -16,7 +16,7 @@ ALinearEnemyAIController::ALinearEnemyAIController()
 {
 	// Component 生成処理(EnemyBaseに紐づける)
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
-	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("InitSightConfig"));
 	
 	// 視覚パラメータの初期設定
 	if (SightConfig)
@@ -66,14 +66,14 @@ void ALinearEnemyAIController::OnPossess(APawn* InPawn)
 // 視野角関連設定
 void ALinearEnemyAIController::ApplySightConfig(const FEnemySightConfig& Settings)
 {
-	if (!SightConfig || !AIPerceptionComponent) return;
+	if (! AIPerceptionComponent || !SightConfig) return;
+
 
 	SightConfig->SightRadius = Settings.SightRadius;
 	SightConfig->LoseSightRadius = Settings.LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = Settings.PeripheralVisionAngleDegrees;
 	SightConfig->SetMaxAge(Settings.MaxAge);
-	// Affiliation はロジック側の共通設定なので constructor のままでOK
-	// 変更を反映するため再登録する
+	// Affiliation はロジック側の共通設定なので constructor のままでよい。変更を反映するため再登録する
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
 	AIPerceptionComponent->RequestStimuliListenerUpdate();
 }
@@ -96,6 +96,9 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+
+		if (SightConfig)
+			UE_LOGFMT(LogTemp, Warning, "MaxAge: {0}", SightConfig->GetMaxAge());
 
 		// Behavior Tree 制御用設定
 		// BB 内部の CombatTarget に Actor を, 視線が通っていることを示すフラグを有効化
