@@ -24,7 +24,7 @@ void UBTService_UpdateEnemyAIState::TickNode(
 	if (!BlackboardComp) return;
 
 	// Œ»Ý‚Ì State ‚ª‹¯‚Ý, UŒ‚’†‚ÍŽ©“®XV‚Ís‚í‚È‚¢
-	uint8 CurrentStateNum = BlackboardComp->GetValueAsEnum(StateKey.SelectedKeyName);
+	uint8 CurrentStateNum = BlackboardComp->GetValueAsEnum(AIStateKey.SelectedKeyName);
 	EEnemyAIState CurrentState = static_cast<EEnemyAIState>(CurrentStateNum);
 	if (CurrentState == EEnemyAIState::EEAIS_Staggered || CurrentState == EEnemyAIState::EEAIS_Attacking)
 	{
@@ -32,54 +32,67 @@ void UBTService_UpdateEnemyAIState::TickNode(
 	}
 
 	UObject* CombatTarget = BlackboardComp->GetValueAsObject(CombatTargetKey.SelectedKeyName);
+	bool bHasLineOfSight = BlackboardComp->GetValueAsBool(HasLineOfSightKey.SelectedKeyName);
 
 	// ƒ^[ƒQƒbƒg‚Ì—L–³‚Å Patrol / Chase ‚ðØ‚è‘Ö‚¦‚é
 	if (!IsValid(CombatTarget))
 	{
+		BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+
 		// TODO: PatrolTarget ‚ÌŠŽ‰Â”Û‚ð t/f ‚ÅŽ‚Â Žb’è‚Å true
-		bool bHasPatrolRoute = true;
-		if (bHasPatrolRoute)
-		{
-			BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
-		}
-		else
-		{
-			BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Idle));
-		}
+		//bool bHasPatrolRoute = true;
+		//if (bHasPatrolRoute)
+		//{
+		//	BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+		//}
+		//else
+		//{
+		//	BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Idle));
+		//}
 	}
 	else
 	{
-		// Chaseˆ—
-		// “G‚ÌUŒ‚”ÍˆÍ‚ð EnemyBase ‚©‚çŽæ“¾‚µ‚ÄA‹——£‚É‰ž‚¶‚½ State ‚ð“ü‚ê‚é
-		AAIController* AIController = OwnerComp.GetAIOwner();
-		if (!AIController || !AIController->GetPawn()) return;
-
-		AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
-		if (EnemyBase == nullptr) return;
-
-		AActor* CombatTargetActor = Cast<AActor>(CombatTarget);
-
-		if (CombatTargetActor)
+		if (bHasLineOfSight)
 		{
-			const double DistanceToTarget = (CombatTargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
-			if (DistanceToTarget <= EnemyBase->OnGetAttackRadius())
+			// Chaseˆ—
+			// “G‚ÌUŒ‚”ÍˆÍ‚ð EnemyBase ‚©‚çŽæ“¾‚µ‚ÄA‹——£‚É‰ž‚¶‚½ State ‚ð“ü‚ê‚é
+			AAIController* AIController = OwnerComp.GetAIOwner();
+			if (!AIController || !AIController->GetPawn()) return;
+
+			AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
+			if (EnemyBase == nullptr) return;
+
+			AActor* CombatTargetActor = Cast<AActor>(CombatTarget);
+
+			if (CombatTargetActor)
 			{
-				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
-				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_ShortRange));
+				const double DistanceToTarget = (CombatTargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
+				if (DistanceToTarget <= EnemyBase->OnGetAttackRadius())
+				{
+					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_ShortRange));
+
+				}
+				else if (DistanceToTarget <= EnemyBase->OnGetLongAttackRadius())
+				{
+					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_LongRange));
+				}
+				else
+				{
+					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
+					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
+				}
 
 			}
-			else if (DistanceToTarget <= EnemyBase->OnGetLongAttackRadius())
-			{
-				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
-				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_LongRange));
-			}
-			else
-			{
-				BlackboardComp->SetValueAsEnum(StateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
-				BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
-			}
-
 		}
+		else
+		{
+			// CombatTarget‚Í‚ ‚é‚ªA–ÚŽ‹‚Å‚«‚Ä‚¢‚È‚¢ê‡
+			// Œ©Ž¸‚Á‚½êŠ‚ÖŒü‚©‚¤AŽüˆÍ‚ðŒ©“n‚·A‚È‚Ç‚ÌLostTargetó‘Ô‚Ö‘JˆÚ
+			BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_LostTarget));
+		}
+
 	}
 
 }

@@ -90,15 +90,17 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	// 視覚以外は考慮しない
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+	if (!BlackboardComp) return;
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		//UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+		UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
 
-		// Behavior Tree を操作するため、 Blackboard 内部の CombatTarget に Actor をセットする
-		if (UBlackboardComponent* BlackboardComp = GetBlackboardComponent())
-		{
-			BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
-		}
+		// Behavior Tree 制御用設定
+		// BB 内部の CombatTarget に Actor を, 視線が通っていることを示すフラグを有効化
+		BlackboardComp->SetValueAsObject(FName("CombatTarget"), Actor);
+		BlackboardComp->SetValueAsBool(FName("HasLineOfSight"), true);
 
 		// Delegate で、Player が死亡したときに CombatTarget をリセットするように登録
 		// AddDynamic ではなく AddUniqueDynamic で、視界に入るたびに登録されるのを防ぐ
@@ -123,15 +125,21 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 			}
 		}
 	}
+	else
+	{
+		// 視界から外れたときの処理
+		BlackboardComp->SetValueAsBool(FName("HasLineOfSight"), false);
+	}
 }
+
+// MaxAge 経過後処理(視点が外れた時点で発火するわけではない)
+// 経過後に Delegate 経由でこの関数が走る
 
 void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
 {
 	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
 
-	// MaxAge 経過後に Delegate 経由でこの関数が走った時、ClearCombatTarget() 実行
 	ClearCombatTarget();
-
 }
 
 void ALinearEnemyAIController::ClearCombatTarget()

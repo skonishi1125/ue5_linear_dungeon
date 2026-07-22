@@ -15,15 +15,16 @@ protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 private:
-	// 対象となるターゲット（ = CombatTarget）
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector CombatTargetKey;
 
-	// 更新対象となるState（ = EEnemyAIState）
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector StateKey;
+	FBlackboardKeySelector AIStateKey;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector CombatRangeStateKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector HasLineOfSightKey;
 
 };
