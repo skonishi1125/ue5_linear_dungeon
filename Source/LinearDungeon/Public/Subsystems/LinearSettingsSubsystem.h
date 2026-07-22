@@ -59,6 +59,6 @@ private:
 	float ThisBGMVolume = 1.0f; // BGM Volumeデフォルト値
 
 	// グラフィック設定 初期化用関数
-	void InitializeGraphicsSettings();
+	void InitializeSettings();
 	
 };

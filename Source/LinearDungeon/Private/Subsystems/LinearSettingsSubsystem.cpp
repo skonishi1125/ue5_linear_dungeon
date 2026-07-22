@@ -11,7 +11,7 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	InitializeGraphicsSettings();
+	InitializeSettings();
 
 	if (UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0))
 	{
@@ -36,7 +36,7 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 // GameUserSettings.ini から既存の設定を読み込み、
 // セーブデータが存在しない場合は初回起動とみなして各設定値とする
-void ULinearSettingsSubsystem::InitializeGraphicsSettings()
+void ULinearSettingsSubsystem::InitializeSettings()
 {
 	if (!GEngine) return;
 
