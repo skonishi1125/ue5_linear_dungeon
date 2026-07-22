@@ -340,6 +340,9 @@ private:
 	TObjectPtr<UParticleSystem> HitParticle;
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TObjectPtr<USoundBase> BlockSound;
+	UPROPERTY(EditAnywhere, Category = Montages)
+	TObjectPtr<USoundBase> HealthWarningSound;
+	bool bIsNoticedWarning = false;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	TObjectPtr<UAnimMontage> DeathMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

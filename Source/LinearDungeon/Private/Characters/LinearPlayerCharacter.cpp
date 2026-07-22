@@ -875,6 +875,19 @@ float ALinearPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const&
 	if (Attributes)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
+		if (Attributes->GetHealthPercent() < .3f && HealthWarningSound)
+		{
+			if (! bIsNoticedWarning)
+			{
+				// 体力が 3割以下になった時、警告音を鳴らす
+				UGameplayStatics::PlaySoundAtLocation(this, HealthWarningSound, GetActorLocation());
+				bIsNoticedWarning = true;
+			}
+		}
+		else
+		{
+			bIsNoticedWarning = false;
+		}
 	}
 
 	return DamageAmount;
