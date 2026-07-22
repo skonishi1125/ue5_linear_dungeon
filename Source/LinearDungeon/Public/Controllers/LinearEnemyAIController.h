@@ -33,8 +33,10 @@ protected:
 	// AI Perception 感知時に走らせる関数（EnemyBase から移行）
 	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus);
-	UFUNCTION() // 今更だが、無いと AddDynamic などに登録しても適用されないので注意
-	void OnTargetForgotten(AActor* Actor);
+
+	// 視点が外れたときに発火する想定だったが、動作が不安定だったので Timer で対応することにした
+	//UFUNCTION() // 今更だが、無いと AddDynamic などに登録しても適用されないので注意
+	//void OnTargetForgotten(AActor* Actor);
 
 private:
 	// ===== Components =====

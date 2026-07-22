@@ -41,8 +41,7 @@ void ALinearEnemyAIController::BeginPlay()
 	if (AIPerceptionComponent)
 	{
 		AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ALinearEnemyAIController::OnTargetDetected);
-		AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ALinearEnemyAIController::OnTargetForgotten);
-
+		//AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ALinearEnemyAIController::OnTargetForgotten);
 	}
 }
 
@@ -95,10 +94,12 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+		//UE_LOGFMT(LogTemp, Warning, "ALinearEnemyAIController::OnTargetDetected() detect target! : {0}", Actor->GetName());
+		//if (SightConfig)
+		//	UE_LOGFMT(LogTemp, Warning, "MaxAge: {0}", SightConfig->GetMaxAge());
 
-		if (SightConfig)
-			UE_LOGFMT(LogTemp, Warning, "MaxAge: {0}", SightConfig->GetMaxAge());
+		// 再発見時はタイマーをリセットして紐づけた関数を発火させない
+		GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimer);
 
 		// Behavior Tree 制御用設定
 		// BB 内部の CombatTarget に Actor を, 視線が通っていることを示すフラグを有効化
@@ -132,18 +133,25 @@ void ALinearEnemyAIController::OnTargetDetected(AActor* Actor, FAIStimulus Stimu
 	{
 		// 視界から外れたときの処理
 		BlackboardComp->SetValueAsBool(FName("HasLineOfSight"), false);
+		float MemoryDuration = 3.0f; // デフォルトのフォールバック値 （後でMaxAgeで上書きする）
+		if (SightConfig)
+		{
+			MemoryDuration = SightConfig->GetMaxAge();
+		}
+		GetWorld()->GetTimerManager().SetTimer(
+			LoseTargetTimer, this, &ALinearEnemyAIController::ClearCombatTarget, MemoryDuration, false
+		);
 	}
 }
 
 // MaxAge 経過後処理(視点が外れた時点で発火するわけではない)
 // 経過後に Delegate 経由でこの関数が走る
-
-void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
-{
-	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
-
-	ClearCombatTarget();
-}
+//void ALinearEnemyAIController::OnTargetForgotten(AActor* Actor)
+//{
+//	if (!IsValid(Actor) || !Actor->ActorHasTag(ALinearPlayerCharacter::GetTag())) return;
+//
+//	ClearCombatTarget();
+//}
 
 void ALinearEnemyAIController::ClearCombatTarget()
 {
