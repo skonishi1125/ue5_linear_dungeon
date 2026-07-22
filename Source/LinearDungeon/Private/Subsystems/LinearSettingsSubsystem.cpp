@@ -35,7 +35,7 @@ void ULinearSettingsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 }
 
 // GameUserSettings.ini から既存の設定を読み込み、
-// セーブデータが存在しない場合は初回起動とみなしてベンチマークに沿った設定値とする
+// セーブデータが存在しない場合は初回起動とみなして各設定値とする
 void ULinearSettingsSubsystem::InitializeGraphicsSettings()
 {
 	if (!GEngine) return;
@@ -45,18 +45,20 @@ void ULinearSettingsSubsystem::InitializeGraphicsSettings()
 
 	UserSettings->LoadSettings(false);
 
-	bool bIsFirstBoot = UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0);
+	// 初回起動時、画質は Medium (1) で設定
+	bool bHasSaveData = UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0);
+	if (!bHasSaveData)
+	{
+		UserSettings->SetOverallScalabilityLevel(1);
+	}
 
-	if (! bIsFirstBoot)
-	{
-		//UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Playing Graphics Benchmark");
-		UserSettings->RunHardwareBenchmark();
-		UserSettings->ApplyHardwareBenchmarkResults();
-	}
-	else
-	{
-		//UE_LOGFMT(LogTemp, Warning, "ULinearSettingsSubsystem::InitializeGraphicsSettings() Exist SettingData.");
-	}
+	// BenchMark を使って、その値に準拠して画質を変える方法
+	//bool bHasSaveData = UGameplayStatics::DoesSaveGameExist(SettingsSlotName, 0);
+	//if (! bHasSaveData)
+	//{
+	//	UserSettings->RunHardwareBenchmark();
+	//	UserSettings->ApplyHardwareBenchmarkResults();
+	//}
 
 	UserSettings->ApplySettings(false);
 }
