@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTaskNode_ClearCombatTarget::ExecuteTask(UBehaviorTreeComp
 	UBlackboardComponent* BB = AIController->GetBlackboardComponent();
 	if (BB == nullptr) return EBTNodeResult::Failed;
 
-	BB->ClearValue(BlackboardKey.SelectedKeyName);
+	BB->ClearValue(CombatTargetKey.SelectedKeyName);
 	//BB->SetValueAsObject(FName("CombatTarget"), nullptr);
 
 	return EBTNodeResult::Succeeded;

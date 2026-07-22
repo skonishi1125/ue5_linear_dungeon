@@ -58,7 +58,8 @@ enum class EEnemyAIState : uint8
 	EEAIS_Chase       UMETA(DisplayName = "Chase"),
 	EEAIS_Attacking      UMETA(DisplayName = "Attacking"),
 	EEAIS_LostTarget  UMETA(DisplayName = "Lost Target"),
-	EEAIS_Staggered  UMETA(DisplayName = "Staggered") // UŒ‚‚ğH‚ç‚Á‚Ä‹¯‚İ’†
+	EEAIS_Staggered  UMETA(DisplayName = "Staggered"),
+	EEAIS_Victory  UMETA(DisplayName = "Victory"),
 };
 
 UENUM(BlueprintType)
