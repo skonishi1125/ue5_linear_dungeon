@@ -3,6 +3,7 @@
 #include "Characters/CharacterTypes.h"
 #include "AIController.h"
 #include "Enemies/EnemyBase.h"
+#include "NavigationSystem.h"
 
 
 UBTService_UpdateEnemyAIState::UBTService_UpdateEnemyAIState()
@@ -66,22 +67,35 @@ void UBTService_UpdateEnemyAIState::TickNode(
 
 			if (CombatTargetActor)
 			{
-				const double DistanceToTarget = (CombatTargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
-				if (DistanceToTarget <= EnemyBase->OnGetAttackRadius())
-				{
-					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
-					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_ShortRange));
+				// 到達可能性 (Reachability) の判定
+				// 例えば Chase 中に、Player が NavMesh の外に出た時などの処理を決める
+				bool bIsReachable = BlackboardComp->GetValueAsBool(IsTargetReachableKey.SelectedKeyName);
 
-				}
-				else if (DistanceToTarget <= EnemyBase->OnGetLongAttackRadius())
+				if (! bIsReachable)
 				{
-					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
-					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_LongRange));
+					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
 				}
 				else
 				{
-					BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
-					BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
+					const double DistanceToTarget = (CombatTargetActor->GetActorLocation() - EnemyBase->GetActorLocation()).Size2D();
+					if (DistanceToTarget <= EnemyBase->OnGetAttackRadius())
+					{
+						BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+						BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_ShortRange));
+
+					}
+					else if (DistanceToTarget <= EnemyBase->OnGetLongAttackRadius())
+					{
+						BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Attacking));
+						BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_LongRange));
+					}
+					else
+					{
+						BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Chase));
+						BlackboardComp->SetValueAsEnum(CombatRangeStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAICombatRangeState::EEAICRS_None));
+					}
+
 				}
 
 			}

@@ -4,6 +4,7 @@
 #include "BehaviorTree/BTService.h"
 #include "BTService_UpdateEnemyAIState.generated.h"
 
+// Enemy BT ‚É‚¨‚¯‚éAAI State ‚ğŒˆ’è‚·‚éªŒ¹‚Æ‚È‚éˆ—
 UCLASS()
 class LINEARDUNGEON_API UBTService_UpdateEnemyAIState : public UBTService
 {
@@ -26,5 +27,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector HasLineOfSightKey;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector IsTargetReachableKey;
 
 };
