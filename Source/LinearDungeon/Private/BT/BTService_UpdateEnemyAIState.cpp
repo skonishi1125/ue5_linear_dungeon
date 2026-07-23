@@ -45,18 +45,30 @@ void UBTService_UpdateEnemyAIState::TickNode(
 	// ターゲットの有無で Patrol / Chase を切り替える
 	if (!IsValid(CombatTarget))
 	{
-		BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
 
-		// TODO: PatrolTarget の所持可否を t/f で持つ 暫定で true
-		//bool bHasPatrolRoute = true;
-		//if (bHasPatrolRoute)
-		//{
-		//	BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
-		//}
-		//else
-		//{
-		//	BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Idle));
-		//}
+		AAIController* AIController = OwnerComp.GetAIOwner();
+		if (!AIController || !AIController->GetPawn())
+		{
+			BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+			return;
+		}
+
+		AEnemyBase* EnemyBase = Cast<AEnemyBase>(AIController->GetPawn());
+		if (EnemyBase == nullptr)
+		{
+			BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+			return;
+		}
+
+		bool bHasPatrolRoute = EnemyBase->HasPatrolRoute();
+		if (bHasPatrolRoute)
+		{
+			BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Patrol));
+		}
+		else
+		{
+			BlackboardComp->SetValueAsEnum(AIStateKey.SelectedKeyName, static_cast<uint8>(EEnemyAIState::EEAIS_Idle));
+		}
 	}
 	else
 	{

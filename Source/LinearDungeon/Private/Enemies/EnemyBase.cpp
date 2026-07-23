@@ -122,6 +122,15 @@ void AEnemyBase::SetOverheadStatusVisible(bool bVisible)
 	}
 }
 
+bool AEnemyBase::HasPatrolRoute()
+{
+	if (PatrolTarget && PatrolTargets.Num() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();

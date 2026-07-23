@@ -113,6 +113,9 @@ public:
 
 	FORCEINLINE const FEnemySightConfig& GetSightSettings() const { return SightSettings; }
 
+	// PatrolRoute ‚ğ‚Â‚©‚Ç‚¤‚©
+	bool HasPatrolRoute();
+
 protected:
 	virtual void BeginPlay() override;
 
