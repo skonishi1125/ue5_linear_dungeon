@@ -702,8 +702,12 @@ void ALinearPlayerCharacter::OnWeaponCollisionEnabled(
 {
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		// 先に倍率をセットする
+		// 仮に CollisionEnabled -> SetMultipliers としてしまうと、
+		// 判定が有効になった瞬間、敵が近くにいると Overlap が発生し割込み
+		// -> ダメージ計算処理 -> その後、Muitipliers が実行されるという挙動になる
 		EquippedWeapon->SetMultipliers(DamageMultiplier, PoiseMultiplier);
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
 	}
 }
 

@@ -815,7 +815,7 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	if (Attributes)
 	{
 		Attributes->ReceiveHealthDamage(DamageAmount);
-		//OverheadStatusWidgetComponent->SetHealthPercent(Attributes->GetHealthPercent());
+		//UE_LOGFMT(LogTemp, Warning, "Damage: {0} Remained Health: {1}", DamageAmount, Attributes->GetCurrentHealth());
 	}
 
 	// UŒ‚‚³‚ê‚½‘Šè‚ğ‘ÎÛ‚É‚·‚éˆ—
