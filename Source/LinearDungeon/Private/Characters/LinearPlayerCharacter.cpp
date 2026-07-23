@@ -654,6 +654,13 @@ void ALinearPlayerCharacter::EquipWeapon(AWeapon* InWeapon, bool bPlaySound)
 
 void ALinearPlayerCharacter::EquipShield(AShield* InShield, bool bPlaySound)
 {
+	// 盾を装備している場合は、同じく外して地面に置いて配置する
+	if (EquippedShield)
+	{
+		EquippedShield->Drop(GetEquipmentDropLocation());
+		EquippedShield = nullptr;
+	}
+
 	// 装備武器が両手武器だった場合、外す
 	if (EquippedWeapon && EquippedWeapon->GetEquippedCharacterState() == ECharacterState::ECS_EquippedTwoHandedWeapon)
 	{
