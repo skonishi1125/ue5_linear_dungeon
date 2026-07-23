@@ -1043,6 +1043,11 @@ void ALinearPlayerCharacter::OnHitReactionAnimEnded()
 
 void ALinearPlayerCharacter::ForceKill(EDeathCause Cause)
 {
+	if (ActionState == EActionState::EAS_Dying)
+	{
+		return;
+	}
+
 	if (Attributes)
 	{
 		Attributes->SetCurrentHealth(0.f);

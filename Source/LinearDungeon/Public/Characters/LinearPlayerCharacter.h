@@ -247,7 +247,7 @@ private:
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
 	// Attack Montage 側で Montage 終わりの Notify でこの State を調整するので、BP で公開する
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"));
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 	// タグ
