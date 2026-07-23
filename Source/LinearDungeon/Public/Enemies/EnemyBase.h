@@ -158,6 +158,8 @@ protected:
 
 	// ===== Montages =====
 	void PlayHitReactionMontage(const FName& SectionName);
+	UFUNCTION()
+	void OnMontageEndedCallback(UAnimMontage* Montage, bool bInterrupted);
 
 	// BoxTrace îªíËÇ≈çló∂ÇµÇ»Ç¢ Actor ÇÃîzóÒ
 	TArray<AActor*> BoxIgnoreActors;

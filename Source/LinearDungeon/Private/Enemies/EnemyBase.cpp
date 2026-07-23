@@ -168,6 +168,12 @@ void AEnemyBase::BeginPlay()
 		PatrolTarget = PatrolTargets[0];
 	}
 
+	// 怯みなどの Montage 再生時に紐づける関数
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &AEnemyBase::OnMontageEndedCallback);
+	}
+
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -733,15 +739,6 @@ void AEnemyBase::GetHit_Implementation(
 		if (bIsStaggered)
 		{
 			//UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Poise Broken!");
-
-			// 怯み中に BT の動きを止める
-			// このフラグの無効化自体は、怯みアニメに Notify を仕込んで操作するようにする
-			if (CachedAIController)
-			{
-				UE_LOGFMT(LogTemp, Warning, "AEnemyBase::GetHit_Implementation Staggered.");
-				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Staggered);
-			}
-
 			// 怯みアニメの再生
 			DirectionalHitReact(ImpactPoint);
 
@@ -792,6 +789,8 @@ void AEnemyBase::GetHit_Implementation(
 }
 
 // 怯みフラグの無効化 Anim Notify 経由で使う
+// ※結果的に不使用になったように見えるが、コメントアウトするときは要確認
+// 　現在は OnMontageEndedCallback が Stagger からの State 変化の役割を担っている
 void AEnemyBase::OnStaggerEnd()
 {
 	if (CachedAIController)
@@ -943,10 +942,38 @@ void AEnemyBase::PlayHitReactionMontage(const FName& SectionName)
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HitReactionMontage)
 	{
+		if (CachedAIController)
+		{
+			CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Staggered);
+		}
+
 		AnimInstance->Montage_Play(HitReactionMontage, 1.0f, EMontagePlayReturnType::MontageLength, .0f, true);
 		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
 	}
 
+}
+
+void AEnemyBase::OnMontageEndedCallback(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == HitReactionMontage)
+	{
+		// 連続ヒットにより割り込まれた場合は、新しい怯みが開始されているため何もしない
+		if (bInterrupted) return;
+
+		if (CachedAIController)
+		{
+			UBlackboardComponent* BB = CachedAIController->GetBlackboardComponent();
+			if (BB && IsValid(BB->GetValueAsObject(FName("CombatTarget"))))
+			{
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Chase);
+			}
+			else
+			{
+				CachedAIController->ChangeAIState(EEnemyAIState::EEAIS_Idle);
+			}
+		}
+		return;
+	}
 }
 
 // PlayerCharacter 死亡時の処理
