@@ -6,8 +6,8 @@
 #include "Components/HUD/LinearTitleMenu.h"
 #include "Components/HUD/SettingsMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
-
-
+#include "Subsystems/LinearFlagSubsystem.h"
+#include "Subsystems/LinearEventSubsystem.h"
 
 void ULinearTitleMenuContainer::NativeConstruct()
 {
@@ -26,6 +26,20 @@ void ULinearTitleMenuContainer::HandleTitleNewGameRequested()
 {
 	if (!NextLevel.IsNull())
 	{
+		// 周回プレイ時など、クラス変数にクリアしたイベント情報が残っている
+		// NewGame 時には Subsystem で管理中イベントをリセット
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (ULinearFlagSubsystem* FlagSub = GI->GetSubsystem<ULinearFlagSubsystem>())
+			{
+				FlagSub->ResetAllEvents();
+			}
+
+			if (ULinearEventSubsystem* EventSub = GI->GetSubsystem<ULinearEventSubsystem>())
+			{
+				EventSub->ResetAllEvents();
+			}
+		}
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, NextLevel);
 	}
 	else
