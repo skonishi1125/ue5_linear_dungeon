@@ -21,3 +21,8 @@ void ULinearFlagSubsystem::RestoreAllFlags(const TSet<FName>& InSavedFlags)
 	ActiveFlags = InSavedFlags;
 	//UE_LOGFMT(LogTemp, Log, "ULinearFlagSubsystem::RestoreAllFlags() Restored {0} flags.", ActiveFlags.Num());
 }
+
+void ULinearFlagSubsystem::ResetAllEvents()
+{
+	ActiveFlags.Empty();
+}

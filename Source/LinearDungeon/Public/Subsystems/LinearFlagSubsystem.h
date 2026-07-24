@@ -23,6 +23,9 @@ public:
 	// セーブデータ読込用 フラグ一覧を復元する
 	void RestoreAllFlags(const TSet<FName>& InSavedFlags);
 
+	UFUNCTION(BlueprintCallable, Category = "GameFlags")
+	void ResetAllEvents();
+
 private:
 	TSet<FName> ActiveFlags;
 	
