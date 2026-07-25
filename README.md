@@ -55,14 +55,14 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
 
 ### 考慮した部分など
 #### Interface
-インターフェースを用いた共通化処理の実装
+インターフェースを用いた共通化処理を実装した。
 * インタラクト関連
   * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/InteractInterface.h
   * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L588-L611
-  * 扉の開閉、装備、NPC との会話等
+  * 扉の開閉、装備、NPC との会話等に使用する。
 * ダメージなど、被弾
   * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/HitInterface.h
-  * 武器や敵の攻撃判定が触れたとき、各 Actor 別の処理を呼ぶ
+  * 武器や敵の攻撃判定が触れたとき、各対象別の被弾処理を呼ぶ。
     * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Items/Weapon.cpp#L120-L124
     * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L511-L514
   * 対象  
@@ -70,7 +70,7 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
       * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L908-L1010
     * 敵
       * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L713-L789
-    * Geometry Collection で用意した、壊れる小道具等（Blueprint 側で実装）
+    * Geometry Collection で用意した、壊れる小道具等（Blueprint 側で実装。被弾時、破壊してサウンドを鳴らすような処理を実行する）
 
 #### Behavior Tree
 敵の State を Enum で管理することで、シンプルな形で敵 AI を設計できるようにした。
