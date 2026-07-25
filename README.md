@@ -54,6 +54,24 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
 
 
 ### 考慮した部分など
+#### Interface
+インターフェースを用いた共通化処理の実装
+* インタラクト関連
+  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/InteractInterface.h
+  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L588-L611
+  * 扉の開閉、装備、NPC との会話等
+* ダメージなど、被弾
+  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/HitInterface.h
+  * 武器や敵の攻撃判定が触れたとき、各 Actor 別の処理を呼ぶ
+    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Items/Weapon.cpp#L120-L124
+    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L511-L514
+  * 対象  
+    * プレイヤー
+      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L908-L1010
+    * 敵
+      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L713-L789
+    * Geometry Collection で用意した、壊れる小道具等（Blueprint 側で実装）
+
 #### Behavior Tree
 敵の State を Enum で管理することで、シンプルな形で敵 AI を設計できるようにした。
 * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/BT/BTService_UpdateEnemyAIState.cpp
@@ -66,19 +84,13 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
 * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Subsystems/LinearSaveSubsystem.cpp
 * <img width="6803" height="2151" alt="BP_CinematicTrigger-EventGraph" src="https://github.com/user-attachments/assets/b6b38ef9-d507-4f66-ba77-23bc43aadb89" />
 
-#### Interface
-インターフェースを用いた共通化処理の実装
-* インタラクト関連
-  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/InteractInterface.h
-  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L588-L611
-  * 扉の開閉、装備、NPC との会話等
-* ダメージなど、被弾
-  * 武器や敵の攻撃判定が触れたとき、各 Actor 別の処理を呼ぶ
-    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Items/Weapon.cpp#L120-L124
-    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L511-L514
-  * 対象  
-    * プレイヤー
-      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L908-L1010
-    * 敵
-      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L713-L789
-    * Geometry Collection で用意した、壊れる小道具等（Blueprint 側で実装）
+#### Animation Blueprint
+Idle, Walk の State を Main State として定義。  
+そちらをベースに、ポーションを飲む挙動や両手武器用の補正用 IK, 攻撃用の Animation Montage を挟んで、適宜調整できるようにした。
+<img width="2091" height="978" alt="ABP_CPaladin-AnimGraph" src="https://github.com/user-attachments/assets/9055a3c5-0e3a-48a9-a7e1-4e4245d25cff" />
+
+#### Animation Montage
+攻撃アニメーション等では Animation Notify State を用いて攻撃判定の有効期間を決定できるようにした。  
+また、ダメージ倍率なども Editor 側に公開することで、コードを考慮せずモーションごとのバランス調整ができるようにした。
+<img width="1916" height="1300" alt="スクリーンショット 2026-07-25 232730" src="https://github.com/user-attachments/assets/ec36214e-f4fc-4771-a824-78d710d5eb8c" />
+
