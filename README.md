@@ -31,8 +31,7 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
 ```
 
 #### ゲームの説明
-キーボードとマウスで遊ぶ 3D アクションゲームです。
-
+キーボードとマウスで遊ぶ 3D アクションゲームです。  
 囚われてしまった騎士が敵を倒して牢獄の脱出を目指します。
 
 ### 開発環境等
@@ -55,3 +54,31 @@ https://kir-thread.site/storage/KirThread_KnightOfJail.zip
 
 
 ### 考慮した部分など
+#### Behavior Tree
+敵の State を Enum で管理することで、シンプルな形で敵 AI を設計できるようにした。
+* https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/BT/BTService_UpdateEnemyAIState.cpp
+* <img width="4019" height="1568" alt="BT_EnemyBase_v2-Behavior Tree_0" src="https://github.com/user-attachments/assets/02fa6c0e-bf3c-4f7e-ae27-33bfed4475d6" />
+
+#### Level Sequence
+透明な判定を持ったトリガーを Blueprint で用意することで、特定の地点にキャラクターが触れるときにイベントを再生できるようにした。  
+また、一度終わったイベントは Subsystem に登録し、同じセーブデータで複数回再生されないような設計とした。
+* https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Subsystems/LinearEventSubsystem.cpp
+* https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Subsystems/LinearSaveSubsystem.cpp
+* <img width="6803" height="2151" alt="BP_CinematicTrigger-EventGraph" src="https://github.com/user-attachments/assets/b6b38ef9-d507-4f66-ba77-23bc43aadb89" />
+
+#### Interface
+インターフェースを用いた共通化処理の実装
+* インタラクト関連
+  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Public/Interfaces/InteractInterface.h
+  * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L588-L611
+  * 扉の開閉、装備、NPC との会話等
+* ダメージなど、被弾
+  * 武器や敵の攻撃判定が触れたとき、各 Actor 別の処理を呼ぶ
+    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Items/Weapon.cpp#L120-L124
+    * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L511-L514
+  * 対象  
+    * プレイヤー
+      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/main/Source/LinearDungeon/Private/Characters/LinearPlayerCharacter.cpp#L908-L1010
+    * 敵
+      * https://github.com/skonishi1125/ue5_linear_dungeon/blob/8638f9e1c0dd7ce266224a9283423a13dcc566d2/Source/LinearDungeon/Private/Enemies/EnemyBase.cpp#L713-L789
+    * Geometry Collection で用意した、壊れる小道具等（Blueprint 側で実装）
