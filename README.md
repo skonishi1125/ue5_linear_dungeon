@@ -2,6 +2,10 @@ wip
 
 ## Knight of Jail
 
+[![Knight of Jail プレイ映像](https://youtube.com)](https://www.youtube.com/watch?v=z3aof6jWfaI)
+
+
+
 ### ゲームについて
 #### URL
 wip
